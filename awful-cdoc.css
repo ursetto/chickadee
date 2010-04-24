@@ -1,0 +1,49 @@
+body {
+  font-family: "Trebuchet MS", serif;
+  background-color: #e0e0e0;
+}
+
+pre {
+  font-family: "Andale Mono", "Courier New", monospace;
+}
+tt {
+  font-family: "Andale Mono", "Courier New", monospace;
+}
+
+.doc-header {
+  background-color: #000050;
+  color: #ffffff;
+  padding-left: 1em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+}
+
+dt.defsig {
+  padding: 0.3em 1.0em;
+  background-color: #202020;
+  color: #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.operator {
+  color: #800000;
+}
+
+dd.defsig {
+  padding-left: 1em;
+  padding-right: 2em;
+  margin-top: 0.5em;
+  border: 1px solid black;
+  border-left: 3px solid black;
+  background-color: #ffffff;
+  margin-left: 1em;
+}
+
+dt.defsig span.type {
+  float: right;
+  color: #ffffff;
+  font-weight: bold;
+}
+dt.defsig span.sig {
+/* monospace already set via tt */
+}
