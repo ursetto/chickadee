@@ -15,9 +15,9 @@
               (print-error-message exn))))))
 
 (define (input-form)
-  (<form> action: (main-page-path)
-          method: 'post
-          (<input> type: "text" name: "x")
+  (<form> action: "cdoc"
+          method: 'get
+          (<input> type: "text" name: "id")
           (<input> type: "submit")))
 
 (define (format-doc x)
@@ -28,11 +28,13 @@
           (<pre> "Found " (length nodes) " nodes"
                  " at paths " (map node-path nodes)))))
   
-(define-page (main-page-path)
+(define-page "cdoc"
   (lambda ()
-    (with-request-vars $ (x)
-      (if x
-          (format-doc x)
-          (input-form)
-          )))
+    (with-request-vars
+     $ (id)
+     (++ (<h1> "chickadee / chicken-doc server / READY")
+         (<div> id: "contents"
+                (if id
+                    (format-doc id)
+                    (input-form))))))
   css: "awful-cdoc.css")

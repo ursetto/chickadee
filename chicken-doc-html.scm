@@ -11,7 +11,7 @@
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
                                (else
                                 (lambda (t b s) (error 'sxml-walk
-                                            "No default binding for " t)))))
+                                            "No default binding for" t)))))
         (text-handler (cond ((assq '*text* ss) => cdr)
                             (else #f))))
     (let loop ((doc doc))
@@ -50,37 +50,92 @@
                           (lambda (t b s) (list open
                                            (walk b inline-ss)
                                            close)))))
-              (inline-ss `((p . ,(inline "p"))
-                           (b . ,(inline "b"))
-                           (tt . ,(inline "tt")))))
+              (inline-ss `((b . ,(inline "b"))
+                           (i . ,(inline "i"))
+                           (tt . ,(inline "tt"))
+                           (link . ,(lambda (t b s)
+                                      (match b
+                                             ((href desc)
+                                              `("<a href=\""
+                                                ,href     ; FIXME: quote this
+                                                "\">"
+                                                ,desc
+                                                "</a>"))
+                                             ((href)
+                                              `("<a href=\""
+                                                ,href
+                                                "\">"
+                                                ,href
+                                                "</a>")))))
+                           (int-link . ,(lambda (t b s)
+                                          (match b
+                                                 ((href desc) desc)
+                                                 ((href) href)))))))
        (walk
         doc
-        `((def
+        `(
+          (p . ,(inline "p"))
+
+          (def
            . ,(lambda (t b def-ss)
                 `("<dl class=\"defsig\">"
                   ,(match b
                           ((('sig . sigs) . body)
-                           `(,(map (lambda (s)
-                                     (match s
-                                            ((type sig)
-                                             `("<dt class=\"defsig\">"
-                                               "<span class=\"sig\"><tt>" ,sig "</tt></span>"
-                                               " "
-                                               "<span class=\"type\">" ,type "</span>"
-                                               "</dt>\n"))))
-                                   sigs)
+                           `(,(map
+                               (lambda (s)
+                                 (match s
+                                        ((type sig)
+                                         `("<dt class=\"defsig\">"
+                                           "<span class=\"sig\"><tt>"
+                                           ,sig "</tt></span>"
+                                           " "
+                                           "<span class=\"type\">" ,type "</span>"
+                                           "</dt>\n"))))
+                               sigs)
                              "<dd class=\"defsig\">"
                              ,(walk body def-ss)
                              "</dd>\n")))
                   "</dl>\n")))
           (pre . ,(block "pre"))
+          (ul . ,(lambda (t b ul-ss)
+                   `("<ul>"
+                     ,(walk b `((li
+                                 . ,(lambda (t b s)
+                                      `("<li>"
+                                        ,(walk b ul-ss)
+                                        "</li>\n")))))
+                     "</ul>\n")))
+          (dl . ,(lambda (t b dl-ss)
+                   `("<dl>"
+                     ,(walk b `((dt . ,(lambda (t b s)
+                                         `("<dt>"
+                                           ,(walk b inline-ss) ;?
+                                           "</dt>\n")))
+                                (dd . ,(lambda (t b s)
+                                         `("<dd>"
+                                           ,(walk b dl-ss)
+                                           "</dd>"))))))))
+
+          (tags . ,drop-tag)
+          (toc . ,drop-tag)
+          (section . ,(lambda (t b s)
+                        (match b ((level title . body)
+                                  (let ((H (string-append "h"
+                                                          (number->string level)
+                                                          ">")))
+                                    (list "<" H
+                                          title
+                                          "</" H
+                                          (walk body s)))))))
+          (script . ,(lambda (t b s)
+                       (match b ((lang . body)
+                                 (list "<pre>" (walk body s) "</pre>")))))
+
+          (hr . ,(lambda (t b s)
+                   "<hr />"))
           
           ,@inline-ss
-          )
-
-
-
-        )))))
+          ))))))
 
 
 )

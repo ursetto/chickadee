@@ -1,6 +1,8 @@
 body {
   font-family: "Trebuchet MS", serif;
   background-color: #e0e0e0;
+  margin: 0;
+  padding: 0;
 }
 
 pre {
@@ -10,19 +12,32 @@ tt {
   font-family: "Andale Mono", "Courier New", monospace;
 }
 
-.doc-header {
-  background-color: #000050;
-  color: #ffffff;
-  padding-left: 1em;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
+h1 {
+  font-size: medium;
+  padding-left: 0.5em;
+  border-bottom: 3px double black;
+  background-color: #ffffff;
+}
+
+div#contents {
+  padding-right: 0.5em;
+  padding-left: 0.5em;
 }
 
 dt.defsig {
-  padding: 0.3em 1.0em;
+  padding: 0.3em 0.7em;
   background-color: #202020;
-  color: #e0e0e0;
+  color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
+}
+
+dt.defsig span.type {
+  float: right;
+  color: #c0c0c0;
+  font-weight: bold;
+}
+dt.defsig span.sig {
+/* monospace already set via tt */
 }
 
 .operator {
@@ -39,11 +54,3 @@ dd.defsig {
   margin-left: 1em;
 }
 
-dt.defsig span.type {
-  float: right;
-  color: #ffffff;
-  font-weight: bold;
-}
-dt.defsig span.sig {
-/* monospace already set via tt */
-}
