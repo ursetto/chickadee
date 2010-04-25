@@ -1,15 +1,20 @@
 body {
-  font-family: "Trebuchet MS", serif;
+  font-family: "Georgia", "Times New Roman", serif;
   background-color: #ffffff;
   margin: 0;
   padding: 0;
 }
 
 pre {
-  font-family: "Andale Mono", "Courier New", monospace;
+  font-family: "Courier", "Courier New", monospace;
+  padding-left: 1em;
+  margin: 0;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  border-left: 3px double black;
 }
 tt {
-  font-family: "Andale Mono", "Courier New", monospace;
+  font-family: "Courier", "Courier New", monospace;
 }
 
 h1 {
@@ -22,6 +27,10 @@ h1 {
 div#contents {
   padding-right: 0.5em;
   padding-left: 0.5em;
+}
+
+dt {
+  font-weight: bold;
 }
 
 dl.defsig {
@@ -38,6 +47,8 @@ dt.defsig {
   background-color: #e8e8e8;
   color: #000000;
   border-bottom: 1px solid black;
+  font-weight: bold;
+  margin: 0;
 }
 
 dt.defsig span.type {
@@ -58,7 +69,57 @@ dd.defsig {
   padding-left: 1em;
   padding-right: 2em;
   margin: 0;
-  margin-top: 0.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
   background-color: #ffffff;
 }
 
+h2 {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+h3 {
+  border-bottom: 1px solid #808080;
+}
+
+hr {
+  border: 1px solid black;
+}
+
+table {
+  border: 1px solid black;
+  border-collapse: collapse;
+/*  margin-left: auto;
+  margin-right: auto;
+*/
+  margin-left: 2em;
+  margin-right: 2em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+th {
+  text-align: left;
+  padding-left: 1em;
+  padding-right: 1em;
+  font-weight: bold;
+  border: 1px solid black;
+}
+td {
+  border: 1px solid black;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+dl {
+  margin-left: 1em;
+}
+dt {
+  margin-top: 0.2em;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  border-bottom: 1px solid black;
+  font-weight: bold;
+}

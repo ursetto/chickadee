@@ -114,7 +114,8 @@
                                 (dd . ,(lambda (t b s)
                                          `("<dd>"
                                            ,(walk b dl-ss)
-                                           "</dd>"))))))))
+                                           "</dd>")))))
+                     "</dl>\n")))
 
           (tags . ,drop-tag)
           (toc . ,drop-tag)
@@ -127,6 +128,24 @@
                                           title
                                           "</" H
                                           (walk body s)))))))
+
+          (table . ,(lambda (t b table-ss)
+                      `("<table>\n"
+                        ,(walk b `((tr . ,(lambda (t b s)
+                                            `("<tr>"
+                                              ,(walk b
+                                                     `((th . ,(lambda (t b s)
+                                                                `("<th>"
+                                                                  ,(walk b table-ss)
+                                                                  "</th>")))
+                                                       (td . ,(lambda (t b s)
+                                                                `("<td>"
+                                                                  ,(walk b table-ss)
+                                                                  "</td>")))))
+                                              "</tr>\n")))
+                                   (@ . ,drop-tag)))
+                        "</table>\n")))
+          
           (script . ,(lambda (t b s)
                        (match b ((lang . body)
                                  (list "<pre>" (walk body s) "</pre>")))))

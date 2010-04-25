@@ -32,7 +32,7 @@
   (lambda ()
     (with-request-vars
      $ (id)
-     (++ (<h1> "chickadee / chicken-doc server / READY")
+     (++ (<h1> "chickadee &mdash; chicken-doc server")
          (<div> id: "contents"
                 (if id
                     (format-doc id)
