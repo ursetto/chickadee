@@ -1,6 +1,6 @@
 body {
   font-family: "Trebuchet MS", serif;
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   margin: 0;
   padding: 0;
 }
@@ -24,17 +24,27 @@ div#contents {
   padding-left: 0.5em;
 }
 
+dl.defsig {
+  border: 1px solid black;
+  border-left: 3px solid black;
+/*  border-right: 3px double black; */
+  border-color: black;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
 dt.defsig {
-  padding: 0.3em 0.7em;
-  background-color: #202020;
-  color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 0.2em 1.0em;
+  background-color: #e8e8e8;
+  color: #000000;
+  border-bottom: 1px solid black;
 }
 
 dt.defsig span.type {
   float: right;
-  color: #c0c0c0;
+  color: #404040;
   font-weight: bold;
+/*  border-left: 3px double black; */
 }
 dt.defsig span.sig {
 /* monospace already set via tt */
@@ -47,10 +57,8 @@ dt.defsig span.sig {
 dd.defsig {
   padding-left: 1em;
   padding-right: 2em;
+  margin: 0;
   margin-top: 0.5em;
-  border: 1px solid black;
-  border-left: 3px solid black;
   background-color: #ffffff;
-  margin-left: 1em;
 }
 
