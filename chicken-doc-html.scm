@@ -2,7 +2,7 @@
 *
 
 (import scheme chicken)
-(use sxml-transforms)   ; temp
+(use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
 (use matchable)
 (use (only data-structures conc))
 (use (only ports with-output-to-string))
@@ -37,7 +37,8 @@
 (define (chicken-doc-sxml->html doc)
   (tree->string
    (let ((walk sxml-walk)
-         (drop-tag (lambda (t b s) '())))
+         (drop-tag (lambda (t b s) '()))
+         (quote-text `(*text* . ,(lambda (t b s) (string->goodHTML b)))))
      (letrec ((block (lambda (tag)
                        (let ((open (conc "<" tag ">"))
                              (close (conc "</" tag ">")))
@@ -50,7 +51,9 @@
                           (lambda (t b s) (list open
                                            (walk b inline-ss)
                                            close)))))
-              (inline-ss `((b . ,(inline "b"))
+              (inline-ss `(
+                           ,quote-text
+                           (b . ,(inline "b"))
                            (i . ,(inline "i"))
                            (tt . ,(inline "tt"))
                            (link . ,(lambda (t b s)
@@ -96,7 +99,7 @@
                              ,(walk body def-ss)
                              "</dd>\n")))
                   "</dl>\n")))
-          (pre . ,(block "pre"))
+          (pre . ,(block "pre"))   ; may need to quote contents
           (ul . ,(lambda (t b ul-ss)
                    `("<ul>"
                      ,(walk b `((li

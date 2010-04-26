@@ -65,6 +65,9 @@ dt.defsig span.sig {
   color: #800000;
 }
 
+/* I want to change the margin-top to padding-top but
+   paragraph margins will use the padding as a baseline;
+   if margin & padding is 0, then tables are not offset */
 dd.defsig {
   padding-left: 1em;
   padding-right: 2em;
