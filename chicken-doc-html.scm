@@ -1,11 +1,14 @@
 (module chicken-doc-html
-*
+(chicken-doc-sxml->html
+ tree->string quote-html)
 
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
+(use (only uri-generic uri-encode-string)) ; grr
 (use matchable)
 (use (only data-structures conc ->string))
 (use (only ports with-output-to-string))
+(use regex) (import irregex)
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -34,11 +37,18 @@
 (define (tree->string doc)
   (with-output-to-string (lambda () (SRV:send-reply doc))))
 
+(define (quote-html s)
+  (string->goodHTML s))
+
 (define (chicken-doc-sxml->html doc)
   (tree->string
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
-         (quote-text `(*text* . ,(lambda (t b s) (string->goodHTML b)))))
+         (quote-text `(*text* . ,(lambda (t b s) (string->goodHTML b))))
+         (link (lambda (href desc)
+                 `("<a href=\"" ,href "\">"
+                   ,(quote-html desc)
+                   "</a>"))))
      (letrec ((block (lambda (tag)
                        (let ((open (conc "<" tag ">"))
                              (close (conc "</" tag ">")))
@@ -59,21 +69,24 @@
                            (link . ,(lambda (t b s)
                                       (match b
                                              ((href desc)
-                                              `("<a href=\""
-                                                ,href     ; FIXME: quote this
-                                                "\">"
-                                                ,desc
-                                                "</a>"))
+                                              (link href desc))
                                              ((href)
-                                              `("<a href=\""
-                                                ,href
-                                                "\">"
-                                                ,href
-                                                "</a>")))))
+                                              (link href href)))))
                            (int-link . ,(lambda (t b s)
-                                          (match b
-                                                 ((href desc) desc)
-                                                 ((href) href)))))))
+                                          (let ((ilink (lambda (href desc)
+                                                         ;; Incomplete.  We need to
+                                                         ;; rewrite internal and
+                                                         ;; external wiki links to
+                                                         ;; local nodes, including
+                                                         ;; canonical node names.
+                                                         `("<a href=\"/cdoc?path="
+                                                           ,(uri-encode-string href)
+                                                           "\">" ,(quote-html desc)
+                                                           "</a>"))))
+                                            (match b
+                                                   ((href desc) (ilink href desc))
+                                                   ((href) (ilink href href))))))))
+              )
        (walk
         doc
         `(

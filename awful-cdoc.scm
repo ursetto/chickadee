@@ -18,8 +18,8 @@
 (define (input-form)
   (<form> action: "cdoc"
           method: 'get
-          (<input> type: "text" name: "id")
-          (<input> type: "submit")))
+          (<input> type: "text" name: "q")  ; query should redirect.
+          (<input> type: "submit" value: "Lookup")))
 
 (define (format-doc x)
   (match (match-nodes x)
@@ -51,25 +51,35 @@
                            (list
                             "<a href=\"/cdoc?path="
                             (uri-encode-string (string-intersperse f " "))
-                            "\">" id
+                            "\">" (quote-html id)
                             "</a>"
                             (if (null? (cdr p)) '() " &raquo; "))
                            r))))))
 
+(define (query p)
+  (let ((q (string-split p)))
+    (cond ((null? q) (error "Query string missing")) 
+          ((null? (cdr q))
+           (format-doc p))
+          (else
+           (format-path p)))))                 ;  API defect
+
 (define-page "cdoc"
   (lambda ()
     (with-request-vars
-     $ (id path)
+     $ (id path q)
      (cond (path => format-path)
            (id   => format-doc)
-           (else (node-page "chicken-doc server"
-                            (input-form))))))
+           (q    => query)
+           (else (node-page #f (input-form))))))
 
   css: "awful-cdoc.css")
 
 (define (node-page title contents)
   (++ (<h1> "<a href=\"/cdoc\">chickadee</a>"
-            (if title (string-append " &raquo; " title) ""))
+            (if title
+                (string-append " &raquo; " title)
+                (string-append " | chicken-doc server")))
       (<div> id: "contents"
              contents)))
 

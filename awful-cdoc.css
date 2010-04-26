@@ -127,7 +127,7 @@ a:hover {
 
 h1 {
   font-size: medium;
-  padding-left: 0;
+  padding-left: 0.3em;
   border-bottom: 3px double black;
   background-color: #ffffff;
 }
@@ -136,6 +136,6 @@ h1 a {
   border: none;
   font-weight: bold;
   font-style: italic;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
 }
