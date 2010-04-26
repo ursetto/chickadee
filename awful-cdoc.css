@@ -17,9 +17,16 @@ tt {
   font-family: "Courier", "Courier New", monospace;
 }
 
-div#contents {
+div#body {
+}
+div#main {
+  float: left; width: 75%;
   padding-right: 0.5em;
   padding-left: 0.5em;
+}
+div#contents {
+  float: right; width: 20%;
+  border-left: 1px solid black;
 }
 
 dt {
@@ -63,7 +70,7 @@ dt.defsig span.sig {
    if margin & padding is 0, then tables are not offset */
 dd.defsig {
   padding-left: 1em;
-  padding-right: 2em;
+  padding-right: 1em;
   margin: 0;
   margin-top: 1em;
   margin-bottom: 1em;
@@ -130,6 +137,7 @@ h1 {
   padding-left: 0.3em;
   border-bottom: 3px double black;
   background-color: #ffffff;
+  margin-bottom: 0;
 }
 
 h1 a {
@@ -140,7 +148,11 @@ h1 a {
   padding-right: 0.2em;
 }
 
-td.match-path a {
+td.match-path {
+  /* text-align: right; */
+}
+
+td.match-path a, ul.contents-list a {
   border: none;
   font-weight: normal;
   font-style: italic;
@@ -148,4 +160,19 @@ td.match-path a {
 
 td.match-sig {
   
+}
+
+ul.contents-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-size: 90%;
+}
+ul.contents-list li {
+  padding: 0;
+  border-bottom: 1px solid black;
+}
+ul.contents-list li a {
+  display: block;
+  padding: 0 0.5em;
 }

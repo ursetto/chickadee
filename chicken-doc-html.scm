@@ -66,6 +66,7 @@
                            (b . ,(inline "b"))
                            (i . ,(inline "i"))
                            (tt . ,(inline "tt"))
+                           (img . ,drop-tag)
                            (link . ,(lambda (t b s)
                                       (match b
                                              ((href desc)

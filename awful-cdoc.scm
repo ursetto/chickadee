@@ -19,31 +19,77 @@
   (<form> action: "cdoc"
           method: 'get
           (<input> type: "text" name: "q")  ; query should redirect.
-          (<input> type: "submit" value: "Lookup")))
+          (<input> type: "submit" name: "query-name" value: "Lookup")
+          (<input> type: "submit" name: "query-regex" value: "Regex")))
 
-(define (format-doc x)
+(define (format-id x)
   (match (match-nodes x)
          ((n1)
           (node-page (title-path n1)
                      (chicken-doc-sxml->html (node-sxml n1))))
          (nodes
-          (node-page (string-append "query " x " ("
-                                    (number->string (length nodes))
-                                    " matches)")
-                     (apply <table>   ; yuck
-                            class: "match-results"
-                      (map (lambda (n)
-                             (<tr> (<td> class: "match-path" (title-path n))
-                                   (<td> class: "match-sig"
-                                         (<tt> (node-signature n)))))
-                           nodes))))))
+          (match-page nodes x))))
+
+(define (format-re x)
+  (match-page (match-nodes (irregex x)) x))
+
+(define (match-page nodes match-text)
+  (node-page (string-append "query " match-text " ("
+                            (number->string (length nodes))
+                            " matches)")
+             (apply <table>   ; yuck
+                    class: "match-results"
+                    (map (lambda (n)
+                           (<tr> (<td> class: "match-path" (title-path n))
+                                 (<td> class: "match-sig"
+                                       (<tt> (node-signature n)))))
+                         nodes))))
+
+;; contents doesn't need full path like match page
+;; also would be nice to return contents without obtaining
+;; signature as that is expensive
+(define (contents-page n)
+  (match-page (node-children n)
+              (title-path n)         ; not correct
+              ))
+
+(define (contents-list n)
+  (define (node-id n)
+    (last (node-path n)))             ; TEMPORARY!!
+  (tree->string
+   `("<ul class=\"contents-list\">"
+     ,(map
+       (lambda (c)
+         `("<li>"
+           "<a href=\"/cdoc?path="
+           ,(uri-encode-string (string-intersperse
+                                (map ->string (node-path c))
+                                " "))
+           "\">" ,(quote-html (->string (node-id c)))
+           "</a>"
+           "</li>"))
+       (node-children n))
+     "</ul>"
+     )))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
-    (if n
-        (node-page (title-path n)
-                   (chicken-doc-sxml->html (node-sxml n)))
-        (node-page p (<p> "No node found at path " p)))))
+    (with-request-vars
+     (contents)           ; bad
+     (if n
+         (if contents
+             (contents-page n)
+             (node-page (string-append (title-path n)
+                                       " | "
+                                       ;; don't know how to do this right now
+                                       "<a href=\"?path=" (uri-encode-string p)
+                                       "&contents=1\">contents</a>")
+                        (string-append
+                         (<div> id: "contents"
+                                (contents-list n))
+                         (<div> id: "main"
+                                (chicken-doc-sxml->html (node-sxml n))))))
+         (node-page p (<p> "No node found at path " p))))))
 
 (define (title-path n)
   (let loop ((p (node-path n))
@@ -67,7 +113,7 @@
   (let ((q (string-split p)))
     (cond ((null? q) (error "Query string missing")) 
           ((null? (cdr q))
-           (format-doc p))
+           (format-id p))
           (else
            (format-path p)))))                 ;  API defect
 
@@ -76,8 +122,13 @@
     (with-request-vars
      $ (id path q)
      (cond (path => format-path)
-           (id   => format-doc)
-           (q    => query)
+           (id   => format-id)
+           (q    => (lambda (p)
+                      (with-request-vars
+                       $ (query-regex query-name)
+                       (if query-regex
+                           (format-re p)
+                           (query p)))))
            (else (node-page #f (input-form))))))
 
   css: "awful-cdoc.css")
@@ -87,7 +138,7 @@
             (if title
                 (string-append " &raquo; " title)
                 (string-append " | chicken-doc server")))
-      (<div> id: "contents"
+      (<div> id: "body"
              contents)))
 
 ;; missing full node path should generate 404
