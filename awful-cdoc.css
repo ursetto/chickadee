@@ -20,13 +20,13 @@ tt {
 div#body {
 }
 div#main {
-  float: left; width: 78%;
-/*  padding-right: 0.5em; */
-  padding-left: 0.5em;
+  padding-left: 1em;
+  padding-right: 1em;
 }
 div#contents {
   float: right; width: 20%;
   border-left: 1px solid black;
+  margin-left: 1em;
 }
 
 dt {
@@ -39,7 +39,7 @@ dl.defsig {
 /*  border-right: 3px double black; */
   border-color: black;
   margin-left: 1em;
-  margin-right: 1em;
+/*  margin-right: 1em; */
 }
 
 dt.defsig {
@@ -175,4 +175,21 @@ ul.contents-list li {
 ul.contents-list li a {
   display: block;
   padding: 0 0.5em;
+}
+
+/* Introduce a new "Block formatting context" (9.4.1) 
+   for each of these block elements by setting
+   overflow to anything other than visible.  This
+   allows blocks to flow around floats.  Certain
+   elts, such as table cells, get a BFC automatically. */
+#main dl, #main ul, #main ol,
+#main h1, #main h2, #main h3,
+#main h4, #main h5, #main h6 {
+  overflow: hidden;
+}
+/* New BFC for pre but allow horiz. scrollbar
+   to appear rather than truncating content. */
+#main pre {
+  overflow: auto;
+  font-size: 90%;
 }
