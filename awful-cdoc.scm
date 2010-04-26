@@ -68,7 +68,7 @@
   css: "awful-cdoc.css")
 
 (define (node-page title contents)
-  (++ (<h1> "chickadee"
+  (++ (<h1> "<a href=\"/cdoc\">chickadee</a>"
             (if title (string-append " &raquo; " title) ""))
       (<div> id: "contents"
              contents)))

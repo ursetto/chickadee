@@ -17,13 +17,6 @@ tt {
   font-family: "Courier", "Courier New", monospace;
 }
 
-h1 {
-  font-size: medium;
-  padding-left: 0.5em;
-  border-bottom: 3px double black;
-  background-color: #ffffff;
-}
-
 div#contents {
   padding-right: 0.5em;
   padding-left: 0.5em;
@@ -130,4 +123,19 @@ a {
 a:hover {
   color: white;
   background-color: black;
+}
+
+h1 {
+  font-size: medium;
+  padding-left: 0;
+  border-bottom: 3px double black;
+  background-color: #ffffff;
+}
+
+h1 a {
+  border: none;
+  font-weight: bold;
+  font-style: italic;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
