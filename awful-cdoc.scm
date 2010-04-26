@@ -27,9 +27,16 @@
           (node-page (title-path n1)
                      (chicken-doc-sxml->html (node-sxml n1))))
          (nodes
-          (node-page x
-                     (<pre> "Found " (length nodes) " nodes"
-                            " at paths " (map node-path nodes))))))
+          (node-page (string-append "query " x " ("
+                                    (number->string (length nodes))
+                                    " matches)")
+                     (apply <table>   ; yuck
+                            class: "match-results"
+                      (map (lambda (n)
+                             (<tr> (<td> class: "match-path" (title-path n))
+                                   (<td> class: "match-sig"
+                                         (<tt> (node-signature n)))))
+                           nodes))))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
