@@ -1,5 +1,6 @@
 (use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
+(use (only uri-generic uri-encode-string))
 (load "chicken-doc-html.scm")
 (import chicken-doc-html)
 
@@ -38,7 +39,22 @@
         (node-page p (<p> "No node found at path " p)))))
 
 (define (title-path n)
-  (string-intersperse (map ->string (node-path n)) " &raquo; "))
+  (let loop ((p (node-path n))
+             (f '())
+             (r '()))
+    (if (null? p)
+        (tree->string (reverse r))
+        (let* ((id (->string (car p)))
+               (f (append f (list id)))
+               (n (lookup-node f)))
+          (loop (cdr p) f (cons
+                           (list
+                            "<a href=\"/cdoc?path="
+                            (uri-encode-string (string-intersperse f " "))
+                            "\">" id
+                            "</a>"
+                            (if (null? (cdr p)) '() " &raquo; "))
+                           r))))))
 
 (define-page "cdoc"
   (lambda ()
@@ -56,3 +72,6 @@
             (if title (string-append " &raquo; " title) ""))
       (<div> id: "contents"
              contents)))
+
+;; missing full node path should generate 404
+;; "q" search should operate like chicken-doc cmd line

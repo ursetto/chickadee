@@ -4,7 +4,7 @@
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
 (use matchable)
-(use (only data-structures conc))
+(use (only data-structures conc ->string))
 (use (only ports with-output-to-string))
 
 (define (sxml-walk doc ss)
@@ -90,9 +90,11 @@
                                         ((type sig)
                                          `("<dt class=\"defsig\">"
                                            "<span class=\"sig\"><tt>"
-                                           ,sig "</tt></span>"
+                                           ,(string->goodHTML sig) "</tt></span>"
                                            " "
-                                           "<span class=\"type\">" ,type "</span>"
+                                           "<span class=\"type\">"
+                                           ,(string->goodHTML (->string type))
+                                           "</span>"
                                            "</dt>\n"))))
                                sigs)
                              "<dd class=\"defsig\">"

@@ -126,3 +126,8 @@ a {
   border-bottom: 1px solid black;
   font-weight: bold;
 }
+
+a:hover {
+  color: white;
+  background-color: black;
+}
