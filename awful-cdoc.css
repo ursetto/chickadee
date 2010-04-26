@@ -20,8 +20,8 @@ tt {
 div#body {
 }
 div#main {
-  float: left; width: 75%;
-  padding-right: 0.5em;
+  float: left; width: 78%;
+/*  padding-right: 0.5em; */
   padding-left: 0.5em;
 }
 div#contents {

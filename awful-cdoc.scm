@@ -80,10 +80,12 @@
          (if contents
              (contents-page n)
              (node-page (string-append (title-path n)
-                                       " | "
-                                       ;; don't know how to do this right now
-                                       "<a href=\"?path=" (uri-encode-string p)
-                                       "&contents=1\">contents</a>")
+                                       ""
+                                       ;; " | "
+                                       ;; ;; don't know how to do this right now
+                                       ;; "<a href=\"?path=" (uri-encode-string p)
+                                       ;; "&contents=1\">contents</a>"
+                                       )
                         (string-append
                          (<div> id: "contents"
                                 (contents-list n))
