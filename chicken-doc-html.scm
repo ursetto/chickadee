@@ -169,6 +169,23 @@
                        (match b ((lang . body)
                                  (list "<pre>" (walk body s) "</pre>")))))
 
+          ;; convert example contents to `(pre ...) and re-walk it
+          (examples
+           . ,(lambda (t b ex-ss)
+                (walk b `((example
+                           . ,(lambda (t b s)
+                                (walk `(pre
+                                        ,(walk b
+                                               `((init . ,(lambda (t b s)
+                                                            (list b "\n")))
+                                                 (expr . ,(lambda (t b s) b))
+                                                 (result . ,(lambda (t b s)
+                                                              `("\n; Result: " ,b)))
+                                                 )))
+                                      ex-ss)))))))
+
+          (blockquote . ,(block "blockquote"))
+
           (hr . ,(lambda (t b s)
                    "<hr />"))
           
