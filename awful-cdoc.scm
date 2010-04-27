@@ -56,23 +56,22 @@
               ))
 
 (define (contents-list n)
-  (define (node-id n)
-    (last (node-path n)))             ; TEMPORARY!!
-  (tree->string
-   `("<ul class=\"contents-list\">"
-     ,(map
-       (lambda (c)
-         `("<li>"
-           "<a href=\"/cdoc?path="
-           ,(uri-encode-string (string-intersperse
-                                (map ->string (node-path c))
-                                " "))
-           "\">" ,(quote-html (->string (node-id c)))
-           "</a>"
-           "</li>"))
-       (node-children n))
-     "</ul>"
-     )))
+  (let ((p (map ->string (node-path n))))
+    (tree->string
+     `("<ul class=\"contents-list\">"
+       ,(map
+         (lambda (id)
+           `("<li>"
+             "<a href=\"/cdoc?path="
+             ,(uri-encode-string (string-intersperse
+                                  (append p (list id))
+                                  " "))
+             "\">" ,(quote-html id)
+             "</a>"
+             "</li>"))
+         (map ->string (node-child-ids n)))
+       "</ul>"
+       ))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
