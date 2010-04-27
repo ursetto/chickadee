@@ -15,11 +15,12 @@
               (print-error-message exn))))))
 
 (define (input-form)
-  (<form> action: "cdoc"
+  (<form> class: "lookup"
+          action: "cdoc"
           method: 'get
-          (<input> type: "text" name: "q")  ; query should redirect.
-          (<input> type: "submit" name: "query-name" value: "Lookup")
-          (<input> type: "submit" name: "query-regex" value: "Regex")))
+          (<input> class: "text" type: "text" name: "q")  ; query should redirect.
+          (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
+          (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
 
 ;; Really needs to redirect to (or at least call) format-path
 (define (format-id x)
@@ -125,6 +126,20 @@
           (else
            (format-path p)))))                 ;  API defect
 
+(define (root-page)
+  (++ (<h3> "Search")
+      (input-form)
+      (<p> "Enter a documentation node name or path in the search box above."
+           (<ul> (<li> "A node name is a single word, usually an identifier or egg name.  Examples: " (<tt> (<u> "posix")) ", " (<tt> (<u> "open/rdonly")) ", " (<tt> (<u> "+")) ".")
+                 (<li> "A node path is multiple words, separated by spaces, such as " (<tt> (<u> "posix open/rdonly")) ".")))
+
+      (<h3> "Quick links")
+      (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
+            (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
+            (<li> (<a> href: (path->href '(foreign)) "FFI"))
+                  ))
+)
+
 (define-page "cdoc"
   (lambda ()
     (with-request-vars
@@ -138,7 +153,7 @@
                            (format-re p)
                            (query p)))))
            (else
-            (node-page #f (contents-list (lookup-node '())) (input-form))))))
+            (node-page #f (contents-list (lookup-node '())) (root-page))))))
 
   css: "awful-cdoc.css")
 

@@ -186,6 +186,7 @@ ul.contents-list {
 ul.contents-list li {
   padding: 0;
   border-bottom: 1px solid black;
+  margin: 0;
 }
 ul.contents-list li a {
   display: block;
@@ -206,4 +207,15 @@ ul.contents-list li a {
    to appear rather than truncating content. */
 #main pre {
   overflow: auto;
+}
+
+ul li {
+  margin-bottom: 3px;  /* > 0 helps avoid cutoff of bottom link border */
+}
+
+form.lookup input.text {
+  width: 20em;
+}
+form.lookup input.button {
+  margin-left: 1em;
 }
