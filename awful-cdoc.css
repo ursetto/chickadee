@@ -3,10 +3,12 @@ body {
   background-color: #ffffff;
   margin: 0;
   padding: 0;
+  font-size: 16px;
 }
 
 pre {
   font-family: "Courier", "Courier New", monospace;
+  font-size: 14px;
   padding-left: 1em;
   margin: 0;
   margin-top: 1em;
@@ -15,6 +17,7 @@ pre {
 }
 tt {
   font-family: "Courier", "Courier New", monospace;
+  font-size: 16px;
 }
 
 div#body {
@@ -191,5 +194,4 @@ ul.contents-list li a {
    to appear rather than truncating content. */
 #main pre {
   overflow: auto;
-  font-size: 90%;
 }

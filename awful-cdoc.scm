@@ -130,7 +130,8 @@
                        (if query-regex
                            (format-re p)
                            (query p)))))
-           (else (node-page #f (input-form))))))
+           (else
+            (node-page #f (contents-list (lookup-node '())) (input-form))))))
 
   css: "awful-cdoc.css")
 
