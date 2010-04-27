@@ -1,8 +1,7 @@
 (use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-(load "chicken-doc-html.scm")
-(import chicken-doc-html)
+(use chicken-doc-html)
 
 (root-path ".")
 (debug-log (current-error-port))
@@ -22,12 +21,17 @@
           (<input> type: "submit" name: "query-name" value: "Lookup")
           (<input> type: "submit" name: "query-regex" value: "Regex")))
 
+;; Really needs to redirect to (or at least call) format-path
 (define (format-id x)
   (match (match-nodes x)
          ((n1)
           (node-page (title-path n1)
                      (contents-list n1)
                      (chicken-doc-sxml->html (node-sxml n1))))
+         (()
+          (node-page #f
+                     ""
+                     (<p> "No node found matching identifier " (<tt> x))))
          (nodes
           (match-page nodes x))))
 
@@ -41,19 +45,19 @@
              ""
              (apply <table>   ; yuck
                     class: "match-results"
+                    (<tr> (<th> "path") (<th> "signature"))
                     (map (lambda (n)
                            (<tr> (<td> class: "match-path" (title-path n))
                                  (<td> class: "match-sig"
-                                       (<tt> (node-signature n)))))
+                                       (<a> href: (path->href (node-path n))
+                                            (<tt> (node-signature n))))))
                          nodes))))
 
 ;; contents doesn't need full path like match page
-;; also would be nice to return contents without obtaining
-;; signature as that is expensive
-(define (contents-page n)
-  (match-page (node-children n)
-              (title-path n)         ; not correct
-              ))
+;; (define (contents-page n)
+;;   (match-page (node-children n)
+;;               (title-path n)         ; not correct
+;;               ))
 
 (define (contents-list n)
   (let ((p (map ->string (node-path n))))
@@ -91,6 +95,10 @@
                         (chicken-doc-sxml->html (node-sxml n))))
          (node-page p "" (<p> "No node found at path " p))))))
 
+(define (path->href p)
+  (string-append
+   "/cdoc?path="
+   (uri-encode-string (string-intersperse (map ->string p) " "))))
 (define (title-path n)
   (let loop ((p (node-path n))
              (f '())

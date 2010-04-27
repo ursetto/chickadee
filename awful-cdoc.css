@@ -25,6 +25,7 @@ div#body {
 div#main {
   padding-left: 1em;
   padding-right: 1em;
+  margin-top: 1em;
 }
 div#contents {
   float: right; width: 20%;
@@ -162,7 +163,18 @@ td.match-path a, ul.contents-list a {
 }
 
 td.match-sig {
-  
+  padding: 0;
+}
+td.match-sig a {
+  display: block;
+  text-decoration: none;
+  border: none;
+  padding-left: 1em;
+  padding-right: 1em;
+  font-weight: normal;
+}
+td.match-sig tt {
+/*  font-size: 14px; */
 }
 
 ul.contents-list {
