@@ -8,6 +8,8 @@
 (use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
+(use (only uri-common update-uri request-uri uri-reference))
+(use (only intarweb request-uri))
 (load "chicken-doc-html.scm") (import chicken-doc-html) ; temp -- for awful reload
 
 (root-path ".")
@@ -131,7 +133,9 @@
           ((null? (cdr q))
            (format-id p))
           (else
-           (format-path p)))))                 ;  API defect
+           (redirect-to (path->href q))
+           ;; (format-path p)
+           ))))                 ;  API defect
 
 (define (root-page)
   (++ (<h3> "Search")
@@ -167,27 +171,34 @@
            (else
             (node-page #f (contents-list (lookup-node '())) (root-page))))))
 
-  css: "awful-cdoc.css")
+  no-template: #t)
 
 (define (node-page title contents body)
-  (++ (<h1> (link (main-page-path) "chickadee")
-            (if title
-                (string-append " &raquo; " title)
-                (string-append " | chicken-doc server")))
-      (<div> id: "contents"
-             contents)
-      (<div> id: "body"
-             (<div> id: "main"
-                    body))))
+  (html-page
+   (++ (<h1> (link (main-page-path) "chickadee")
+             (if title
+                 (string-append " &raquo; " title)
+                 (string-append " | chicken-doc server")))
+       (<div> id: "contents"
+              contents)
+       (<div> id: "body"
+              (<div> id: "main"
+                     body)))
+   css: "awful-cdoc.css"))
 
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
 
-
-
-;; (define (redirect-to path #!key (status 302) (headers '()))
-;;   (send-response status: status
-;;                  headers: (append `((location ,(update-uri
-;;                                                 (request-uri (current-request))
-;;                                                 path: path)))
-;;                                   headers)))
+(define (redirect-to path #!key (status 302) (headers '()))
+  (warning "redirecting to " path)
+  (with-headers `((location ,(uri-reference (string-append "http://localhost:8080"
+                                                           path))))
+                (lambda ()
+                  (send-status 302 "oh crap")
+                  ""))
+  ;; (send-response status: status
+  ;;                headers: (append `((location ,(update-uri
+  ;;                                               (request-uri (current-request))
+  ;;                                               path: path)))
+  ;;                                 headers))
+  )
