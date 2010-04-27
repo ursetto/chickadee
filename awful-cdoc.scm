@@ -26,6 +26,7 @@
   (match (match-nodes x)
          ((n1)
           (node-page (title-path n1)
+                     (contents-list n1)
                      (chicken-doc-sxml->html (node-sxml n1))))
          (nodes
           (match-page nodes x))))
@@ -37,6 +38,7 @@
   (node-page (string-append "query " match-text " ("
                             (number->string (length nodes))
                             " matches)")
+             ""
              (apply <table>   ; yuck
                     class: "match-results"
                     (map (lambda (n)
@@ -86,12 +88,9 @@
                                        ;; "<a href=\"?path=" (uri-encode-string p)
                                        ;; "&contents=1\">contents</a>"
                                        )
-                        (string-append
-                         (<div> id: "contents"
-                                (contents-list n))
-                         (<div> id: "main"
-                                (chicken-doc-sxml->html (node-sxml n))))))
-         (node-page p (<p> "No node found at path " p))))))
+                        (contents-list n)
+                        (chicken-doc-sxml->html (node-sxml n))))
+         (node-page p "" (<p> "No node found at path " p))))))
 
 (define (title-path n)
   (let loop ((p (node-path n))
@@ -135,13 +134,16 @@
 
   css: "awful-cdoc.css")
 
-(define (node-page title contents)
+(define (node-page title contents body)
   (++ (<h1> "<a href=\"/cdoc\">chickadee</a>"
             (if title
                 (string-append " &raquo; " title)
                 (string-append " | chicken-doc server")))
+      (<div> id: "contents"
+             contents)
       (<div> id: "body"
-             contents)))
+             (<div> id: "main"
+                    body))))
 
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
