@@ -1,7 +1,7 @@
 (use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-(use chicken-doc-html)
+(load "chicken-doc-html.scm") (import chicken-doc-html) ; temp -- for awful reload
 
 (root-path ".")
 (debug-log (current-error-port))

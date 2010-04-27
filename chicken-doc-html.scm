@@ -6,9 +6,10 @@
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
 (use (only uri-generic uri-encode-string)) ; grr
 (use matchable)
-(use (only data-structures conc ->string))
+(use (only data-structures conc ->string string-intersperse))
 (use (only ports with-output-to-string))
 (use regex) (import irregex)
+(use (only chicken-doc-admin man-filename->path))
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -66,6 +67,8 @@
                            (b . ,(inline "b"))
                            (i . ,(inline "i"))
                            (tt . ,(inline "tt"))
+                           (sup . ,(inline "sup"))
+                           (sub . ,(inline "sub"))
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
                                       (match b
@@ -73,20 +76,28 @@
                                               (link href desc))
                                              ((href)
                                               (link href href)))))
-                           (int-link . ,(lambda (t b s)
-                                          (let ((ilink (lambda (href desc)
-                                                         ;; Incomplete.  We need to
-                                                         ;; rewrite internal and
-                                                         ;; external wiki links to
-                                                         ;; local nodes, including
-                                                         ;; canonical node names.
-                                                         `("<a href=\"/cdoc?path="
-                                                           ,(uri-encode-string href)
-                                                           "\">" ,(quote-html desc)
-                                                           "</a>"))))
-                                            (match b
-                                                   ((href desc) (ilink href desc))
-                                                   ((href) (ilink href href))))))))
+                           (int-link
+                            . ,(lambda (t b s)
+                                 (let ((ilink
+                                        (lambda (href desc)
+                                          (let ((path (cond ((man-filename->path href)
+                                                             => (lambda (p)
+                                                                  (string-intersperse
+                                                                   (map ->string p)
+                                                                   " ")))
+                                                            (else href))))
+                                            ;; Incomplete.  We need to
+                                            ;; rewrite internal and
+                                            ;; external wiki links to
+                                            ;; local nodes, including
+                                            ;; canonical node names.
+                                            `("<a href=\"/cdoc?path="
+                                              ,(uri-encode-string path)
+                                              "\">" ,(quote-html desc)
+                                              "</a>")))))
+                                   (match b
+                                          ((href desc) (ilink href desc))
+                                          ((href) (ilink href href))))))))
               )
        (walk
         doc
@@ -144,7 +155,7 @@
                                                           (number->string level)
                                                           ">")))
                                     (list "<" H
-                                          title
+                                          (walk title inline-ss)
                                           "</" H
                                           (walk body s)))))))
 
