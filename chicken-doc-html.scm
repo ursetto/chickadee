@@ -135,6 +135,14 @@
                                         ,(walk b ul-ss)
                                         "</li>\n")))))
                      "</ul>\n")))
+          (ol . ,(lambda (t b ol-ss)
+                   `("<ol>"
+                     ,(walk b `((li
+                                 . ,(lambda (t b s)
+                                      `("<li>"
+                                        ,(walk b ol-ss)
+                                        "</li>\n")))))
+                     "</ol>\n")))
           (dl . ,(lambda (t b dl-ss)
                    `("<dl>"
                      ,(walk b `((dt . ,(lambda (t b s)
