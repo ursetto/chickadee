@@ -1,3 +1,10 @@
+;; todo
+;;   rewrite /cdoc/path/to/node to ?path=path to node, somehow
+;;   redir found ID to ?path=
+;;   ----
+;;   get rid of awful, probably
+;;   bench
+
 (use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
@@ -16,7 +23,7 @@
 
 (define (input-form)
   (<form> class: "lookup"
-          action: "cdoc"
+          action: (main-page-path)
           method: 'get
           (<input> class: "text" type: "text" name: "q")  ; query should redirect.
           (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
@@ -67,7 +74,7 @@
        ,(map
          (lambda (id)
            `("<li>"
-             "<a href=\"/cdoc?path="
+             "<a href=\"" ,(main-page-path) "?path="
              ,(uri-encode-string (string-intersperse
                                   (append p (list id))
                                   " "))
@@ -98,7 +105,7 @@
 
 (define (path->href p)
   (string-append
-   "/cdoc?path="
+   (main-page-path) "?path="
    (uri-encode-string (string-intersperse (map ->string p) " "))))
 (define (title-path n)
   (let loop ((p (node-path n))
@@ -111,7 +118,7 @@
                (n (lookup-node f)))
           (loop (cdr p) f (cons
                            (list
-                            "<a href=\"/cdoc?path="
+                            "<a href=\"" (main-page-path) "?path="
                             (uri-encode-string (string-intersperse f " "))
                             "\">" (quote-html id)
                             "</a>"
@@ -130,8 +137,11 @@
   (++ (<h3> "Search")
       (input-form)
       (<p> "Enter a documentation node name or path in the search box above."
-           (<ul> (<li> "A node name is a single word, usually an identifier or egg name.  Examples: " (<tt> (<u> "posix")) ", " (<tt> (<u> "open/rdonly")) ", " (<tt> (<u> "+")) ".")
-                 (<li> "A node path is multiple words, separated by spaces, such as " (<tt> (<u> "posix open/rdonly")) ".")))
+           (<ul> (<li> "A node name is a single word, usually an identifier or egg name.  Examples: "
+                       (<tt> (<u> "posix")) ", " (<tt> (<u> "open/rdonly"))
+                       ", " (<tt> (<u> "+")) ".")
+                 (<li> "A node path is multiple words, separated by spaces, such as "
+                       (<tt> (<u> "posix open/rdonly")) ".")))
 
       (<h3> "Quick links")
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
@@ -140,7 +150,9 @@
                   ))
 )
 
-(define-page "cdoc"
+(main-page-path "/cdoc")
+
+(define-page (main-page-path)
   (lambda ()
     (with-request-vars
      $ (id path q)
@@ -158,7 +170,7 @@
   css: "awful-cdoc.css")
 
 (define (node-page title contents body)
-  (++ (<h1> "<a href=\"/cdoc\">chickadee</a>"
+  (++ (<h1> (link (main-page-path) "chickadee")
             (if title
                 (string-append " &raquo; " title)
                 (string-append " | chicken-doc server")))
@@ -170,3 +182,12 @@
 
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
+
+
+
+;; (define (redirect-to path #!key (status 302) (headers '()))
+;;   (send-response status: status
+;;                  headers: (append `((location ,(update-uri
+;;                                                 (request-uri (current-request))
+;;                                                 path: path)))
+;;                                   headers)))
