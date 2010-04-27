@@ -197,7 +197,14 @@
                                         ,(walk b
                                                `((init . ,(lambda (t b s)
                                                             (list b "\n")))
-                                                 (expr . ,(lambda (t b s) b))
+                                                 ;; FIXME: The html-parser will erroneously
+                                                 ;; parse html tags inside <expr> tags.
+                                                 ;; Right now we drop them, but we should
+                                                 ;; either not parse them in the first place
+                                                 ;; or convert them back here (less nice).
+                                                 (expr . ,(lambda (t b s)
+                                                            (walk b `((*default*
+                                                                       . ,drop-tag)))))
                                                  (result . ,(lambda (t b s)
                                                               `("\n; Result: " ,b)))
                                                  )))
