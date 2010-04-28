@@ -1,8 +1,6 @@
 ;; todo
 ;;   rewrite /cdoc/path/to/node to ?path=path to node, somehow
-;;   redir found ID to ?path=
 ;;   ----
-;;   get rid of awful, probably
 ;;   bench
 
 (use spiffy spiffy-request-vars html-tags html-utils chicken-doc)
@@ -10,7 +8,9 @@
 (use (only uri-generic uri-encode-string))
 (use uri-common)
 (use (only intarweb request-uri))
-(load "chicken-doc-html.scm") (import chicken-doc-html) ; temp -- for awful reload
+;(load "chicken-doc-html.scm")
+(require-library chicken-doc-html)
+(import chicken-doc-html) ; temp -- for awful reload
 
 (root-path ".")  ; dangerous
 (debug-log (current-error-port))
@@ -233,20 +233,8 @@
 
 ;;; start server
 
-(unless (verify-repository)
-  (error "Unable to verify chicken repository"))
-;; Prime cache in primordial thread, shared amongst children, hacking
-;; around the fact that every thread has a separate ID cache which
-;; must be (slowly) populated anew on every request if invalid.
-;; Unfortunately, once the ID cache is updated externally, the
-;; slowdown returns for each request.
-(match-nodes "chicken")  ; sneaky
+(verify-repository)
 (start-server)
-
-
-
-;; -- slowdown due to revalidation of cache every time
-;;    cache should be shared amongst threads
 
 #|
 jim@amaranth ~$ time echo "GET /cdoc?q=fmt+abc HTTP/1.0" | nc localhost 8080
