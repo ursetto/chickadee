@@ -5,23 +5,24 @@
 ;;   get rid of awful, probably
 ;;   bench
 
-(use awful spiffy spiffy-request-vars html-tags html-utils chicken-doc)
+(use spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-(use (only uri-common update-uri request-uri uri-reference))
+(use (only uri-common update-uri request-uri uri-reference uri-path))
 (use (only intarweb request-uri))
 (load "chicken-doc-html.scm") (import chicken-doc-html) ; temp -- for awful reload
 
-(root-path ".")
+(root-path ".")  ; dangerous
 (debug-log (current-error-port))
+(server-port 8080)
 
-(page-exception-message
- (lambda (exn)
-   (<pre> convert-to-entities?: #t
-          (with-output-to-string
-            (lambda ()
-              (print-call-chain)
-              (print-error-message exn))))))
+;; (page-exception-message
+;;  (lambda (exn)
+;;    (<pre> convert-to-entities?: #t
+;;           (with-output-to-string
+;;             (lambda ()
+;;               (print-call-chain)
+;;               (print-error-message exn))))))
 
 (define (input-form)
   (<form> class: "lookup"
@@ -154,12 +155,21 @@
                   ))
 )
 
-(main-page-path "/cdoc")
+(define main-page-path (make-parameter "/cdoc"))
 
-(define-page (main-page-path)
-  (lambda ()
-    (with-request-vars
-     $ (id path q)
+(handle-not-found
+ (let ((old-handler (handle-not-found)))  ; don't eval more than once!
+   (lambda (path)
+     (let ((p (uri-path (request-uri (current-request)))))
+       (match p
+              (('/ "cdoc")
+               (parameterize ((http-request-variables (request-vars))) ; for $ ... hmmm
+                 (cdoc-handler)))
+              (else (old-handler path)))))))
+
+(define (cdoc-handler)
+  (with-request-vars
+   $ (id path q)
      (cond (path => format-path)
            (id   => format-id)
            (q    => (lambda (p)
@@ -169,22 +179,30 @@
                            (format-re p)
                            (query p)))))
            (else
-            (node-page #f (contents-list (lookup-node '())) (root-page))))))
+            (node-page #f (contents-list (lookup-node '()))
+                       (root-page))))))
 
-  no-template: #t)
+(define ++ string-append)  ; legacy from awful
+(define (link href desc)
+  (<a> href: href desc))
+(define ($ var #!optional default converter)  ; from awful
+    ((http-request-variables) var default (or converter identity)))
+(define http-request-variables (make-parameter #f))
 
 (define (node-page title contents body)
-  (html-page
-   (++ (<h1> (link (main-page-path) "chickadee")
-             (if title
-                 (string-append " &raquo; " title)
-                 (string-append " | chicken-doc server")))
-       (<div> id: "contents"
-              contents)
-       (<div> id: "body"
-              (<div> id: "main"
-                     body)))
-   css: "awful-cdoc.css"))
+  (send-response
+   body:
+   (html-page
+    (++ (<h1> (link (main-page-path) "chickadee")
+              (if title
+                  (string-append " &raquo; " title)
+                  (string-append " | chicken-doc server")))
+        (<div> id: "contents"
+               contents)
+        (<div> id: "body"
+               (<div> id: "main"
+                      body)))
+    css: "awful-cdoc.css")))
 
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
@@ -194,11 +212,12 @@
   (with-headers `((location ,(uri-reference (string-append "http://localhost:8080"
                                                            path))))
                 (lambda ()
-                  (send-status 302 "oh crap")
-                  ""))
+                  (send-status 302 "Found")))
   ;; (send-response status: status
   ;;                headers: (append `((location ,(update-uri
   ;;                                               (request-uri (current-request))
   ;;                                               path: path)))
   ;;                                 headers))
   )
+
+(start-server)
