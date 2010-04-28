@@ -59,7 +59,8 @@
                            (<tr> (<td> class: "match-path" (title-path n))
                                  (<td> class: "match-sig"
                                        (<a> href: (path->href (node-path n))
-                                            (<tt> (node-signature n))))))
+                                            (<tt> convert-to-entities?: #t
+                                                  (node-signature n))))))
                          nodes))))
 
 ;; contents doesn't need full path like match page
@@ -128,7 +129,8 @@
 
 (define (query p)
   (let ((q (string-split p)))
-    (cond ((null? q) (error "Query string missing")) 
+    (cond ((null? q)
+           (redirect-to (main-page-path))) 
           ((null? (cdr q))
            (format-id p))
           (else
@@ -229,36 +231,30 @@
   ;;                             . ,headers)))
   )
 
+
+;;; start server
+
+(unless (verify-repository)
+  (error "Unable to verify chicken repository"))
+;; Prime cache in primordial thread, shared amongst children, hacking
+;; around the fact that every thread has a separate ID cache which
+;; must be (slowly) populated anew on every request if invalid.
+;; Unfortunately, once the ID cache is updated externally, the
+;; slowdown returns for each request.
+(match-nodes "chicken")  ; sneaky
 (start-server)
 
 
 
-;; NOTE: redirect from q=posix or q=fmt takes forever while
-;; redirect from q=posix+foo or q=posix+open/rdonly is instant
+;; -- slowdown due to revalidation of cache every time
+;;    cache should be shared amongst threads
 
 #|
 jim@amaranth ~$ time echo "GET /cdoc?q=fmt+abc HTTP/1.0" | nc localhost 8080
-HTTP/1.1 302 OK
-Content-Type: text/html
-Server: Spiffy/4.5 (Running on Chicken 4.4.6)
-Content-Length: 0
 Location: http://localhost:8080/cdoc?path=fmt%20abc
-Date: Wed, 28 Apr 2010 02:33:11 GMT
-
-
 real    0m0.024s
-user    0m0.002s
-sys     0m0.006s
+
 jim@amaranth ~$ time echo "GET /cdoc?q=fmt HTTP/1.0" | nc localhost 8080
-HTTP/1.1 302 OK
-Content-Type: text/html
-Server: Spiffy/4.5 (Running on Chicken 4.4.6)
-Content-Length: 0
 Location: http://localhost:8080/cdoc?path=fmt
-Date: Wed, 28 Apr 2010 02:33:13 GMT
-
-
 real    0m0.145s
-user    0m0.002s
-sys     0m0.006s
 |#
