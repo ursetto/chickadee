@@ -15,6 +15,7 @@
 (root-path ".")  ; dangerous
 (debug-log (current-error-port))
 (server-port 8080)
+(tcp-buffer-size 1024)
 
 ;; (page-exception-message
 ;;  (lambda (exn)
@@ -212,9 +213,7 @@
   (send-response code: code
                  headers: `((location ,(uri-reference  ; BAD!
                                         (string-append "http://localhost:8080" path)))
-                            . ,headers)
-                 body: "")
-  ;; empty body apparently necessary, Content-length must be 0!
+                            . ,headers))
 
   ;; doesn't work because does not preserve new path= params
   ;; (let* ((uri (request-uri (current-request)))
