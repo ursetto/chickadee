@@ -7,7 +7,7 @@
 (use matchable)
 (use (only uri-generic uri-encode-string))
 (use uri-common)
-(use (only intarweb request-uri))
+(use intarweb)
 ;(load "chicken-doc-html.scm")
 (require-library chicken-doc-html)
 (import chicken-doc-html) ; temp -- for awful reload
@@ -77,10 +77,7 @@
        ,(map
          (lambda (id)
            `("<li>"
-             "<a href=\"" ,(main-page-path) "?path="
-             ,(uri-encode-string (string-intersperse
-                                  (append p (list id))
-                                  " "))
+             "<a href=\"" ,(path->href (append p (list id)))
              "\">" ,(quote-html id)
              "</a>"
              "</li>"))
@@ -104,12 +101,16 @@
                                        )
                         (contents-list n)
                         (chicken-doc-sxml->html (node-sxml n))))
-         (node-page p "" (<p> "No node found at path " p))))))
+         (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
+(define (chickadee-page-path) "/chickadee")
 (define (path->href p)
   (string-append
-   (main-page-path) "?path="
-   (uri-encode-string (string-intersperse (map ->string p) " "))))
+   (chickadee-page-path)
+   "/"
+   (string-intersperse (map (lambda (x)
+                              (uri-encode-string (->string x)))
+                            p) "/")))
 (define (title-path n)
   (let loop ((p (node-path n))
              (f '())
@@ -121,8 +122,7 @@
                (n (lookup-node f)))
           (loop (cdr p) f (cons
                            (list
-                            "<a href=\"" (main-page-path) "?path="
-                            (uri-encode-string (string-intersperse f " "))
+                            "<a href=\"" (path->href f)
                             "\">" (quote-html id)
                             "</a>"
                             (if (null? (cdr p)) '() " &raquo; "))
@@ -166,7 +166,23 @@
               (('/ "cdoc")
                (parameterize ((http-request-variables (request-vars))) ; for $ ... hmmm
                  (cdoc-handler)))
+              (('/ "chickadee" . p)
+               (chickadee-handler p))
               (else (old-handler path)))))))
+
+;; uri rewriter
+(define (chickadee-handler p)
+  (let ((r (current-request)))
+    (restart-request (make-request
+                      uri: (uri-reference
+                            ;; FIXME
+                            (if (null? p)
+                                "http://localhost:8080/cdoc"
+                                (string-append "http://localhost:8080/cdoc?path="
+                                               (uri-encode-string
+                                                (string-intersperse p
+                                                                    " ")))))
+                      headers: (request-headers r)))))
 
 (define (cdoc-handler)
   (with-request-vars
@@ -194,7 +210,7 @@
   (send-response
    body:
    (html-page
-    (++ (<h1> (link (main-page-path) "chickadee")
+    (++ (<h1> (link (chickadee-page-path) "chickadee")
               (if title
                   (string-append " &raquo; " title)
                   (string-append " | chicken-doc server")))
@@ -203,7 +219,7 @@
         (<div> id: "body"
                (<div> id: "main"
                       body)))
-    css: "awful-cdoc.css")))
+    css: "/awful-cdoc.css")))
 
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
