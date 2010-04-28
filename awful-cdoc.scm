@@ -8,7 +8,7 @@
 (use spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-(use (only uri-common update-uri request-uri uri-reference uri-path))
+(use uri-common)
 (use (only intarweb request-uri))
 (load "chicken-doc-html.scm") (import chicken-doc-html) ; temp -- for awful reload
 
@@ -205,17 +205,60 @@
 ;; missing full node path should generate 404
 ;; "q" search should operate like chicken-doc cmd line
 
-(define (redirect-to path #!key (status 302) (headers '()))
+(define (redirect-to path #!key (code 302) (headers '()))
   (warning "redirecting to " path)
-  (with-headers `((location ,(uri-reference (string-append "http://localhost:8080"
-                                                           path))))
-                (lambda ()
-                  (send-status 302 "Found")))
-  ;; (send-response status: status
-  ;;                headers: (append `((location ,(update-uri
-  ;;                                               (request-uri (current-request))
-  ;;                                               path: path)))
-  ;;                                 headers))
+  (send-response code: code
+                 headers: `((location ,(uri-reference  ; BAD!
+                                        (string-append "http://localhost:8080" path)))
+                            . ,headers)
+                 body: "")
+  ;; empty body apparently necessary, Content-length must be 0!
+
+  ;; doesn't work because does not preserve new path= params
+  ;; (let* ((uri (request-uri (current-request)))
+  ;;        (host (or (uri-host uri)
+  ;;                  "localhost"))
+  ;;        (port (or (uri-port uri)
+  ;;                  (server-port)))) ; meh
+  ;;   (send-response code: code
+  ;;                  headers: `((location ,(update-uri
+  ;;                                         (request-uri (current-request))
+  ;;                                         host: host
+  ;;                                         port: port
+  ;;                                         path: path))
+  ;;                             . ,headers)))
   )
 
 (start-server)
+
+
+
+;; NOTE: redirect from q=posix or q=fmt takes forever while
+;; redirect from q=posix+foo or q=posix+open/rdonly is instant
+
+#|
+jim@amaranth ~$ time echo "GET /cdoc?q=fmt+abc HTTP/1.0" | nc localhost 8080
+HTTP/1.1 302 OK
+Content-Type: text/html
+Server: Spiffy/4.5 (Running on Chicken 4.4.6)
+Content-Length: 0
+Location: http://localhost:8080/cdoc?path=fmt%20abc
+Date: Wed, 28 Apr 2010 02:33:11 GMT
+
+
+real    0m0.024s
+user    0m0.002s
+sys     0m0.006s
+jim@amaranth ~$ time echo "GET /cdoc?q=fmt HTTP/1.0" | nc localhost 8080
+HTTP/1.1 302 OK
+Content-Type: text/html
+Server: Spiffy/4.5 (Running on Chicken 4.4.6)
+Content-Length: 0
+Location: http://localhost:8080/cdoc?path=fmt
+Date: Wed, 28 Apr 2010 02:33:13 GMT
+
+
+real    0m0.145s
+user    0m0.002s
+sys     0m0.006s
+|#
