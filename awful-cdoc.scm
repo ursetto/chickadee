@@ -36,9 +36,7 @@
 (define (format-id x)
   (match (match-nodes x)
          ((n1)
-          (node-page (title-path n1)
-                     (contents-list n1)
-                     (chicken-doc-sxml->html (node-sxml n1))))
+          (redirect-to (path->href (node-path n1))))
          (()
           (node-page #f
                      ""
