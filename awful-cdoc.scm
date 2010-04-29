@@ -27,7 +27,7 @@
 
 (define (input-form)
   (<form> class: "lookup"
-          action: (main-page-path)
+          action: (cdoc-page-path)
           method: 'get
           (<input> class: "text" type: "text" name: "q")  ; query should redirect.
           (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
@@ -104,6 +104,7 @@
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
 (define (chickadee-page-path) "/chickadee")
+(define (chickadee-path) '("chickadee"))
 (define (path->href p)
   (string-append
    (chickadee-page-path)
@@ -131,7 +132,7 @@
 (define (query p)
   (let ((q (string-split p)))
     (cond ((null? q)
-           (redirect-to (main-page-path))) 
+           (redirect-to (cdoc-page-path)))
           ((null? (cdr q))
            (format-id p))
           (else
@@ -156,19 +157,19 @@
                   ))
 )
 
-(define main-page-path (make-parameter "/cdoc"))
+(define cdoc-page-path (make-parameter "/cdoc"))
 
 (handle-not-found
  (let ((old-handler (handle-not-found)))  ; don't eval more than once!
-   (lambda (path)
+   (lambda (path) ; useless
      (let ((p (uri-path (request-uri (current-request)))))
-       (match p
-              (('/ "cdoc")
-               (parameterize ((http-request-variables (request-vars))) ; for $ ... hmmm
-                 (cdoc-handler)))
-              (('/ "chickadee" . p)
-               (chickadee-handler p))
-              (else (old-handler path)))))))
+       (parameterize ((http-request-variables (request-vars))) ; for $
+         (match p
+                (('/ "cdoc" . p)
+                 (cdoc-handler p))
+                (('/ "chickadee" . p)
+                 (chickadee-handler p))
+                (else (old-handler path))))))))
 
 ;; uri rewriter
 (define (chickadee-handler p)
@@ -184,7 +185,8 @@
                                                                     " ")))))
                       headers: (request-headers r)))))
 
-(define (cdoc-handler)
+(define (cdoc-handler p)
+  p ;ignore
   (with-request-vars
    $ (id path q)
      (cond (path => format-path)
@@ -225,26 +227,11 @@
 ;; "q" search should operate like chicken-doc cmd line
 
 (define (redirect-to path #!key (code 302) (headers '()))
-  (warning "redirecting to " path)
   (send-response code: code
-                 headers: `((location ,(uri-reference  ; BAD!
-                                        (string-append "http://localhost:8080" path)))
-                            . ,headers))
-
-  ;; doesn't work because does not preserve new path= params
-  ;; (let* ((uri (request-uri (current-request)))
-  ;;        (host (or (uri-host uri)
-  ;;                  "localhost"))
-  ;;        (port (or (uri-port uri)
-  ;;                  (server-port)))) ; meh
-  ;;   (send-response code: code
-  ;;                  headers: `((location ,(update-uri
-  ;;                                         (request-uri (current-request))
-  ;;                                         host: host
-  ;;                                         port: port
-  ;;                                         path: path))
-  ;;                             . ,headers)))
-  )
+                 headers: `((location ,(uri-relative-to
+                                        (uri-reference path)
+                                        (server-root-uri)))
+                            . ,headers)))
 
 
 ;;; start server
