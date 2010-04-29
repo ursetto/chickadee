@@ -156,15 +156,18 @@
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path
-  (make-parameter #f
-                  (lambda (x) (cdoc-page-path
-                          (and x (uri-path->string x))))))
+  (make-parameter #f (lambda (x)
+                       (cdoc-page-path
+                        (and x (uri-path->string x)))
+                       x)))
 
 (define chickadee-page-path (make-parameter #f))
 (define chickadee-uri-path
   (make-parameter #f
-                  (lambda (x) (chickadee-page-path   ;auto update (mostly for debugging)
-                          (and x (uri-path->string x))))))
+                  (lambda (x)
+                    (chickadee-page-path   ;auto update (mostly for debugging)
+                     (and x (uri-path->string x)))
+                    x)))
 
 (handle-not-found
  (let ((old-handler (handle-not-found)))  ; don't eval more than once!
@@ -172,25 +175,36 @@
      (let ((p (uri-path (request-uri (current-request)))))
        (parameterize ((http-request-variables (request-vars))) ; for $
          (match p
-                (('/ "cdoc" . p)
+                (('/ "cdoc" . p)   ; FIXME: use handler vars here
                  (cdoc-handler p))
                 (('/ "chickadee" . p)
                  (chickadee-handler p))
                 (else (old-handler path))))))))
 
+;; Inefficient way to functionally update an alist.
+(define (alist-update k v x . test)
+  (apply alist-update! k v (alist-copy x) test))
+(define (update-param param val uri-query)
+  (alist-update param val uri-query))
+
 ;; uri rewriter
 (define (chickadee-handler p)
-  (let ((r (current-request)))
-    (restart-request (make-request
-                      uri: (uri-reference
-                            ;; FIXME
-                            (if (null? p)
-                                "http://localhost:8080/cdoc"
-                                (string-append "http://localhost:8080/cdoc?path="
-                                               (uri-encode-string
-                                                (string-intersperse p
-                                                                    " ")))))
-                      headers: (request-headers r)))))
+  (let* ((r (current-request))
+         (u (request-uri r))
+         (q (uri-query u)))
+    (let ((uri (update-uri u
+                           path: (cdoc-uri-path)
+                           query: (if (null? p)
+                                      q
+                                      (update-param 'path
+                                                    (string-intersperse p " ") q)))))
+      (restart-request (make-request uri: uri
+                                     ;; No easy way to update request URI.
+                                     port: (request-port r)
+                                     method: (request-method r)
+                                     major: (request-major r)
+                                     minor: (request-minor r)
+                                     headers: (request-headers r))))))
 
 (define (cdoc-handler p)
   p ;ignore
@@ -253,13 +267,3 @@
 
 (verify-repository)
 (start-server)
-
-#|
-jim@amaranth ~$ time echo "GET /cdoc?q=fmt+abc HTTP/1.0" | nc localhost 8080
-Location: http://localhost:8080/cdoc?path=fmt%20abc
-real    0m0.024s
-
-jim@amaranth ~$ time echo "GET /cdoc?q=fmt HTTP/1.0" | nc localhost 8080
-Location: http://localhost:8080/cdoc?path=fmt
-real    0m0.145s
-|#
