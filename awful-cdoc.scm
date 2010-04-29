@@ -9,16 +9,9 @@
 (use uri-common)
 (use intarweb)
 ;(load "chicken-doc-html.scm")
-(require-library chicken-doc-html)
-(import chicken-doc-html) ; temp -- for awful reload
+(use chicken-doc-html)
 
-;; (page-exception-message
-;;  (lambda (exn)
-;;    (<pre> convert-to-entities?: #t
-;;           (with-output-to-string
-;;             (lambda ()
-;;               (print-call-chain)
-;;               (print-error-message exn))))))
+;;; Pages
 
 (define (input-form)
   (<form> class: "lookup"
@@ -59,12 +52,6 @@
                                                   (node-signature n))))))
                          nodes))))
 
-;; contents doesn't need full path like match page
-;; (define (contents-page n)
-;;   (match-page (node-children n)
-;;               (title-path n)         ; not correct
-;;               ))
-
 (define (contents-list n)
   (let ((p (map ->string (node-path n))))
     (tree->string
@@ -98,13 +85,14 @@
                         (chicken-doc-sxml->html (node-sxml n))))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
-(define (path->href p)
+(define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
    (chickadee-page-path)
    "/"
    (string-intersperse (map (lambda (x)
                               (uri-encode-string (->string x)))
                             p) "/")))
+
 (define (title-path n)
   (let loop ((p (node-path n))
              (f '())
@@ -150,9 +138,20 @@
                   ))
 )
 
-(define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
-  (uri->string (update-uri (uri-reference "")
-                           path: p)))
+(define (node-page title contents body)
+  (send-response
+   body:
+   (html-page
+    (++ (<h1> (link (chickadee-page-path) "chickadee")
+              (if title
+                  (string-append " &raquo; " title)
+                  (string-append " | chicken-doc server")))
+        (<div> id: "contents"
+               contents)
+        (<div> id: "body"
+               (<div> id: "main"
+                      body)))
+    css: (chickadee-css-path))))
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path
@@ -169,19 +168,10 @@
                      (and x (uri-path->string x)))
                     x)))
 
-(handle-not-found
- (let ((old-handler (handle-not-found)))  ; don't eval more than once!
-   (lambda (path) ; useless
-     (let ((p (uri-path (request-uri (current-request)))))
-       (parameterize ((http-request-variables (request-vars))) ; for $
-         (match p
-                (('/ "cdoc" . p)   ; FIXME: use handler vars here
-                 (cdoc-handler p))
-                (('/ "chickadee" . p)
-                 (chickadee-handler p))
-                (else (old-handler path))))))))
+(define chickadee-css-path
+  (make-parameter "chickadee.css"))
 
-;; Helper functions
+;;; Helper functions
 
 ;; Inefficient way to functionally update an alist.
 (define (alist-update k v x . test)
@@ -196,19 +186,58 @@
                 major: (request-major r)
                 minor: (request-minor r)
                 headers: (request-headers r)))
-
-;; uri rewriter
-(define (chickadee-handler p)
+(define (match-path pattern path)  ; just a prefix match on list; returns remainder
+  (let loop ((pattern pattern)
+             (path path))
+    (cond ((null? path)
+           (and (null? pattern)
+                path))
+          ((null? pattern)
+           path)
+          ((equal? (car pattern)
+                   (car path))                              ; allow re match?
+           (loop (cdr pattern) (cdr path)))
+          (else #f))))
+;; calls rewriter with the current uri; restarts request with the returned uri
+(define (rewrite-uri rewriter)
   (let* ((r (current-request))
-         (u (request-uri r))
-         (q (uri-query u)))
-    (let ((uri (update-uri u
-                           path: (cdoc-uri-path)
-                           query: (if (null? p)
-                                      q
-                                      (update-param 'path
-                                                    (string-intersperse p " ") q)))))
-      (restart-request (update-request-uri r uri)))))
+         (u (request-uri r)))
+    (restart-request
+     (update-request-uri r (rewriter u)))))
+
+(define ++ string-append)  ; legacy from awful
+(define (link href desc)
+  (<a> href: href desc))
+(define ($ var #!optional default converter)  ; from awful
+    ((http-request-variables) var default (or converter identity)))
+(define http-request-variables (make-parameter #f))
+
+;; note: missing full node path should maybe generate 404
+(define (redirect-to path #!key (code 302) (headers '()))
+  (send-response code: code
+                 headers: `((location ,(uri-relative-to
+                                        (uri-reference path)
+                                        (server-root-uri)))
+                            . ,headers)))
+(define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
+  (uri->string (update-uri (uri-reference "")
+                           path: p)))
+
+;;;
+
+(define (rewrite-chickadee-uri u p)
+  (let ((q (uri-query u)))
+    (update-uri u
+                path: (cdoc-uri-path)
+                query: (if (null? p)
+                           q
+                           (update-param 'path
+                                         (string-intersperse p " ") q)))))
+
+
+
+(define (chickadee-handler p)
+  (rewrite-uri (lambda (u) (rewrite-chickadee-uri u p)))) ;?
 
 (define (cdoc-handler p)
   p ;ignore
@@ -226,38 +255,19 @@
             (node-page #f (contents-list (lookup-node '()))
                        (root-page))))))
 
-(define ++ string-append)  ; legacy from awful
-(define (link href desc)
-  (<a> href: href desc))
-(define ($ var #!optional default converter)  ; from awful
-    ((http-request-variables) var default (or converter identity)))
-(define http-request-variables (make-parameter #f))
+;;; set up handlers
 
-(define (node-page title contents body)
-  (send-response
-   body:
-   (html-page
-    (++ (<h1> (link (chickadee-page-path) "chickadee")
-              (if title
-                  (string-append " &raquo; " title)
-                  (string-append " | chicken-doc server")))
-        (<div> id: "contents"
-               contents)
-        (<div> id: "body"
-               (<div> id: "main"
-                      body)))
-    css: "/awful-cdoc.css")))
-
-;; missing full node path should generate 404
-;; "q" search should operate like chicken-doc cmd line
-
-(define (redirect-to path #!key (code 302) (headers '()))
-  (send-response code: code
-                 headers: `((location ,(uri-relative-to
-                                        (uri-reference path)
-                                        (server-root-uri)))
-                            . ,headers)))
-
+(handle-not-found
+ (let ((old-handler (handle-not-found)))  ; don't eval more than once!
+   (lambda (path) ; useless
+     (let ((p (uri-path (request-uri (current-request)))))
+       (parameterize ((http-request-variables (request-vars))) ; for $
+         (cond ((match-path (cdoc-uri-path) p)
+                => cdoc-handler)
+               ((match-path (chickadee-uri-path) p)
+                => chickadee-handler)
+               (else
+                (old-handler path))))))))
 
 ;;; start server
 
@@ -268,6 +278,7 @@
 
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
+(chickadee-css-path "/chickadee.css")
 
 (verify-repository)
 (start-server)
