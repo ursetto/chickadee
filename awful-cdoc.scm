@@ -10,6 +10,7 @@
 (use intarweb)
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
+(use doctype)
 
 ;;; Pages
 
@@ -82,7 +83,8 @@
                                        ;; "&contents=1\">contents</a>"
                                        )
                         (contents-list n)
-                        (chicken-doc-sxml->html (node-sxml n))))
+                        (chicken-doc-sxml->html (node-sxml n)
+                                                path->href)))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -151,7 +153,8 @@
         (<div> id: "body"
                (<div> id: "main"
                       body)))
-    css: (chickadee-css-path))))
+    css: (chickadee-css-path)
+    doctype: xhtml-1.0-strict)))
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path

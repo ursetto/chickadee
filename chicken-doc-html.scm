@@ -8,7 +8,6 @@
 (use matchable)
 (use (only data-structures conc ->string string-intersperse))
 (use (only ports with-output-to-string))
-(use regex) (import irregex)
 (use (only chicken-doc-admin man-filename->path))
 
 (define (sxml-walk doc ss)
@@ -41,7 +40,9 @@
 (define (quote-html s)
   (string->goodHTML s))
 
-(define (chicken-doc-sxml->html doc)
+(define (chicken-doc-sxml->html doc
+                                path->href  ; for internal links; make parameter?
+                                )
   (tree->string
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
@@ -80,20 +81,22 @@
                             . ,(lambda (t b s)
                                  (let ((ilink
                                         (lambda (href desc)
-                                          (let ((path (cond ((man-filename->path href)
-                                                             => (lambda (p)
-                                                                  (string-intersperse
-                                                                   (map ->string p)
-                                                                   " ")))
-                                                            (else href))))
-                                            ;; Incomplete.  We need to
-                                            ;; rewrite internal and
-                                            ;; external wiki links to
-                                            ;; local nodes, including
-                                            ;; canonical node names.
-                                            `("<a href=\"/cdoc?path="
-                                              ,(uri-encode-string path)
-                                              "\">" ,(quote-html desc)
+                                          (let ((href
+                                                 ;; barely tolerable.  perhaps we
+                                                 ;; should use the id cache
+                                                 (cond ((man-filename->path href)
+                                                        => path->href)
+                                                       ((char=? (string-ref href 0) #\#)
+                                                        href)
+                                                       ((char=? (string-ref href 0) #\/)
+                                                        (string-append  ; ???
+                                                         "http://chicken.wiki.br/"
+                                                         href))
+                                                       (else
+                                                        (path->href (list href)) ; !
+                                                        ))))
+                                            `("<a href=\"" ,href "\">"
+                                              ,(quote-html desc)
                                               "</a>")))))
                                    (match b
                                           ((href desc) (ilink href desc))
