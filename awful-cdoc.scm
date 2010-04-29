@@ -181,11 +181,21 @@
                  (chickadee-handler p))
                 (else (old-handler path))))))))
 
+;; Helper functions
+
 ;; Inefficient way to functionally update an alist.
 (define (alist-update k v x . test)
   (apply alist-update! k v (alist-copy x) test))
 (define (update-param param val uri-query)
   (alist-update param val uri-query))
+(define (update-request-uri r u)
+  (make-request uri: u
+                ;; No easy way to update request URI.
+                port: (request-port r)
+                method: (request-method r)
+                major: (request-major r)
+                minor: (request-minor r)
+                headers: (request-headers r)))
 
 ;; uri rewriter
 (define (chickadee-handler p)
@@ -198,13 +208,7 @@
                                       q
                                       (update-param 'path
                                                     (string-intersperse p " ") q)))))
-      (restart-request (make-request uri: uri
-                                     ;; No easy way to update request URI.
-                                     port: (request-port r)
-                                     method: (request-method r)
-                                     major: (request-major r)
-                                     minor: (request-minor r)
-                                     headers: (request-headers r))))))
+      (restart-request (update-request-uri r uri)))))
 
 (define (cdoc-handler p)
   p ;ignore
