@@ -12,11 +12,6 @@
 (require-library chicken-doc-html)
 (import chicken-doc-html) ; temp -- for awful reload
 
-(root-path ".")  ; dangerous
-(debug-log (current-error-port))
-(server-port 8080)
-(tcp-buffer-size 1024)
-
 ;; (page-exception-message
 ;;  (lambda (exn)
 ;;    (<pre> convert-to-entities?: #t
@@ -103,8 +98,6 @@
                         (chicken-doc-sxml->html (node-sxml n))))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
-(define (chickadee-page-path) "/chickadee")
-(define (chickadee-path) '("chickadee"))
 (define (path->href p)
   (string-append
    (chickadee-page-path)
@@ -157,7 +150,21 @@
                   ))
 )
 
-(define cdoc-page-path (make-parameter "/cdoc"))
+(define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
+  (uri->string (update-uri (uri-reference "")
+                           path: p)))
+
+(define cdoc-page-path (make-parameter #f))
+(define cdoc-uri-path
+  (make-parameter #f
+                  (lambda (x) (cdoc-page-path
+                          (and x (uri-path->string x))))))
+
+(define chickadee-page-path (make-parameter #f))
+(define chickadee-uri-path
+  (make-parameter #f
+                  (lambda (x) (chickadee-page-path   ;auto update (mostly for debugging)
+                          (and x (uri-path->string x))))))
 
 (handle-not-found
  (let ((old-handler (handle-not-found)))  ; don't eval more than once!
@@ -235,6 +242,14 @@
 
 
 ;;; start server
+
+(root-path ".")  ; dangerous
+(debug-log (current-error-port))
+(server-port 8080)
+(tcp-buffer-size 1024)
+
+(cdoc-uri-path '(/ "cdoc"))
+(chickadee-uri-path '(/ "chickadee"))
 
 (verify-repository)
 (start-server)
