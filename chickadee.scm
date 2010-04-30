@@ -65,34 +65,33 @@
                "" ;contents
                (if (= result-length 0)
                    ""
-                   (time
-                    (tree->string
-                     (list
-                      "<table class=\"match-results\">"
-                      (<tr> (<th> "path") (<th> "signature"))
-                      (let loop ((sigs (maximum-match-signatures))
-                                 (results max-results)
-                                 (nodes nodes) (acc '()))
-                        (if (or (null? nodes)
-                                (<= results 0))
-                            (reverse acc)
-                            (let ((n (car nodes)))
-                              (loop (- sigs 1) (- results 1)
-                                    (cdr nodes)
-                                    (cons 
-                                     (list
-                                      "<tr>"
-                                      (<td> class: "match-path" (title-path n))
-                                      (<td> class: "match-sig"
-                                            (<a> href: (path->href (node-path n))
-                                                 ;; FIXME: trying to speed this up
-                                                 (if (<= sigs 0)
-                                                     "-"
-                                                     (<tt> convert-to-entities?: #t
-                                                           (node-signature n)))))
-                                      "</tr>")
-                                     acc)))))
-                      "</table>")))))))
+                   (tree->string
+                    (list
+                     "<table class=\"match-results\">"
+                     (<tr> (<th> "path") (<th> "signature"))
+                     (let loop ((sigs (maximum-match-signatures))
+                                (results max-results)
+                                (nodes nodes) (acc '()))
+                       (if (or (null? nodes)
+                               (<= results 0))
+                           (reverse acc)
+                           (let ((n (car nodes)))
+                             (loop (- sigs 1) (- results 1)
+                                   (cdr nodes)
+                                   (cons 
+                                    (list
+                                     "<tr>"
+                                     (<td> class: "match-path" (title-path n))
+                                     (<td> class: "match-sig"
+                                           (<a> href: (path->href (node-path n))
+                                                ;; FIXME: trying to speed this up
+                                                (if (<= sigs 0)
+                                                    "-"
+                                                    (<tt> convert-to-entities?: #t
+                                                          (node-signature n)))))
+                                     "</tr>")
+                                    acc)))))
+                     "</table>"))))))
 
 ;;   query p (1437 matches)
 ;;   1.216 s 111 major GCs (node signature)
