@@ -1,0 +1,11 @@
+(compile -s -O2 -d1 chicken-doc-html.scm -j chicken-doc-html)
+(compile -s -O2 -d0 chicken-doc-html.import.scm)
+
+(compile -s -O2 -d1 chickadee.scm -j chickadee)
+(compile -s -O2 -d0 chickadee.import.scm)
+
+(install-extension
+  'chickadee
+  '("chickadee.so" "chicken-doc-html.so" "chickadee.import.so"
+    "chicken-doc-html.import.so")
+  `((version 0.1.0)))

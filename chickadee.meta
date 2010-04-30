@@ -1,0 +1,15 @@
+((egg "chickadee.egg")
+ (synopsis "chicken-doc web server")
+ (author "Jim Ursetto")
+ (category doc-tools)
+ (license "BSD")
+ (doc-from-wiki)
+ (needs matchable  uri-common intarweb doctype        ; chickadee
+        spiffy spiffy-request-vars              
+        html-tags html-utils 
+        chicken-doc
+        sxml-transforms uri-generic chicken-doc-admin ; chicken-doc-html
+ )
+ (files "chickadee.scm" "chickadee-driver.scm"
+        "chickadee.css" "chicken-doc-html.scm"
+        "chickadee.setup"))
