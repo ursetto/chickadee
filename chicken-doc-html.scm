@@ -86,9 +86,11 @@
                                                  ;; should use the id cache
                                                  (cond ((man-filename->path href)
                                                         => path->href)
-                                                       ((char=? (string-ref href 0) #\#)
+                                                       ((char=? (string-ref href 0)
+                                                                #\#)
                                                         href)
-                                                       ((char=? (string-ref href 0) #\/)
+                                                       ((char=? (string-ref href 0)
+                                                                #\/)
                                                         (string-append  ; ???
                                                          "http://chicken.wiki.br/"
                                                          href))

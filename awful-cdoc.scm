@@ -260,28 +260,34 @@
 
 ;;; set up handlers
 
+;; vhost-map can be used to take control of requests as
+;; they come in, before any handlers are invoked.
+(vhost-map
+ `((".*" . ,(lambda (continue)
+              (let ((p (uri-path (request-uri (current-request)))))
+                (parameterize ((http-request-variables (request-vars))) ; for $
+                  (cond ((equal? (cdoc-uri-path) p)
+                         => cdoc-handler)
+                        ((match-path (chickadee-uri-path) p)
+                         => chickadee-handler)
+                        (else
+                         (continue)))))))))
+
 (handle-not-found
  (let ((old-handler (handle-not-found)))  ; don't eval more than once!
    (lambda (path) ; useless
-     (let ((p (uri-path (request-uri (current-request)))))
-       (parameterize ((http-request-variables (request-vars))) ; for $
-         (cond ((match-path (cdoc-uri-path) p)
-                => cdoc-handler)
-               ((match-path (chickadee-uri-path) p)
-                => chickadee-handler)
-               (else
-                (old-handler path))))))))
+     (old-handler path))))      ; noop
 
 ;;; start server
 
-(root-path ".")  ; dangerous
+(root-path "./root")
 (debug-log (current-error-port))
 (server-port 8080)
 (tcp-buffer-size 1024)
 
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
-(chickadee-css-path "/chickadee.css")
+(chickadee-css-path "/cdoc/chickadee.css")
 
 (verify-repository)
 (start-server)
