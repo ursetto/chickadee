@@ -1,7 +1,6 @@
-;; todo
-;;   rewrite /cdoc/path/to/node to ?path=path to node, somehow
-;;   ----
-;;   bench
+;; chickadee chicken-doc server
+;; Copyright (c) 2010 Jim Ursetto.  All Rights Reserved.
+;; License: BSD.
 
 (module chickadee
  (chickadee-start-server
@@ -342,7 +341,9 @@
   (parameterize ((vhost-map +vhost-map+)
                  (handle-not-found +not-found-handler+)
                  (tcp-buffer-size 1024))
-    (start-server))))
+    (start-server)))
+
+)
 
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
