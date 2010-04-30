@@ -8,4 +8,7 @@
 (chickadee-uri-path '(/ "chickadee"))
 (chickadee-css-path "/cdoc/chickadee.css")
 
+(maximum-match-results 250)
+(maximum-match-signatures 100)
+
 (chickadee-start-server)

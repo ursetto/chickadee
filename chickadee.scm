@@ -7,7 +7,10 @@
  (chickadee-start-server
   cdoc-uri-path
   chickadee-uri-path
-  chickadee-css-path)
+  chickadee-css-path
+  maximum-match-results
+  maximum-match-signatures
+  )
 
 (import scheme chicken)
 (import tcp data-structures srfi-1)
@@ -20,6 +23,7 @@
 (use chicken-doc-html)
 (use doctype)
 (use regex) (import irregex)
+(use (only srfi-13 string-index))
 
 ;;; Pages
 
@@ -45,30 +49,50 @@
 
 (define (format-re x)
   (match-page (match-nodes (irregex x)) x))
+(define (format-path-re x)
+  (match-page (match-node-paths/re (irregex x)) x))
 
 (define (match-page nodes match-text)
-  (node-page (string-append "query " match-text " ("
-                            (number->string (length nodes))
-                            " matches)")
-             ""
-             (time
-              (tree->string
-               (list
-                "<table class=\"match-results\">"
-                (<tr> (<th> "path") (<th> "signature"))
-                (map (lambda (n)
-                       (list
-                        "<tr>"
-                        (<td> class: "match-path" (title-path n))
-                        (<td> class: "match-sig"
-                              (<a> href: (path->href (node-path n))
-                                   ;; FIXME: trying to speed this up
-                                   (<tt> convert-to-entities?: #t
-                                         (node-signature n))))
-                        "</tr>")
-                        )
-                     nodes)
-                "</table>")))))
+  (let ((max-results (maximum-match-results))
+        (result-length (length nodes)))
+    (node-page (string-append "query " match-text " ("
+                              (if (> result-length max-results)
+                                  (string-append (number->string
+                                                  max-results) " of ")
+                                  "")
+                              (number->string result-length)
+                              " matches)")
+               "" ;contents
+               (if (= result-length 0)
+                   ""
+                   (time
+                    (tree->string
+                     (list
+                      "<table class=\"match-results\">"
+                      (<tr> (<th> "path") (<th> "signature"))
+                      (let loop ((sigs (maximum-match-signatures))
+                                 (results max-results)
+                                 (nodes nodes) (acc '()))
+                        (if (or (null? nodes)
+                                (<= results 0))
+                            (reverse acc)
+                            (let ((n (car nodes)))
+                              (loop (- sigs 1) (- results 1)
+                                    (cdr nodes)
+                                    (cons 
+                                     (list
+                                      "<tr>"
+                                      (<td> class: "match-path" (title-path n))
+                                      (<td> class: "match-sig"
+                                            (<a> href: (path->href (node-path n))
+                                                 ;; FIXME: trying to speed this up
+                                                 (if (<= sigs 0)
+                                                     "-"
+                                                     (<tt> convert-to-entities?: #t
+                                                           (node-signature n)))))
+                                      "</tr>")
+                                     acc)))))
+                      "</table>")))))))
 
 ;;   query p (1437 matches)
 ;;   1.216 s 111 major GCs (node signature)
@@ -154,7 +178,11 @@
                        (<tt> (<u> "posix")) ", " (<tt> (<u> "open/rdonly"))
                        ", " (<tt> (<u> "+")) ".")
                  (<li> "A node path is multiple words, separated by spaces, such as "
-                       (<tt> (<u> "posix open/rdonly")) ".")))
+                       (<tt> (<u> "posix open/rdonly")) ".")
+                 (<li> "Regular expression search is usually done on single identifiers, but if it contains a space, the match is against the full path.")
+                 ;; It might be more useful to match against each identifier level
+                 ;; with a separate regex.
+                 ))
 
       (<h3> "Quick links")
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
@@ -196,6 +224,9 @@
 
 (define chickadee-css-path
   (make-parameter "chickadee.css"))
+
+(define maximum-match-results (make-parameter 250))
+(define maximum-match-signatures (make-parameter 100))
 
 ;;; Helper functions
 
@@ -275,7 +306,9 @@
                       (with-request-vars
                        $ (query-regex query-name)
                        (if query-regex
-                           (format-re p)
+                           (if (string-index p #\space) ; hmm
+                               (format-path-re p)
+                               (format-re p))
                            (query p)))))
            (else
             (node-page #f (contents-list (lookup-node '()))
