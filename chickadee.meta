@@ -7,8 +7,8 @@
  (needs matchable  uri-common intarweb doctype        ; chickadee
         spiffy spiffy-request-vars              
         html-tags html-utils 
-        chicken-doc
-        sxml-transforms uri-generic chicken-doc-admin ; chicken-doc-html
+        (chicken-doc 0.3.5)
+        sxml-transforms uri-generic (chicken-doc-admin 0.3.4) ; chicken-doc-html
  )
  (files "chickadee.scm" "chickadee-driver.scm"
         "chickadee.css" "chicken-doc-html.scm"
