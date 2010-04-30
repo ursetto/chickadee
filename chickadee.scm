@@ -51,16 +51,32 @@
                             (number->string (length nodes))
                             " matches)")
              ""
-             (apply <table>   ; yuck
-                    class: "match-results"
-                    (<tr> (<th> "path") (<th> "signature"))
-                    (map (lambda (n)
-                           (<tr> (<td> class: "match-path" (title-path n))
-                                 (<td> class: "match-sig"
-                                       (<a> href: (path->href (node-path n))
-                                            (<tt> convert-to-entities?: #t
-                                                  (node-signature n))))))
-                         nodes))))
+             (time
+              (tree->string
+               (list
+                "<table class=\"match-results\">"
+                (<tr> (<th> "path") (<th> "signature"))
+                (map (lambda (n)
+                       (list
+                        "<tr>"
+                        (<td> class: "match-path" (title-path n))
+                        (<td> class: "match-sig"
+                              (<a> href: (path->href (node-path n))
+                                   ;; FIXME: trying to speed this up
+                                   (<tt> convert-to-entities?: #t
+                                         (node-signature n))))
+                        "</tr>")
+                        )
+                     nodes)
+                "</table>")))))
+
+;;   query p (1437 matches)
+;;   1.216 s 111 major GCs (node signature)
+;;   0.926 seconds 97 major GCs  (no node signature)
+;;   0.457 seconds 6 major GCs (tree->string instead of <apply> table; node signature)
+;;   0.287 seconds             (same, no node signature)
+;;   query . (4532 matches)
+;;   2.301 seconds elapsed, 29 major GCs
 
 (define (contents-list n)
   (let ((p (map ->string (node-path n))))
@@ -295,3 +311,8 @@
                  (handle-not-found +not-found-handler+)
                  (tcp-buffer-size 1024))
     (start-server))))
+
+
+;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
+;; (1374 matches) real    0m1.382s (warm cache) 
+;;                real    0m1.098s (turn signatures off)
