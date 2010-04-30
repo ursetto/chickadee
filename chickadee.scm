@@ -3,6 +3,14 @@
 ;;   ----
 ;;   bench
 
+(module chickadee
+ (chickadee-start-server
+  cdoc-uri-path
+  chickadee-uri-path
+  chickadee-css-path)
+
+(import scheme chicken)
+(import tcp data-structures srfi-1)
 (use spiffy spiffy-request-vars html-tags html-utils chicken-doc)
 (use matchable)
 (use (only uri-generic uri-encode-string))
@@ -11,6 +19,7 @@
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
 (use doctype)
+(use regex) (import irregex)
 
 ;;; Pages
 
@@ -73,18 +82,16 @@
     (with-request-vars
      (contents)           ; bad
      (if n
-         (if contents
-             (contents-page n)
-             (node-page (string-append (title-path n)
-                                       ""
-                                       ;; " | "
-                                       ;; ;; don't know how to do this right now
-                                       ;; "<a href=\"?path=" (uri-encode-string p)
-                                       ;; "&contents=1\">contents</a>"
-                                       )
-                        (contents-list n)
-                        (chicken-doc-sxml->html (node-sxml n)
-                                                path->href)))
+         (node-page (string-append (title-path n)
+                                   ""
+                                   ;; " | "
+                                   ;; ;; don't know how to do this right now
+                                   ;; "<a href=\"?path=" (uri-encode-string p)
+                                   ;; "&contents=1\">contents</a>"
+                                   )
+                    (contents-list n)
+                    (chicken-doc-sxml->html (node-sxml n)
+                                            path->href))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -258,36 +265,33 @@
             (node-page #f (contents-list (lookup-node '()))
                        (root-page))))))
 
-;;; set up handlers
+;;; handlers
 
 ;; vhost-map can be used to take control of requests as
 ;; they come in, before any handlers are invoked.
-(vhost-map
- `((".*" . ,(lambda (continue)
-              (let ((p (uri-path (request-uri (current-request)))))
-                (parameterize ((http-request-variables (request-vars))) ; for $
-                  (cond ((equal? (cdoc-uri-path) p)
-                         => cdoc-handler)
-                        ((match-path (chickadee-uri-path) p)
-                         => chickadee-handler)
-                        (else
-                         (continue)))))))))
 
-(handle-not-found
- (let ((old-handler (handle-not-found)))  ; don't eval more than once!
+(define +vhost-map+
+  `((".*" . ,(lambda (continue)
+               (let ((p (uri-path (request-uri (current-request)))))
+                 (parameterize ((http-request-variables (request-vars))) ; for $
+                   (cond ((equal? (cdoc-uri-path) p)
+                          => cdoc-handler)
+                         ((match-path (chickadee-uri-path) p)
+                          => chickadee-handler)
+                         (else
+                          (continue)))))))))
+
+(define +not-found-handler+
+ (let ((old-handler (handle-not-found)))  ; hmm
    (lambda (path) ; useless
-     (old-handler path))))      ; noop
+     (old-handler path))))
 
 ;;; start server
 
-(root-path "./root")
-(debug-log (current-error-port))
-(server-port 8080)
-(tcp-buffer-size 1024)
-
-(cdoc-uri-path '(/ "cdoc"))
-(chickadee-uri-path '(/ "chickadee"))
-(chickadee-css-path "/cdoc/chickadee.css")
-
-(verify-repository)
-(start-server)
+(define (chickadee-start-server)
+  (verify-repository)
+  ;; using parameterize, we cannot override in REPL
+  (parameterize ((vhost-map +vhost-map+)
+                 (handle-not-found +not-found-handler+)
+                 (tcp-buffer-size 1024))
+    (start-server))))
