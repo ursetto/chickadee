@@ -3,6 +3,7 @@
 (root-path "./root")
 (debug-log (current-error-port))
 (server-port 8080)
+(access-log "access.log")
 
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))

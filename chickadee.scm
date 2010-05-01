@@ -278,6 +278,27 @@
   (uri->string (update-uri (uri-reference "")
                            path: p)))
 
+(use (only posix seconds->string))
+(define (proxy-logger)
+  ;; access logger with X-Forwarded-For: header
+  ;; Copied verbatim from spiffy's handle-access-logging
+  (let ((h (request-headers (current-request))))
+    (log-to (access-log)
+            "~A ~A [~A] \"~A ~A HTTP/~A.~A\" ~A \"~A\" \"~A\""
+            (header-value 'x-forwarded-for h "-")
+            (remote-address)
+            (seconds->string (current-seconds))
+            (request-method (current-request))
+            (uri->string (request-uri (current-request)))
+            (request-major (current-request))
+            (request-minor (current-request))
+            (response-code (current-response))
+            (uri->string (header-value 'referer h (uri-reference "-")))
+            (let ((product (header-contents 'user-agent h)))
+              (if product
+                  (product-unparser product)   ; undocumented intarweb proc
+                  "**Unknown product**")))))
+
 ;;;
 
 (define (rewrite-chickadee-uri u p)
@@ -340,10 +361,9 @@
   ;; using parameterize, we cannot override in REPL
   (parameterize ((vhost-map +vhost-map+)
                  (handle-not-found +not-found-handler+)
+                 (handle-access-logging proxy-logger)
                  (tcp-buffer-size 1024))
-    (start-server)))
-
-)
+    (start-server))))
 
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
