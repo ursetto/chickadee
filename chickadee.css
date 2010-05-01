@@ -202,6 +202,9 @@ ul.contents-list li a {
 #main h1, #main h2, #main h3,
 #main h4, #main h5, #main h6 {
   overflow: hidden;
+  /* Also set hasLayout in IE6 and IE7 */
+  zoom: 1;
+  min-height: 0;
 }
 /* New BFC for pre but allow horiz. scrollbar
    to appear rather than truncating content. */
