@@ -123,6 +123,7 @@
     (with-request-vars
      (contents)                         ; bad
      (if n
+         ;; If you use id-cache-mtime, you have to validate the id cache first.
          (let ((cache-mtime (##sys#slot (repository-id-cache
                                          (current-repository)) 2))
                (header-mtime-vec (header-value
@@ -143,9 +144,7 @@
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
                                                      path->href))))
-               (send-response code: 304 reason: "Not modified"
-                              headers: `((last-modified #(,(seconds->utc-time
-                                                            cache-mtime)))))))
+               (not-modified cache-mtime)))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -289,8 +288,16 @@
                  reason: reason
                  headers: `((location ,(uri-relative-to
                                         (uri-reference path)
-                                        (server-root-uri)))
-                            . ,headers)))
+                                        (server-root-uri))))))
+
+;; Return 304 Not Modified.  If ACTUAL-MTIME is an integer, it is
+;; returned to the client as the actual modification time of the resource.
+(define (not-modified actual-mtime)
+  (let ((headers (if (integer? actual-mtime)
+                     `((last-modified #(,(seconds->utc-time actual-mtime))))
+                     '())))
+    (send-response code: 304 reason: "Not modified" headers: headers)))
+
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
                            path: p)))
