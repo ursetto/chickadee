@@ -25,7 +25,7 @@
 (use doctype)
 (use regex) (import irregex)
 (use (only srfi-13 string-index))
-
+(use (only posix seconds->string seconds->utc-time utc-time->seconds))
 
 ;;; Pages
 
@@ -121,18 +121,31 @@
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (with-request-vars
-     (contents)           ; bad
+     (contents)                         ; bad
      (if n
-         (node-page (string-append (title-path n)
-                                   ""
-                                   ;; " | "
-                                   ;; ;; don't know how to do this right now
-                                   ;; "<a href=\"?path=" (uri-encode-string p)
-                                   ;; "&contents=1\">contents</a>"
-                                   )
-                    (contents-list n)
-                    (chicken-doc-sxml->html (node-sxml n)
-                                            path->href))
+         (let ((cache-mtime (##sys#slot (repository-id-cache
+                                         (current-repository)) 2))
+               (header-mtime-vec (header-value
+                                  'if-modified-since
+                                  (request-headers (current-request)))))
+           (if (or (not header-mtime-vec)
+                   (> cache-mtime (utc-time->seconds header-mtime-vec)))
+               (with-headers
+                `((last-modified #(,(seconds->utc-time cache-mtime))))
+                (lambda ()
+                  (node-page (string-append (title-path n)
+                                            ""
+                                            ;; " | "
+                                            ;; ;; don't know how to do this right now
+                                            ;; "<a href=\"?path=" (uri-encode-string p)
+                                            ;; "&contents=1\">contents</a>"
+                                            )
+                             (contents-list n)
+                             (chicken-doc-sxml->html (node-sxml n)
+                                                     path->href))))
+               (send-response code: 304 reason: "Not modified"
+                              headers: `((last-modified #(,(seconds->utc-time
+                                                            cache-mtime)))))))
          (node-page p "" (<p> "No node found at path " (<i> p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -282,7 +295,6 @@
   (uri->string (update-uri (uri-reference "")
                            path: p)))
 
-(use (only posix seconds->string))
 (define (proxy-logger)
   ;; access logger with X-Forwarded-For: header
   ;; Copied verbatim from spiffy's handle-access-logging
