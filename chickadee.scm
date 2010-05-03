@@ -37,12 +37,12 @@
           (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
           (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
 
-;; Really needs to redirect to (or at least call) format-path
 (define (format-id x)
   (match (match-nodes x)
          ((n1)
           (redirect-to (path->href (node-path n1))))
          (()
+          ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
                      (<p> "No node found matching identifier " (<tt> x))))
@@ -118,20 +118,23 @@
        "</ul>"
        ))))
 
+;; TEMPORARY HACK
+(define (id-cache-mtime)
+  (##sys#slot (repository-id-cache
+               (current-repository)) 2))
+
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (if n
         ;; If you use id-cache-mtime, you have to validate the id cache first.
-        (let ((cache-mtime (##sys#slot (repository-id-cache
-                                        (current-repository)) 2)))
-          (last-modified-at
-           cache-mtime
-           (lambda ()
-             (node-page (title-path n)
-                        (contents-list n)
-                        (chicken-doc-sxml->html (node-sxml n)
-                                                path->href)))))
-        (node-page p "" (<p> "No node found at path " (<i> p))))))
+        (last-modified-at
+         (id-cache-mtime)
+         (lambda ()
+           (node-page (title-path n)
+                      (contents-list n)
+                      (chicken-doc-sxml->html (node-sxml n)
+                                              path->href))))
+        (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
@@ -190,21 +193,32 @@
                   ))
 )
 
+;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
+(define (%node-page-body title contents body) ; internal for node-page / not-found
+  (html-page
+   (++ (<h1> (link (chickadee-page-path) "chickadee")
+             (if title
+                 (string-append " &raquo; " title)
+                 (string-append " | chicken-doc server")))
+       (<div> id: "contents"
+              contents)
+       (<div> id: "body"
+              (<div> id: "main"
+                     body)))
+   css: (chickadee-css-path)
+   doctype: xhtml-1.0-strict))
+
 (define (node-page title contents body)
   (send-response
-   body:
-   (html-page
-    (++ (<h1> (link (chickadee-page-path) "chickadee")
-              (if title
-                  (string-append " &raquo; " title)
-                  (string-append " | chicken-doc server")))
-        (<div> id: "contents"
-               contents)
-        (<div> id: "body"
-               (<div> id: "main"
-                      body)))
-    css: (chickadee-css-path)
-    doctype: xhtml-1.0-strict)))
+   body: (%node-page-body title contents body)))
+
+(define (node-not-found title body)
+  ;; Should create a dedicated not-found page instead;
+  ;; but right now I don't want to duplicate main page code
+  (send-response code: 404 reason: "Not found"
+                 body:
+                 (%node-page-body (htmlize title)  ; quoting critical
+                                  "" body)))
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path
@@ -287,7 +301,7 @@
 ;; Compare mtime with If-Modified-Since: header in client request.
 ;; If newer, client's copy of resource is outdated and we execute thunk.
 ;; Otherwise, return 304 Not Modified.
-(define (last-modified-at mtime thunk)  ; BAD NAME
+(define (last-modified-at mtime thunk)
   (let ((header-mtime-vec (header-value
                            'if-modified-since
                            (request-headers (current-request)))))
@@ -360,8 +374,11 @@
                                (format-re p))
                            (query p)))))
            (else
-            (node-page #f (contents-list (lookup-node '()))
-                       (root-page))))))
+            (last-modified-at
+             (id-cache-mtime)
+             (lambda ()
+               (node-page #f (contents-list (lookup-node '()))
+                          (root-page))))))))
 
 ;;; handlers
 
