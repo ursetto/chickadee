@@ -120,32 +120,18 @@
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
-    (with-request-vars
-     (contents)                         ; bad
-     (if n
-         ;; If you use id-cache-mtime, you have to validate the id cache first.
-         (let ((cache-mtime (##sys#slot (repository-id-cache
-                                         (current-repository)) 2))
-               (header-mtime-vec (header-value
-                                  'if-modified-since
-                                  (request-headers (current-request)))))
-           (if (or (not header-mtime-vec)
-                   (> cache-mtime (utc-time->seconds header-mtime-vec)))
-               (with-headers
-                `((last-modified #(,(seconds->utc-time cache-mtime))))
-                (lambda ()
-                  (node-page (string-append (title-path n)
-                                            ""
-                                            ;; " | "
-                                            ;; ;; don't know how to do this right now
-                                            ;; "<a href=\"?path=" (uri-encode-string p)
-                                            ;; "&contents=1\">contents</a>"
-                                            )
-                             (contents-list n)
-                             (chicken-doc-sxml->html (node-sxml n)
-                                                     path->href))))
-               (not-modified cache-mtime)))
-         (node-page p "" (<p> "No node found at path " (<i> p)))))))
+    (if n
+        ;; If you use id-cache-mtime, you have to validate the id cache first.
+        (let ((cache-mtime (##sys#slot (repository-id-cache
+                                        (current-repository)) 2)))
+          (last-modified-at
+           cache-mtime
+           (lambda ()
+             (node-page (title-path n)
+                        (contents-list n)
+                        (chicken-doc-sxml->html (node-sxml n)
+                                                path->href)))))
+        (node-page p "" (<p> "No node found at path " (<i> p))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
@@ -293,10 +279,23 @@
 ;; Return 304 Not Modified.  If ACTUAL-MTIME is an integer, it is
 ;; returned to the client as the actual modification time of the resource.
 (define (not-modified actual-mtime)
-  (let ((headers (if (integer? actual-mtime)
+  (let ((headers (if (integer? actual-mtime)     ; error?
                      `((last-modified #(,(seconds->utc-time actual-mtime))))
                      '())))
     (send-response code: 304 reason: "Not modified" headers: headers)))
+
+;; Compare mtime with If-Modified-Since: header in client request.
+;; If newer, client's copy of resource is outdated and we execute thunk.
+;; Otherwise, return 304 Not Modified.
+(define (last-modified-at mtime thunk)  ; BAD NAME
+  (let ((header-mtime-vec (header-value
+                           'if-modified-since
+                           (request-headers (current-request)))))
+    (if (or (not header-mtime-vec)
+            (> mtime (utc-time->seconds header-mtime-vec)))
+        (with-headers `((last-modified #(,(seconds->utc-time mtime))))
+                      thunk)
+        (not-modified mtime))))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
