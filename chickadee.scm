@@ -271,8 +271,9 @@
 (define http-request-variables (make-parameter #f))
 
 ;; note: missing full node path should maybe generate 404
-(define (redirect-to path #!key (code 302) (headers '()))
+(define (redirect-to path #!key (code 302) (reason "Found") (headers '()))
   (send-response code: code
+                 reason: reason
                  headers: `((location ,(uri-relative-to
                                         (uri-reference path)
                                         (server-root-uri)))
