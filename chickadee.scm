@@ -59,43 +59,49 @@
 (define (match-page nodes match-text)
   (let ((max-results (maximum-match-results))
         (result-length (length nodes)))
-    (node-page (string-append "query " match-text " ("
-                              (if (> result-length max-results)
-                                  (string-append (number->string
-                                                  max-results) " of ")
-                                  "")
-                              (number->string result-length)
-                              " matches)")
-               "" ;contents
-               (if (= result-length 0)
-                   ""
-                   (tree->string
-                    (list
-                     "<table class=\"match-results\">"
-                     (<tr> (<th> "path") (<th> "signature"))
-                     (let loop ((sigs (maximum-match-signatures))
-                                (results max-results)
-                                (nodes nodes) (acc '()))
-                       (if (or (null? nodes)
-                               (<= results 0))
-                           (reverse acc)
-                           (let ((n (car nodes)))
-                             (loop (- sigs 1) (- results 1)
-                                   (cdr nodes)
-                                   (cons 
-                                    (list
-                                     "<tr>"
-                                     (<td> class: "match-path" (title-path n))
-                                     (<td> class: "match-sig"
-                                           (<a> href: (path->href (node-path n))
-                                                ;; FIXME: trying to speed this up
-                                                (if (<= sigs 0)
-                                                    "-"
-                                                    (<tt> convert-to-entities?: #t
-                                                          (node-signature n)))))
-                                     "</tr>")
-                                    acc)))))
-                     "</table>"))))))
+    (cache-for
+     (cache-nodes-for) ;?
+     (lambda ()
+       (last-modified-at
+        (repository-modification-time (current-repository))
+        (lambda ()
+          (node-page
+           (string-append "query " match-text " ("
+                          (if (> result-length max-results)
+                              (string-append (number->string
+                                              max-results) " of ")
+                              "")
+                          (number->string result-length)
+                          " matches)")
+           ""                 ;contents
+           (if (= result-length 0)
+               ""
+               (tree->string
+                (list
+                 "<table class=\"match-results\">"
+                 (<tr> (<th> "path") (<th> "signature"))
+                 (let loop ((sigs (maximum-match-signatures))
+                            (results max-results)
+                            (nodes nodes) (acc '()))
+                   (if (or (null? nodes)
+                           (<= results 0))
+                       (reverse acc)
+                       (let ((n (car nodes)))
+                         (loop (- sigs 1) (- results 1)
+                               (cdr nodes)
+                               (cons 
+                                (list
+                                 "<tr>"
+                                 (<td> class: "match-path" (title-path n))
+                                 (<td> class: "match-sig"
+                                       (<a> href: (path->href (node-path n))
+                                            (if (<= sigs 0)
+                                                "-"
+                                                (<tt> convert-to-entities?: #t
+                                                      (node-signature n)))))
+                                 "</tr>")
+                                acc)))))
+                 "</table>"))))))))))
 
 (define (contents-list n)
   (let ((p (map ->string (node-path n))))
@@ -119,6 +125,9 @@
          300
          (lambda ()
            (last-modified-at
+            ;; Node modification time may also be more fine-grained,
+            ;; but some generated HTML may depend on the entire repository
+            ;; anyway--and we usually update the whole repo at once.
             (repository-modification-time (current-repository))
             (lambda ()
               (node-page (title-path n)
