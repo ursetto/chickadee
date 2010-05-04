@@ -112,11 +112,6 @@
        "</ul>"
        ))))
 
-;; TEMPORARY HACK
-(define (id-cache-mtime)
-  (##sys#slot (repository-id-cache
-               (current-repository)) 2))
-
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (if n
@@ -124,8 +119,7 @@
          300
          (lambda ()
            (last-modified-at
-            ;; If you use id-cache-mtime, you have to validate the id cache first.
-            (id-cache-mtime)
+            (repository-modification-time (current-repository))
             (lambda ()
               (node-page (title-path n)
                          (contents-list n)
@@ -381,7 +375,7 @@
              (cache-nodes-for)
              (lambda ()
               (last-modified-at
-               (id-cache-mtime)
+               (repository-modification-time (current-repository))
                (lambda ()
                  (node-page #f (contents-list (lookup-node '()))
                             (root-page))))))))))
