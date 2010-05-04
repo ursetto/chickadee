@@ -9,6 +9,7 @@
   chickadee-css-path
   maximum-match-results
   maximum-match-signatures
+  cache-nodes-for
   )
 
 (import scheme chicken)
@@ -126,14 +127,17 @@
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (if n
-        ;; If you use id-cache-mtime, you have to validate the id cache first.
-        (last-modified-at
-         (id-cache-mtime)
+        (cache-for   ;; NB We send cache-control even with 304s.
+         300
          (lambda ()
-           (node-page (title-path n)
-                      (contents-list n)
-                      (chicken-doc-sxml->html (node-sxml n)
-                                              path->href))))
+           (last-modified-at
+            ;; If you use id-cache-mtime, you have to validate the id cache first.
+            (id-cache-mtime)
+            (lambda ()
+              (node-page (title-path n)
+                         (contents-list n)
+                         (chicken-doc-sxml->html (node-sxml n)
+                                                 path->href))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -240,6 +244,7 @@
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
+(define cache-nodes-for (make-parameter 300))
 
 ;;; Helper functions
 
@@ -292,6 +297,7 @@
 
 ;; Return 304 Not Modified.  If ACTUAL-MTIME is an integer, it is
 ;; returned to the client as the actual modification time of the resource.
+;; You should also resend any associated Cache-control: directive (separately).
 (define (not-modified actual-mtime)
   (let ((headers (if (integer? actual-mtime)     ; error?
                      `((last-modified #(,(seconds->utc-time actual-mtime))))
@@ -310,6 +316,9 @@
         (with-headers `((last-modified #(,(seconds->utc-time mtime))))
                       thunk)
         (not-modified mtime))))
+
+(define (cache-for seconds thunk)
+  (with-headers `((cache-control (max-age . ,seconds))) thunk))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
@@ -374,11 +383,14 @@
                                (format-re p))
                            (query p)))))
            (else
-            (last-modified-at
-             (id-cache-mtime)
+            (cache-for
+             (cache-nodes-for)
              (lambda ()
-               (node-page #f (contents-list (lookup-node '()))
-                          (root-page))))))))
+              (last-modified-at
+               (id-cache-mtime)
+               (lambda ()
+                 (node-page #f (contents-list (lookup-node '()))
+                            (root-page))))))))))
 
 ;;; handlers
 
