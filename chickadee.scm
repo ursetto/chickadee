@@ -96,14 +96,6 @@
                                     acc)))))
                      "</table>"))))))
 
-;;   query p (1437 matches)
-;;   1.216 s 111 major GCs (node signature)
-;;   0.926 seconds 97 major GCs  (no node signature)
-;;   0.457 seconds 6 major GCs (tree->string instead of <apply> table; node signature)
-;;   0.287 seconds             (same, no node signature)
-;;   query . (4532 matches)
-;;   2.301 seconds elapsed, 29 major GCs
-
 (define (contents-list n)
   (let ((p (map ->string (node-path n))))
     (tree->string
