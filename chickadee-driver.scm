@@ -12,5 +12,6 @@
 (maximum-match-results 250)
 (maximum-match-signatures 100)
 (cache-nodes-for 300)
+(cache-static-content-for 1800)
 
 (chickadee-start-server)

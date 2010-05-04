@@ -10,6 +10,7 @@
   maximum-match-results
   maximum-match-signatures
   cache-nodes-for
+  cache-static-content-for
   )
 
 (import scheme chicken)
@@ -237,6 +238,7 @@
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
 (define cache-nodes-for (make-parameter 300))
+(define cache-static-content-for (make-parameter 3600))
 
 ;;; Helper functions
 
@@ -405,6 +407,13 @@
    (lambda (path) ; useless
      (old-handler path))))
 
+(define +static-file-handler+
+  (let ((old-handler (handle-file)))
+    (lambda (path)
+      (cache-for (cache-static-content-for)
+                 (lambda ()
+                   (old-handler path))))))
+
 ;;; start server
 
 (define (chickadee-start-server)
@@ -412,10 +421,10 @@
   ;; using parameterize, we cannot override in REPL
   (parameterize ((vhost-map +vhost-map+)
                  (handle-not-found +not-found-handler+)
+                 (handle-file +static-file-handler+)
                  (handle-access-logging proxy-logger)
                  (tcp-buffer-size 1024))
     (start-server))))
-
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
 ;; (1374 matches) real    0m1.382s (warm cache) 
