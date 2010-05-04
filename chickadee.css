@@ -223,3 +223,10 @@ form.lookup input.text {
 form.lookup input.button {
   margin-left: 1em;
 }
+
+#navskip {
+  display: none;
+}
+div#contents h2{
+  display: none;
+}

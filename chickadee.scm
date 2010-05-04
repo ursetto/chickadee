@@ -104,19 +104,23 @@
                  "</table>"))))))))))
 
 (define (contents-list n)
-  (let ((p (map ->string (node-path n))))
-    (tree->string
-     `("<ul class=\"contents-list\">"
-       ,(map
-         (lambda (id)
-           `("<li>"
-             "<a href=\"" ,(path->href (append p (list id)))
-             "\">" ,(quote-html id)
-             "</a>"
-             "</li>"))
-         (map ->string (node-child-ids n)))
-       "</ul>"
-       ))))
+  (let ((p (map ->string (node-path n)))
+        (ids (node-child-ids n)))
+    (if (null? ids)
+        ""
+        (tree->string
+         `("<h2 class=\"contents-list\">Contents</h2>\n"
+           "<ul class=\"contents-list\">"
+           ,(map
+             (lambda (id)
+               `("<li>"
+                 "<a href=\"" ,(path->href (append p (list id)))
+                 "\">" ,(quote-html id)
+                 "</a>"
+                 "</li>"))
+             (map ->string ids))
+           "</ul>\n"
+           )))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -196,7 +200,9 @@
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 (define (%node-page-body title contents body) ; internal for node-page / not-found
   (html-page
-   (++ (<h1> (link (chickadee-page-path) "chickadee")
+   (++ (<p> id: 'navskip
+            (<a> href: "#body" "Skip navigation."))
+       (<h1> (link (chickadee-page-path) "chickadee")
              (if title
                  (string-append " &raquo; " title)
                  (string-append " | chicken-doc server")))
