@@ -11,6 +11,7 @@
   maximum-match-signatures
   cache-nodes-for
   cache-static-content-for
+  last-modified
   )
 
 (import scheme chicken)
@@ -63,7 +64,8 @@
      (cache-nodes-for) ;?
      (lambda ()
        (last-modified-at
-        (repository-modification-time (current-repository))
+        (max (repository-modification-time (current-repository))
+             (last-modified))
         (lambda ()
           (node-page
            (string-append "query " match-text " ("
@@ -132,7 +134,8 @@
             ;; Node modification time may also be more fine-grained,
             ;; but some generated HTML may depend on the entire repository
             ;; anyway--and we usually update the whole repo at once.
-            (repository-modification-time (current-repository))
+            (max (repository-modification-time (current-repository))
+                 (last-modified))
             (lambda ()
               (if (null? (node-path n))
                   (node-page #f
@@ -258,6 +261,9 @@
 (define maximum-match-signatures (make-parameter 100))
 (define cache-nodes-for (make-parameter 300))
 (define cache-static-content-for (make-parameter 3600))
+;; Base time used for last-modified calculations, in seconds.
+;; Set to (current)-seconds to invalidate pages when server is started.
+(define last-modified (make-parameter 0))
 
 ;;; Helper functions
 
