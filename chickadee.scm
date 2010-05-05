@@ -126,7 +126,7 @@
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (if n
         (cache-for   ;; NB We send cache-control even with 304s.
-         300
+         (cache-nodes-for)
          (lambda ()
            (last-modified-at
             ;; Node modification time may also be more fine-grained,
@@ -134,10 +134,14 @@
             ;; anyway--and we usually update the whole repo at once.
             (repository-modification-time (current-repository))
             (lambda ()
-              (node-page (title-path n)
-                         (contents-list n)
-                         (chicken-doc-sxml->html (node-sxml n)
-                                                 path->href))))))
+              (if (null? (node-path n))
+                  (node-page #f
+                             (contents-list n)
+                             (root-page))
+                  (node-page (title-path n)
+                             (contents-list n)
+                             (chicken-doc-sxml->html (node-sxml n)
+                                                     path->href)))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -366,8 +370,6 @@
                            (update-param 'path
                                          (string-intersperse p " ") q)))))
 
-
-
 (define (chickadee-handler p)
   (rewrite-uri (lambda (u) (rewrite-chickadee-uri u p)))) ;?
 
@@ -385,15 +387,7 @@
                                (format-path-re p)
                                (format-re p))
                            (query p)))))
-           (else
-            (cache-for
-             (cache-nodes-for)
-             (lambda ()
-              (last-modified-at
-               (repository-modification-time (current-repository))
-               (lambda ()
-                 (node-page #f (contents-list (lookup-node '()))
-                            (root-page))))))))))
+           (else (format-path "")))))
 
 ;;; handlers
 
