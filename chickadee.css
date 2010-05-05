@@ -55,6 +55,14 @@ dt.defsig {
   margin: 0;
 }
 
+dt.defsig {
+  /* Both child elements are floating, so we introduce a new
+     block context so they are encapsulated. */
+  overflow: hidden;
+  zoom: 1;
+  min-height: 0;
+}
+
 dt.defsig span.type {
   float: right;
   color: #404040;
@@ -63,6 +71,7 @@ dt.defsig span.type {
 }
 dt.defsig span.sig {
 /* monospace already set via tt */
+  float: left;
 }
 
 .operator {
