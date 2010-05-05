@@ -1,4 +1,4 @@
-(use chickadee spiffy)
+(use chickadee spiffy posix)
 
 (root-path "./root")
 (debug-log (current-error-port))
@@ -11,5 +11,9 @@
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
+(cache-nodes-for 300)
+(cache-static-content-for 1800)
+
+(last-modified (current-seconds))
 
 (chickadee-start-server)

@@ -9,6 +9,9 @@
   chickadee-css-path
   maximum-match-results
   maximum-match-signatures
+  cache-nodes-for
+  cache-static-content-for
+  last-modified
   )
 
 (import scheme chicken)
@@ -25,7 +28,7 @@
 (use doctype)
 (use regex) (import irregex)
 (use (only srfi-13 string-index))
-
+(use (only posix seconds->string seconds->utc-time utc-time->seconds))
 
 ;;; Pages
 
@@ -37,12 +40,12 @@
           (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
           (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
 
-;; Really needs to redirect to (or at least call) format-path
 (define (format-id x)
   (match (match-nodes x)
          ((n1)
           (redirect-to (path->href (node-path n1))))
          (()
+          ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
                      (<p> "No node found matching identifier " (<tt> x))))
@@ -57,83 +60,92 @@
 (define (match-page nodes match-text)
   (let ((max-results (maximum-match-results))
         (result-length (length nodes)))
-    (node-page (string-append "query " match-text " ("
-                              (if (> result-length max-results)
-                                  (string-append (number->string
-                                                  max-results) " of ")
-                                  "")
-                              (number->string result-length)
-                              " matches)")
-               "" ;contents
-               (if (= result-length 0)
-                   ""
-                   (tree->string
-                    (list
-                     "<table class=\"match-results\">"
-                     (<tr> (<th> "path") (<th> "signature"))
-                     (let loop ((sigs (maximum-match-signatures))
-                                (results max-results)
-                                (nodes nodes) (acc '()))
-                       (if (or (null? nodes)
-                               (<= results 0))
-                           (reverse acc)
-                           (let ((n (car nodes)))
-                             (loop (- sigs 1) (- results 1)
-                                   (cdr nodes)
-                                   (cons 
-                                    (list
-                                     "<tr>"
-                                     (<td> class: "match-path" (title-path n))
-                                     (<td> class: "match-sig"
-                                           (<a> href: (path->href (node-path n))
-                                                ;; FIXME: trying to speed this up
-                                                (if (<= sigs 0)
-                                                    "-"
-                                                    (<tt> convert-to-entities?: #t
-                                                          (node-signature n)))))
-                                     "</tr>")
-                                    acc)))))
-                     "</table>"))))))
-
-;;   query p (1437 matches)
-;;   1.216 s 111 major GCs (node signature)
-;;   0.926 seconds 97 major GCs  (no node signature)
-;;   0.457 seconds 6 major GCs (tree->string instead of <apply> table; node signature)
-;;   0.287 seconds             (same, no node signature)
-;;   query . (4532 matches)
-;;   2.301 seconds elapsed, 29 major GCs
+    (cache-for
+     (cache-nodes-for) ;?
+     (lambda ()
+       (last-modified-at
+        (max (repository-modification-time (current-repository))
+             (last-modified))
+        (lambda ()
+          (node-page
+           (string-append "query " match-text " ("
+                          (if (> result-length max-results)
+                              (string-append (number->string
+                                              max-results) " of ")
+                              "")
+                          (number->string result-length)
+                          " matches)")
+           ""                 ;contents
+           (if (= result-length 0)
+               ""
+               (tree->string
+                (list
+                 "<table class=\"match-results\">"
+                 (<tr> (<th> "path") (<th> "signature"))
+                 (let loop ((sigs (maximum-match-signatures))
+                            (results max-results)
+                            (nodes nodes) (acc '()))
+                   (if (or (null? nodes)
+                           (<= results 0))
+                       (reverse acc)
+                       (let ((n (car nodes)))
+                         (loop (- sigs 1) (- results 1)
+                               (cdr nodes)
+                               (cons 
+                                (list
+                                 "<tr>"
+                                 (<td> class: "match-path" (title-path n))
+                                 (<td> class: "match-sig"
+                                       (<a> href: (path->href (node-path n))
+                                            (if (<= sigs 0)
+                                                "-"
+                                                (<tt> convert-to-entities?: #t
+                                                      (node-signature n)))))
+                                 "</tr>")
+                                acc)))))
+                 "</table>"))))))))))
 
 (define (contents-list n)
-  (let ((p (map ->string (node-path n))))
-    (tree->string
-     `("<ul class=\"contents-list\">"
-       ,(map
-         (lambda (id)
-           `("<li>"
-             "<a href=\"" ,(path->href (append p (list id)))
-             "\">" ,(quote-html id)
-             "</a>"
-             "</li>"))
-         (map ->string (node-child-ids n)))
-       "</ul>"
-       ))))
+  (let ((p (map ->string (node-path n)))
+        (ids (node-child-ids n)))
+    (if (null? ids)
+        ""
+        (tree->string
+         `("<h2 class=\"contents-list\">Contents</h2>\n"
+           "<ul class=\"contents-list\">"
+           ,(map
+             (lambda (id)
+               `("<li>"
+                 "<a href=\"" ,(path->href (append p (list id)))
+                 "\">" ,(quote-html id)
+                 "</a>"
+                 "</li>"))
+             (map ->string ids))
+           "</ul>\n"
+           )))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
-    (with-request-vars
-     (contents)           ; bad
-     (if n
-         (node-page (string-append (title-path n)
-                                   ""
-                                   ;; " | "
-                                   ;; ;; don't know how to do this right now
-                                   ;; "<a href=\"?path=" (uri-encode-string p)
-                                   ;; "&contents=1\">contents</a>"
-                                   )
-                    (contents-list n)
-                    (chicken-doc-sxml->html (node-sxml n)
-                                            path->href))
-         (node-page p "" (<p> "No node found at path " (<i> p)))))))
+    (if n
+        (cache-for   ;; NB We send cache-control even with 304s.
+         (cache-nodes-for)
+         (lambda ()
+           (last-modified-at
+            ;; Node modification time may also be more fine-grained,
+            ;; but some generated HTML may depend on the entire repository
+            ;; anyway--and we usually update the whole repo at once.
+            (max (repository-modification-time (current-repository))
+                 (last-modified))
+            (lambda ()
+              (if (null? (node-path n))
+                  (node-page #f
+                             (contents-list n)
+                             (root-page))
+                  (node-page (title-path n)
+                             (contents-list n)
+                             (chicken-doc-sxml->html (node-sxml n)
+                                                     path->href)))))))
+        (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
@@ -192,21 +204,40 @@
                   ))
 )
 
+;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
+;; Internal fxn for node-page / not-found
+(define (%node-page-body title contents body)
+  (html-page
+   (++ (<p> id: 'navskip
+            (<a> href: "#body" "Skip navigation."))
+       (<h1> (link (path->href '()) "chickadee")
+             (if title
+                 (string-append " &raquo; " title)
+                 (string-append " | "
+                                (link (path->href '(chicken-doc))
+                                      "chicken-doc")
+                                " server")))
+       (<div> id: "contents"
+              contents)
+       (<div> id: "body"
+              (<div> id: "main"
+                     body)))
+   css: (chickadee-css-path)
+   doctype: xhtml-1.0-strict
+   ;; no good way to get a nice title yet
+   title: "chickadee | chicken-doc server"))
+
 (define (node-page title contents body)
   (send-response
-   body:
-   (html-page
-    (++ (<h1> (link (chickadee-page-path) "chickadee")
-              (if title
-                  (string-append " &raquo; " title)
-                  (string-append " | chicken-doc server")))
-        (<div> id: "contents"
-               contents)
-        (<div> id: "body"
-               (<div> id: "main"
-                      body)))
-    css: (chickadee-css-path)
-    doctype: xhtml-1.0-strict)))
+   body: (%node-page-body title contents body)))
+
+(define (node-not-found title body)
+  ;; Should create a dedicated not-found page instead;
+  ;; but right now I don't want to duplicate main page code
+  (send-response code: 404 reason: "Not found"
+                 body:
+                 (%node-page-body (htmlize title)  ; quoting critical
+                                  "" body)))
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path
@@ -228,6 +259,11 @@
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
+(define cache-nodes-for (make-parameter 300))
+(define cache-static-content-for (make-parameter 3600))
+;; Base time used for last-modified calculations, in seconds.
+;; Set to (current)-seconds to invalidate pages when server is started.
+(define last-modified (make-parameter 0))
 
 ;;; Helper functions
 
@@ -276,13 +312,37 @@
                  reason: reason
                  headers: `((location ,(uri-relative-to
                                         (uri-reference path)
-                                        (server-root-uri)))
-                            . ,headers)))
+                                        (server-root-uri))))))
+
+;; Return 304 Not Modified.  If ACTUAL-MTIME is an integer, it is
+;; returned to the client as the actual modification time of the resource.
+;; You should also resend any associated Cache-control: directive (separately).
+(define (not-modified actual-mtime)
+  (let ((headers (if (integer? actual-mtime)     ; error?
+                     `((last-modified #(,(seconds->utc-time actual-mtime))))
+                     '())))
+    (send-response code: 304 reason: "Not modified" headers: headers)))
+
+;; Compare mtime with If-Modified-Since: header in client request.
+;; If newer, client's copy of resource is outdated and we execute thunk.
+;; Otherwise, return 304 Not Modified.
+(define (last-modified-at mtime thunk)
+  (let ((header-mtime-vec (header-value
+                           'if-modified-since
+                           (request-headers (current-request)))))
+    (if (or (not header-mtime-vec)
+            (> mtime (utc-time->seconds header-mtime-vec)))
+        (with-headers `((last-modified #(,(seconds->utc-time mtime))))
+                      thunk)
+        (not-modified mtime))))
+
+(define (cache-for seconds thunk)
+  (with-headers `((cache-control (max-age . ,seconds))) thunk))
+
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
                            path: p)))
 
-(use (only posix seconds->string))
 (define (proxy-logger)
   ;; access logger with X-Forwarded-For: header
   ;; Copied verbatim from spiffy's handle-access-logging
@@ -322,8 +382,6 @@
                            (update-param 'path
                                          (string-intersperse p " ") q)))))
 
-
-
 (define (chickadee-handler p)
   (rewrite-uri (lambda (u) (rewrite-chickadee-uri u p)))) ;?
 
@@ -341,9 +399,7 @@
                                (format-path-re p)
                                (format-re p))
                            (query p)))))
-           (else
-            (node-page #f (contents-list (lookup-node '()))
-                       (root-page))))))
+           (else (format-path "")))))
 
 ;;; handlers
 
@@ -366,6 +422,13 @@
    (lambda (path) ; useless
      (old-handler path))))
 
+(define +static-file-handler+
+  (let ((old-handler (handle-file)))
+    (lambda (path)
+      (cache-for (cache-static-content-for)
+                 (lambda ()
+                   (old-handler path))))))
+
 ;;; start server
 
 (define (chickadee-start-server)
@@ -373,10 +436,10 @@
   ;; using parameterize, we cannot override in REPL
   (parameterize ((vhost-map +vhost-map+)
                  (handle-not-found +not-found-handler+)
+                 (handle-file +static-file-handler+)
                  (handle-access-logging proxy-logger)
                  (tcp-buffer-size 1024))
     (start-server))))
-
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
 ;; (1374 matches) real    0m1.382s (warm cache) 
