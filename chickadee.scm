@@ -206,7 +206,7 @@
   (html-page
    (++ (<p> id: 'navskip
             (<a> href: "#body" "Skip navigation."))
-       (<h1> (link (chickadee-page-path) "chickadee")
+       (<h1> (link (path->href '()) "chickadee")
              (if title
                  (string-append " &raquo; " title)
                  (string-append " | chicken-doc server")))
