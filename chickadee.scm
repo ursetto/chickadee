@@ -210,7 +210,10 @@
        (<h1> (link (path->href '()) "chickadee")
              (if title
                  (string-append " &raquo; " title)
-                 (string-append " | chicken-doc server")))
+                 (string-append " | "
+                                (link (path->href '(chicken-doc))
+                                      "chicken-doc")
+                                " server")))
        (<div> id: "contents"
               contents)
        (<div> id: "body"
