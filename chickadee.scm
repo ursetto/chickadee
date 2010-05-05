@@ -202,7 +202,8 @@
 )
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
-(define (%node-page-body title contents body) ; internal for node-page / not-found
+;; Internal fxn for node-page / not-found
+(define (%node-page-body title contents body)
   (html-page
    (++ (<p> id: 'navskip
             (<a> href: "#body" "Skip navigation."))
@@ -216,7 +217,9 @@
               (<div> id: "main"
                      body)))
    css: (chickadee-css-path)
-   doctype: xhtml-1.0-strict))
+   doctype: xhtml-1.0-strict
+   ;; no good way to get a nice title yet
+   title: "chickadee | chicken-doc server"))
 
 (define (node-page title contents body)
   (send-response
