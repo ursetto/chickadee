@@ -46,6 +46,7 @@
   (tree->string
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
+         (drop-tag-noisily (lambda (t b s) (warning "dropped" (cons t b)) '()))
          (quote-text `(*text* . ,(lambda (t b s) (string->goodHTML b))))
          (link (lambda (href desc)
                  `("<a href=\"" ,href "\">"
@@ -65,11 +66,14 @@
                                            close)))))
               (inline-ss `(
                            ,quote-text
+                           (*default* . ,drop-tag-noisily)  ;; 500 error is annoying
                            (b . ,(inline "b"))
                            (i . ,(inline "i"))
                            (tt . ,(inline "tt"))
                            (sup . ,(inline "sup"))
                            (sub . ,(inline "sub"))
+                           (small . ,(inline "small"))     ;; questionable
+                           (big . ,(inline "big"))         ;; questionable
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
                                       (match b
@@ -177,14 +181,17 @@
                         ,(walk b `((tr . ,(lambda (t b s)
                                             `("<tr>"
                                               ,(walk b
-                                                     `((th . ,(lambda (t b s)
-                                                                `("<th>"
-                                                                  ,(walk b table-ss)
-                                                                  "</th>")))
-                                                       (td . ,(lambda (t b s)
-                                                                `("<td>"
-                                                                  ,(walk b table-ss)
-                                                                  "</td>")))))
+                                                     (let ((table-ss `((@ . ,drop-tag)
+                                                                       . ,table-ss)))
+                                                       `((th . ,(lambda (t b s)
+                                                                  `("<th>"
+                                                                    ,(walk b table-ss)
+                                                                    "</th>")))
+                                                         (td . ,(lambda (t b s)
+                                                                  `("<td>"
+                                                                    ,(walk b table-ss)
+                                                                    "</td>")))
+                                                         (@ . ,drop-tag))))
                                               "</tr>\n")))
                                    (@ . ,drop-tag)))
                         "</table>\n")))
@@ -219,7 +226,7 @@
 
           (hr . ,(lambda (t b s)
                    "<hr />"))
-          
+
           ,@inline-ss
           ))))))
 
