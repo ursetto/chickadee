@@ -230,7 +230,9 @@
 
 (define (node-page title contents body)
   (send-response
-   body: (%node-page-body title contents body)))
+   body: (%node-page-body title contents body)
+   headers: `((content-type #(text/html ((charset . "utf-8"))))
+              )))
 
 (define (node-not-found title body)
   ;; Should create a dedicated not-found page instead;
