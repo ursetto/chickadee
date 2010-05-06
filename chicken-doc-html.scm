@@ -41,7 +41,7 @@
   (string->goodHTML s))
 
 (define (chicken-doc-sxml->html doc
-                                path->href  ; for internal links; make parameter?
+                                path->href ; for internal links; make parameter?
                                 )
   (tree->string
    (let ((walk sxml-walk)
@@ -66,14 +66,14 @@
                                            close)))))
               (inline-ss `(
                            ,quote-text
-                           (*default* . ,drop-tag-noisily)  ;; 500 error is annoying
+                           (*default* . ,drop-tag-noisily) ;; 500 error is annoying
                            (b . ,(inline "b"))
                            (i . ,(inline "i"))
                            (tt . ,(inline "tt"))
                            (sup . ,(inline "sup"))
                            (sub . ,(inline "sub"))
-                           (small . ,(inline "small"))     ;; questionable
-                           (big . ,(inline "big"))         ;; questionable
+                           (small . ,(inline "small")) ;; questionable
+                           (big . ,(inline "big"))     ;; questionable
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
                                       (match b
@@ -95,7 +95,7 @@
                                                         href)
                                                        ((char=? (string-ref href 0)
                                                                 #\/)
-                                                        (string-append  ; ???
+                                                        (string-append ; ???
                                                          "http://chicken.wiki.br/"
                                                          href))
                                                        (else
@@ -135,7 +135,7 @@
                              ,(walk body def-ss)
                              "</dd>\n")))
                   "</dl>\n")))
-          (pre . ,(block "pre"))   ; may need to quote contents
+          (pre . ,(block "pre"))        ; may need to quote contents
           (ul . ,(lambda (t b ul-ss)
                    `("<ul>"
                      ,(walk b `((li
@@ -201,25 +201,30 @@
                                  (list "<pre>" (walk body s) "</pre>")))))
 
           ;; convert example contents to `(pre ...) and re-walk it
+          
+          ;; FIXME: The html-parser will erroneously parse html tags
+          ;; inside <expr> tags.  Right now we drop them, but we
+          ;; should either not parse them in the first place or
+          ;; convert them back here (less nice).  Furthermore the parser
+          ;; may unrecoverably screw up the structure of examples, for
+          ;; example if it contains an <h1> tag; therefore we drop unknown
+          ;; tags to prevent a complete rendering error.
+
           (examples
            . ,(lambda (t b ex-ss)
-                (walk b `((example
+                (walk b `((*default* . ,drop-tag-noisily)
+                          (example
                            . ,(lambda (t b s)
                                 (walk `(pre
                                         ,(walk b
                                                `((init . ,(lambda (t b s)
                                                             (list b "\n")))
-                                                 ;; FIXME: The html-parser will erroneously
-                                                 ;; parse html tags inside <expr> tags.
-                                                 ;; Right now we drop them, but we should
-                                                 ;; either not parse them in the first place
-                                                 ;; or convert them back here (less nice).
                                                  (expr . ,(lambda (t b s)
                                                             (walk b `((*default*
-                                                                       . ,drop-tag)))))
+                                                                       . ,drop-tag-noisily)))))
                                                  (result . ,(lambda (t b s)
                                                               `("\n; Result: " ,b)))
-                                                 )))
+                                                 (*default* . ,drop-tag-noisily))))
                                       ex-ss)))))))
 
           (blockquote . ,(block "blockquote"))
