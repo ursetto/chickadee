@@ -223,6 +223,7 @@
               (<div> id: "main"
                      body)))
    css: (chickadee-css-path)
+   charset: "UTF-8"
    doctype: xhtml-1.0-strict
    ;; no good way to get a nice title yet
    title: "chickadee | chicken-doc server"))
