@@ -27,7 +27,7 @@
 (use chicken-doc-html)
 (use doctype)
 (use regex) (import irregex)
-(use (only srfi-13 string-index))
+(use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
 
 ;;; Pages
@@ -182,6 +182,22 @@
            (redirect-to (path->href q))
            ;; (format-path p)
            ))))                 ;  API defect
+
+(define (handle-ajax _)
+  (with-request-vars
+   $ (prefix)
+   (if (not prefix)
+       (send-status 500 "Internal server error")
+       (let ((ids (match-ids/prefix prefix 20)))
+         (let ((body (tree->string
+                      `("<ul>"
+                        ,(map (lambda (x)
+                                `("<li>" ,(htmlize x) "</li>"))
+                              (vector->list ids))
+                        "</ul>"))))
+           ;; Make sure to send cache and last-modified headers
+           (send-response
+            body: body))))))
 
 (define (root-page)
   (++ (<h3> "Search")
@@ -391,8 +407,9 @@
 (define (cdoc-handler p)
   p ;ignore
   (with-request-vars
-   $ (id path q)
-     (cond (path => format-path)
+   $ (id path q ajax)
+     (cond (ajax => handle-ajax)
+           (path => format-path)
            (id   => format-id)
            (q    => (lambda (p)
                       (with-request-vars
