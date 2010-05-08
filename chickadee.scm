@@ -193,9 +193,12 @@
    (if (not prefix)
        (send-status 500 "Internal server error")
        ;; FIXME: doesn't skip 0 or #f incremental-search
-       (let ((ids (vector->list
-                   (match-ids/prefix prefix (incremental-search)))))
-         (let ((body (if (null? ids)
+       (let ((M (vector->list
+                 ((if (string-index prefix #\space)
+                      match-paths/prefix
+                      match-ids/prefix)
+                  prefix (incremental-search)))))
+         (let ((body (if (null? M)
                          ""
                          (let ((plen (string-length prefix)))
                            (tree->string
@@ -205,7 +208,7 @@
                                         "<b>" ,(htmlize (substring x 0 plen))
                                         "</b>"
                                         ,(htmlize (substring x plen)) "</li>"))
-                                    ids)
+                                    M)
                               "</ul>"))))))
            ;; Make sure to send cache and last-modified headers
            (cache-for
