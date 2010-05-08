@@ -197,12 +197,16 @@
                    (match-ids/prefix prefix (incremental-search)))))
          (let ((body (if (null? ids)
                          ""
-                         (tree->string
-                          `("<ul>"
-                            ,(map (lambda (x)
-                                    `("<li>" ,(htmlize x) "</li>"))
-                                  ids)
-                            "</ul>")))))
+                         (let ((plen (string-length prefix)))
+                           (tree->string
+                            `("<ul>"
+                              ,(map (lambda (x)
+                                      `("<li>"
+                                        "<b>" ,(htmlize (substring x 0 plen))
+                                        "</b>"
+                                        ,(htmlize (substring x plen)) "</li>"))
+                                    ids)
+                              "</ul>"))))))
            ;; Make sure to send cache and last-modified headers
            (cache-for
             60
