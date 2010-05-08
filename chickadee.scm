@@ -204,8 +204,9 @@
                                   ids)
                             "</ul>")))))
            ;; Make sure to send cache and last-modified headers
-           (send-response
-            body: body))))))
+           (parameterize ((access-log #f))
+             (send-response
+              body: body)))))))
 
 (define (root-page)
   (++ (<h3> "Search")

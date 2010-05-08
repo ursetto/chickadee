@@ -12,7 +12,7 @@
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
-(incremental-search 10)
+(incremental-search 15)
 (cache-nodes-for 300)
 (cache-static-content-for 1800)
 

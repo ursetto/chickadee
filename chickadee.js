@@ -7,7 +7,6 @@ function init() {
   last_search = sb.value;
   if (sb) {
     sb.onkeyup = function() {
-      /* FIXME: keep track of old value, only send request on change */
       if (sb.value != last_search) {
 	last_search = sb.value;
 	sendGetRequest(sb.value);
@@ -19,6 +18,9 @@ function init() {
   }
 }
 
+/* FIXME: avoid overloading server here, possibly don't send
+ * new request until one comes back, or establish minimum
+ * interval */
 function sendGetRequest(prefix) {
   var xhr = getHTTPObject();
   if (xhr) {
