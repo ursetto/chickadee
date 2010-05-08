@@ -1,11 +1,17 @@
 window.onload = init;
 
+var last_search;
+
 function init() {
   var sb = $('searchbox');
+  last_search = sb.value;
   if (sb) {
     sb.onkeyup = function() {
       /* FIXME: keep track of old value, only send request on change */
-      sendGetRequest(sb.value);
+      if (sb.value != last_search) {
+	last_search = sb.value;
+	sendGetRequest(sb.value);
+      }
     };
     sb.onblur = function() {
       $('incsearch').style.visibility = "hidden";
