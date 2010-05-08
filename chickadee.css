@@ -226,11 +226,19 @@ ul li {
   margin-bottom: 3px;  /* > 0 helps avoid cutoff of bottom link border */
 }
 
-form.lookup input.text {
+form.lookup input.text, div#incsearch {
   width: 20em;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 16px;
+  border: 1px solid black;
+  padding: 2px;   /* make up for 3px border on buttons */
 }
 form.lookup input.button {
   margin-left: 1em;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 16px;
+  border: 3px double black;
+  background-color: #ffffff;
 }
 
 #navskip {
@@ -238,4 +246,31 @@ form.lookup input.button {
 }
 div#contents h2{
   display: none;
+}
+
+
+div#incsearch {
+  border: 1px solid #000000;
+  overflow: hidden;
+  zoom: 1;
+  min-height: 0;
+  padding: 0;
+  position: absolute;
+  /* Absolute position must be written on window resize (specifically,
+     when input elt changes position or size */
+  left: 18px; top: 110px;
+  visibility: hidden;
+  background-color: #ffffff;
+}
+div#incsearch ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+div#incsearch ul li {
+  margin: 0;
+  padding: 0 1em;
+}
+div#incsearch ul li:hover {
+  background-color: #aaaaaa;
 }

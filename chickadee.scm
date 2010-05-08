@@ -7,8 +7,10 @@
   cdoc-uri-path
   chickadee-uri-path
   chickadee-css-path
+  chickadee-js-path
   maximum-match-results
   maximum-match-signatures
+  incremental-search
   cache-nodes-for
   cache-static-content-for
   last-modified
@@ -36,7 +38,8 @@
   (<form> class: "lookup"
           action: (cdoc-page-path)
           method: 'get
-          (<input> class: "text" type: "text" name: "q")  ; query should redirect.
+          (<input> id: "searchbox" class: "text" type: "text" name: "q"
+                   autocomplete: "off")
           (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
           (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
 
@@ -184,17 +187,22 @@
            ))))                 ;  API defect
 
 (define (handle-ajax _)
+  ;; FIXME: Access logging should be disabled or at least greatly reduced here.
   (with-request-vars
    $ (prefix)
    (if (not prefix)
        (send-status 500 "Internal server error")
-       (let ((ids (match-ids/prefix prefix 20)))
-         (let ((body (tree->string
-                      `("<ul>"
-                        ,(map (lambda (x)
-                                `("<li>" ,(htmlize x) "</li>"))
-                              (vector->list ids))
-                        "</ul>"))))
+       ;; FIXME: doesn't skip 0 or #f incremental-search
+       (let ((ids (vector->list
+                   (match-ids/prefix prefix (incremental-search)))))
+         (let ((body (if (null? ids)
+                         ""
+                         (tree->string
+                          `("<ul>"
+                            ,(map (lambda (x)
+                                    `("<li>" ,(htmlize x) "</li>"))
+                                  ids)
+                            "</ul>")))))
            ;; Make sure to send cache and last-modified headers
            (send-response
             body: body))))))
@@ -217,7 +225,9 @@
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  ))
+                  )
+      (<div> id: "incsearch"
+             "Initial contents"))
 )
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
@@ -238,6 +248,7 @@
        (<div> id: "body"
               (<div> id: "main"
                      body)))
+   headers: (<script> type: "text/javascript" src: (chickadee-js-path))
    css: (chickadee-css-path)
    charset: "UTF-8"
    doctype: xhtml-1.0-strict
@@ -275,6 +286,8 @@
 
 (define chickadee-css-path
   (make-parameter "chickadee.css"))
+(define chickadee-js-path
+  (make-parameter "chickadee.js"))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
@@ -283,6 +296,8 @@
 ;; Base time used for last-modified calculations, in seconds.
 ;; Set to (current)-seconds to invalidate pages when server is started.
 (define last-modified (make-parameter 0))
+;; Number of incremental search results to display; 0 or #f to disable.
+(define incremental-search (make-parameter 0))
 
 ;;; Helper functions
 
