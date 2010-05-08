@@ -40,8 +40,8 @@
           method: 'get
           (<input> id: "searchbox" class: "text" type: "text" name: "q"
                    autocomplete: "off")
-          (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
-          (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
+          (<input> class: "button" type: "submit" id: "query-name" name: "query-name" value: "Lookup")
+          (<input> class: "button" type: "submit" id: "query-regex" name: "query-regex" value: "Regex")))
 
 (define (format-id x)
   (match (match-nodes x)

@@ -4,17 +4,43 @@ var last_search;
 
 function init() {
   var sb = $('searchbox');
-  last_search = sb.value;
   if (sb) {
+    sb.focus();
+    last_search = sb.value;
+    var is = $('incsearch');
+
     sb.onkeyup = function() {
       if (sb.value != last_search) {
 	last_search = sb.value;
 	sendGetRequest(sb.value);
       }
     };
-    sb.onblur = function() {
-      $('incsearch').style.visibility = "hidden";
+    var hide_incsearch = function() {  // lambda lift
+      is.style.visibility = "hidden";
     };
+    sb.onblur = function() {
+      // Blur fires before onclick, so click does not reach hidden incsearch.
+      // Hack around it by delaying onblur a bit (rather than adding
+      // an onclick handle to the entire document).
+      window.setTimeout(hide_incsearch, 100);
+    };
+
+    if (is) {
+      is.onclick = function(e) {
+	e = e || window.event;
+	var elt = e.target || e.srcElement;
+	// alert('clicked' + e.target.textContent);
+        // "target" may be "srcElement" on IE"
+	sb.value = elt.textContent;
+	sb.focus();
+
+	// This will submit the clicked item immediately.
+	hide_incsearch();
+	b = $('query-name');
+	b.focus();
+	b.click();
+      };
+    }
   }
 }
 
