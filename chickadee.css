@@ -261,6 +261,7 @@ div#incsearch {
   left: 18px; top: 110px;
   visibility: hidden;
   background-color: #ffffff;
+  cursor: default;
 }
 div#incsearch ul {
   margin: 0;
@@ -269,7 +270,7 @@ div#incsearch ul {
 }
 div#incsearch ul li {
   margin: 0;
-  padding: 0 1em;
+  padding: 0 0.5em;
 }
 div#incsearch ul li:hover {
   background-color: #aaaaaa;
