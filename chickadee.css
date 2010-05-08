@@ -234,12 +234,23 @@ form.lookup input.text, div#incsearch {
   padding-left: 0.2em; padding-right: 0.2em;
 /*  padding: 2px; */   /* make up for 3px border on buttons */
 }
+form.lookup input.text:focus {
+  outline: none;
+  border: 1px solid black;
+}
+form.lookup input.button:focus {
+/*  outline: 1px solid #888888; */
+  border: 1px solid black;
+  outline: none;
+  background-color: #f4f4f4;
+}
 form.lookup input.button {
   margin-left: 1em;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
   border: 1px solid #888888;
   background-color: #fcfcfc;
+  cursor: pointer;
 }
 
 #navskip {

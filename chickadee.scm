@@ -237,8 +237,7 @@
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
                   )
-      (<div> id: "incsearch"
-             "Initial contents"))
+      (<div> id: "incsearch"))
 )
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
