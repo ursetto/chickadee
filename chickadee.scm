@@ -204,9 +204,15 @@
                                   ids)
                             "</ul>")))))
            ;; Make sure to send cache and last-modified headers
-           (parameterize ((access-log #f))
-             (send-response
-              body: body)))))))
+           (cache-for
+            60
+            (lambda ()
+              (send-response
+               body: body)              
+              ;; (parameterize ((access-log #f))   ; disabled to test ajax caching
+              ;;   (send-response
+              ;;    body: body))
+              )))))))
 
 (define (root-page)
   (++ (<h3> "Search")
