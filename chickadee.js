@@ -29,9 +29,8 @@ function init() {
       is.onclick = function(e) {
 	e = e || window.event;
 	var elt = e.target || e.srcElement;
-	// alert('clicked' + e.target.textContent);
-        // "target" may be "srcElement" on IE"
-	sb.value = elt.textContent;
+
+	sb.value = textContent(elt);
 	sb.focus();
 
 	// This will submit the clicked item immediately.
@@ -95,4 +94,11 @@ function $(id) {
 	return get ? document.getElementById(id) : null;
     }
     return id;
+}
+
+/* Poor man's elt.textContent, only available in DOM Level 3.
+ * Just strip out all tags. */
+function textContent(elt) {
+  return (elt.textContent ||
+	  elt.innerHTML.replace(/<[^>]+>/g, ""));  /* precompiled re */
 }

@@ -285,5 +285,6 @@ div#incsearch ul li {
   padding: 0 0.5em;
 }
 div#incsearch ul li:hover {
+  /* IE6 doesn't support :hover on non-A. */
   background-color: #bbbbbb;
 }
