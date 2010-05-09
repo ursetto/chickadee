@@ -19,7 +19,8 @@ function init() {
 	if (str == "") {
 	  hide_incsearch();
 	} else {
-	  prefix.send(str);
+	  /* hide here? */
+	  prefix.send(function() { return str; });
 	}
       }
     };
@@ -66,12 +67,29 @@ function init() {
 var prefix = {
   xhr: null,
   delay: 100,
-  send: function(str) {
-    if (this.xhr) { return this.xhr; }
+  cancel: function() {
+    if (typeof this.timeoutID == "number") {
+      window.clearTimeout(this.timeoutID);
+      delete this.timeoutID;
+    }
+  },
+  schedule: function(cb) {
+    this.cancel();
+    this.timeoutID = window.setTimeout(
+      function() {
+	delete self.timeoutID;
+	cb();
+      }, this.delay);
+  },
+  send: function(cb) {
+    var self = this;
+    if (this.xhr) {
+      this.schedule(function() { self.send(cb); });
+      return this.xhr;
+    }
     var xhr = getHTTPObject();
     this.xhr = xhr;
     if (xhr) {
-      var self = this;
       xhr.onreadystatechange = function() {
 	if (xhr.readyState == 4) {
 	  if (xhr.status == 200) {
@@ -82,8 +100,12 @@ var prefix = {
 	  }
 	}
       };
-      xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(str), true);
-      xhr.send();
+      // this.schedule(
+      // function() {
+	  var pfx = cb();
+	  xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(pfx), true);
+	  xhr.send();
+      // });
     }
     return xhr;
   },

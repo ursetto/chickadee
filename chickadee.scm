@@ -213,7 +213,6 @@
                                     M)
                               "</ul>"))))))
            ;; Make sure to send cache and last-modified headers
-
            (cache-for
             60
             (lambda ()
