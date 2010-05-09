@@ -12,7 +12,7 @@ function init() {
     sb.onkeyup = function() {
       if (sb.value != last_search) {
 	last_search = sb.value;
-	sendPrefixXHR(sb.value);
+	prefix.send(sb.value);
       }
     };
     var hide_incsearch = function() {  // lambda lift
@@ -58,30 +58,32 @@ function init() {
 /* FIXME: avoid overloading server here, possibly don't send
  * new request until one comes back, or establish minimum
  * interval */
-var prefixXHR = null;
-
-function sendPrefixXHR(prefix) {
-  if (prefixXHR) {
-    return prefixXHR;
-  }
-  var xhr = getHTTPObject();
-  prefixXHR = xhr;
-  if (xhr) {
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-	if (xhr.status == 200) {
-	  var is = $('incsearch');
-	  is.innerHTML = xhr.responseText;
-	  is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
-	  prefixXHR = null;
+var prefix = {
+  xhr: null,
+  delay: 100,
+  send: function(str) {
+    if (this.xhr) { return this.xhr; }
+    var xhr = getHTTPObject();
+    this.xhr = xhr;
+    if (xhr) {
+      var self = this;
+      xhr.onreadystatechange = function() {
+	if (xhr.readyState == 4) {
+	  if (xhr.status == 200) {
+	    var is = $('incsearch');
+	    is.innerHTML = xhr.responseText;
+	    is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
+	    self.xhr = null;
+	  }
 	}
-      }
-    };
-    xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(prefix), true);
-    xhr.send();
-  }
-  return xhr;
-}
+      };
+      xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(str), true);
+      xhr.send();
+    }
+    return xhr;
+  },
+};
+
 
 function getHTTPObject() {
   var xhr = false;
