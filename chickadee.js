@@ -9,14 +9,19 @@ function init() {
     last_search = sb.value;
     var is = $('incsearch');
 
-    sb.onkeyup = function() {
-      if (sb.value != last_search) {
-	last_search = sb.value;
-	prefix.send(sb.value);
-      }
-    };
     var hide_incsearch = function() {  // lambda lift
       is.style.visibility = "hidden";
+    };
+    sb.onkeyup = function() {
+      var str = sb.value;
+      if (str != last_search) {
+	last_search = str;
+	if (str == "") {
+	  hide_incsearch();
+	} else {
+	  prefix.send(str);
+	}
+      }
     };
     sb.onblur = function() {
       // Blur fires before onclick, so click does not reach hidden incsearch.
