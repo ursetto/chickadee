@@ -12,7 +12,7 @@ function init() {
     sb.onkeyup = function() {
       if (sb.value != last_search) {
 	last_search = sb.value;
-	sendGetRequest(sb.value);
+	sendPrefixXHR(sb.value);
       }
     };
     var hide_incsearch = function() {  // lambda lift
@@ -58,8 +58,14 @@ function init() {
 /* FIXME: avoid overloading server here, possibly don't send
  * new request until one comes back, or establish minimum
  * interval */
-function sendGetRequest(prefix) {
+var prefixXHR = null;
+
+function sendPrefixXHR(prefix) {
+  if (prefixXHR) {
+    return prefixXHR;
+  }
   var xhr = getHTTPObject();
+  prefixXHR = xhr;
   if (xhr) {
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
@@ -67,6 +73,7 @@ function sendGetRequest(prefix) {
 	  var is = $('incsearch');
 	  is.innerHTML = xhr.responseText;
 	  is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
+	  prefixXHR = null;
 	}
       }
     };

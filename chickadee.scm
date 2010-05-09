@@ -31,6 +31,7 @@
 (use regex) (import irregex)
 (use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
+(use srfi-18)
 
 ;;; Pages
 
@@ -39,7 +40,8 @@
           action: (cdoc-page-path)
           method: 'get
           (<input> id: "searchbox" class: "text" type: "text" name: "q"
-                   autocomplete: "off")
+                   autocomplete: "off"  ;; apparently readonly in DOM
+                   )
           (<input> class: "button" type: "submit" id: "query-name" name: "query-name" value: "Lookup")
           (<input> class: "button" type: "submit" id: "query-regex" name: "query-regex" value: "Regex")))
 
@@ -211,6 +213,7 @@
                                     M)
                               "</ul>"))))))
            ;; Make sure to send cache and last-modified headers
+
            (cache-for
             60
             (lambda ()
