@@ -25,6 +25,18 @@ function init() {
       window.setTimeout(hide_incsearch, 100);
     };
 
+    function repositionIncSearch() {
+      var pos = absolutePosition(sb);
+      is.style.left = pos[0] + 2 + 'px';
+      is.style.top = pos[1] + sb.offsetHeight + 3 + 'px';
+      is.style.width = sb.clientWidth - 4 + 'px';
+    };
+
+    /* It's possible to delay repositioning incsearch until it becomes
+     * visible. */
+    window.onresize = repositionIncSearch;
+    repositionIncSearch();
+
     if (is) {
       is.onclick = function(e) {
 	e = e || window.event;
@@ -101,4 +113,15 @@ function $(id) {
 function textContent(elt) {
   return (elt.textContent ||
 	  elt.innerHTML.replace(/<[^>]+>/g, ""));  /* precompiled re */
+}
+
+function absolutePosition(elt) {
+  var curleft = curtop = 0;
+  if (elt.offsetParent) {
+      do {
+	curleft += elt.offsetLeft;
+	curtop += elt.offsetTop;
+      } while (elt = elt.offsetParent);
+  }
+  return [curleft,curtop];
 }

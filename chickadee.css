@@ -227,7 +227,7 @@ ul li {
 }
 
 form.lookup input.text, div#incsearch {
-  width: 20em;
+  width: 40%;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
   border: 1px solid #888888;
