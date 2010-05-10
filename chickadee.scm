@@ -6,6 +6,7 @@
  (chickadee-start-server
   cdoc-uri-path
   chickadee-uri-path
+  incremental-search-uri-path
   chickadee-css-path
   chickadee-js-path
   maximum-match-results
@@ -190,46 +191,41 @@
            ;; (format-path p)
            ))))                 ;  API defect
 
-(define (handle-ajax _)
-  ;; FIXME: Access logging should be disabled or at least greatly reduced here.
+(define (incremental-search-handler _)
   (with-request-vars*
-   $ (prefix)
-   (if (not prefix)
-       (send-status 500 "Internal server error")
-       ;; FIXME: doesn't skip 0 or #f incremental-search
-       (let ((M (vector->list
-                 ((if (string-index prefix #\space)
-                      match-paths/prefix
-                      match-ids/prefix)
-                  prefix (incremental-search)))))
-         (let ((body (if (null? M)
-                         ""
-                         (let ((plen (string-length prefix)))
-                           (tree->string
-                            `("<ul>"
-                              ,(map (lambda (x)
-                                      `("<li>"
-                                        "<b>" ,(htmlize (substring x 0 plen))
-                                        "</b>"
-                                        ,(htmlize (substring x plen)) "</li>"))
-                                    M)
-                              "</ul>"))))))
-           ;; Latency pause for debugging
-           (let ((pause (%chickadee:debug-incremental-search-latency)))
-             (if (> pause 0)
-                 (thread-sleep! (/ pause 1000))))
-           ;; Send last-modified headers? May not be worth it.
-           ;; We allow browser to cache responses, but not intermediate
-           ;; proxies as the latency may be too high (esp. nginx proxy_cache).
-           (cache-privately-for
-            (cache-nodes-for)
-            (lambda ()
-              ;; (send-response
-              ;;   body: body)              
-              (parameterize ((access-log #f))   ; Access logging is extremely slow
-                (send-response
-                 body: body))
-              )))))))
+   $ (q)
+   ;; FIXME: doesn't skip 0 or #f incremental-search
+   (let ((M (vector->list
+             ((if (string-index q #\space)
+                  match-paths/prefix
+                  match-ids/prefix)
+              q (incremental-search)))))
+     (let ((body (if (null? M)
+                     ""
+                     (let ((plen (string-length q)))
+                       (tree->string
+                        `("<ul>"
+                          ,(map (lambda (x)
+                                  `("<li>"
+                                    "<b>" ,(htmlize (substring x 0 plen))
+                                    "</b>"
+                                    ,(htmlize (substring x plen)) "</li>"))
+                                M)
+                          "</ul>"))))))
+       ;; Latency pause for debugging
+       (let ((pause (%chickadee:debug-incremental-search-latency)))
+         (if (> pause 0)
+             (thread-sleep! (/ pause 1000))))
+       ;; Send last-modified headers? May not be worth it.
+       (cache-privately-for  ; `private` has no effect on nginx proxy cache
+        (cache-nodes-for)
+        (lambda ()
+          ;; (send-response
+          ;;   body: body)              
+          (parameterize ((access-log #f)) ; Access logging is extremely slow
+            (send-response
+             body: body))
+          ))))))
 
 (define (root-page)
   (++ (<h3> "Search")
@@ -298,6 +294,8 @@
                        (cdoc-page-path
                         (and x (uri-path->string x)))
                        x)))
+(define incremental-search-uri-path
+  (make-parameter #f))
 
 (define chickadee-page-path (make-parameter #f))
 (define chickadee-uri-path
@@ -399,7 +397,10 @@
 (define (cache-for seconds thunk)
   (with-headers `((cache-control (max-age . ,seconds))) thunk))
 (define (cache-privately-for seconds thunk)
-  (with-headers `((cache-control (private . #t) (max-age . ,seconds))) thunk))
+  (with-headers `((x-accel-expires 0)  ; nginx hack
+                  (cache-control (private . #t)
+                                 (max-age . ,seconds)))
+                thunk))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
@@ -450,9 +451,8 @@
 (define (cdoc-handler p)
   p ;ignore
   (with-request-vars*
-   $ (id path q ajax)
-     (cond (ajax => handle-ajax)
-           (path => format-path)
+   $ (id path q)
+     (cond (path => format-path)
            (id   => format-id)
            (q    => (lambda (p)
                       (with-request-vars*
@@ -477,6 +477,9 @@
                           => cdoc-handler)
                          ((match-path (chickadee-uri-path) p)
                           => chickadee-handler)
+                         ((and (incremental-search-uri-path)
+                               (equal? (incremental-search-uri-path) p))
+                          => incremental-search-handler)
                          (else
                           (continue)))))))))
 

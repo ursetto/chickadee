@@ -64,7 +64,8 @@ function init() {
 
 var prefix = {
   xhr: null,
-  delay: 50,
+  uri: "/cdoc/ajax/prefix",    // should be configurable
+  delay: 50,                   // should be configurable
   cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
@@ -115,7 +116,7 @@ var prefix = {
       this.schedule(
         function() {
           var pfx = cb();
-	  xhr.open("GET", "/cdoc?ajax=1&prefix=" + encodeURIComponent(pfx), true);
+	  xhr.open("GET", self.uri + "?q=" + encodeURIComponent(pfx), true);
 	  xhr.send();
       });
     }

@@ -14,8 +14,9 @@
 
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
+(incremental-search-uri-path '(/ "cdoc" "ajax" "prefix"))
 (chickadee-css-path "/cdoc/chickadee.css")
-(chickadee-js-path "/cdoc/chickadee.js")
+(chickadee-js-path "/cdoc/chickadee.js?1")
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
