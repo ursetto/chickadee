@@ -7,7 +7,10 @@
 ;; Note: if connections is small and AJAX parallel requests
 ;; are allowed, spiffy may take tens of seconds to respond,
 ;; occasionally.  May be an issue with keepalives.
-(max-connections 2)
+
+;; An even number of connections is desirable as user agents
+;; usually open two (keep-alive) connections per hostname.
+(max-connections 4)
 
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
@@ -21,5 +24,11 @@
 (cache-static-content-for 1800)
 
 (last-modified (current-seconds))
+
+;;; debugging
+
+(%chickadee:debug-incremental-search-latency 0)
+
+;;; start
 
 (chickadee-start-server)

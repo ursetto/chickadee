@@ -14,6 +14,8 @@
   cache-nodes-for
   cache-static-content-for
   last-modified
+
+  %chickadee:debug-incremental-search-latency
   )
 
 (import scheme chicken)
@@ -212,15 +214,19 @@
                                         ,(htmlize (substring x plen)) "</li>"))
                                     M)
                               "</ul>"))))))
-           ;; Make sure to send cache and last-modified headers
+           ;; Latency pause for debugging
+           (let ((pause (%chickadee:debug-incremental-search-latency)))
+             (if (> pause 0)
+                 (thread-sleep! (/ pause 1000))))
+           ;; Send last-modified headers? May not be worth it.
            (cache-for
-            60
+            (cache-nodes-for)
             (lambda ()
-              (send-response
-               body: body)              
-              ;; (parameterize ((access-log #f))   ; disabled to test ajax caching
-              ;;   (send-response
-              ;;    body: body))
+              ;; (send-response
+              ;;   body: body)              
+              (parameterize ((access-log #f))   ; Access logging is extremely slow
+                (send-response
+                 body: body))
               )))))))
 
 (define (root-page)
@@ -313,6 +319,9 @@
 (define last-modified (make-parameter 0))
 ;; Number of incremental search results to display; 0 or #f to disable.
 (define incremental-search (make-parameter 0))
+
+;; debugging: incremental search latency, in ms
+(define %chickadee:debug-incremental-search-latency (make-parameter 0))
 
 ;;; Helper functions
 

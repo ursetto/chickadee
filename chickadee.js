@@ -19,7 +19,8 @@ function init() {
 	if (str == "") {
 	  hide_incsearch();
 	} else {
-	  /* hide here? */
+	  // send does not currently require you to determine
+	  // the value of the prefix at callback time.
 	  prefix.send(function() { return str; });
 	}
       }
@@ -61,12 +62,9 @@ function init() {
   }
 }
 
-/* FIXME: avoid overloading server here, possibly don't send
- * new request until one comes back, or establish minimum
- * interval */
 var prefix = {
   xhr: null,
-  delay: 100,
+  delay: 50,
   cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
@@ -105,14 +103,20 @@ var prefix = {
 	      self.schedule(function() { self.send(ecb) });
 	    }
 	  }
+	  // Note that, if XHR does not return successfully, the xhr
+	  // object is never deleted and future callbacks will just
+	  // be enqueued instead of sent.
 	}
       };
-      // this.schedule(
-      // function() {
-	  var pfx = cb();
+//    this.cancel();  // We need to cancel any outstanding timeout (e.g.
+                      // from an enqueued callback), whether implicitly
+		      // via another schedule() call, or explicitly via cancel().
+      this.schedule(
+        function() {
+          var pfx = cb();
 	  xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(pfx), true);
 	  xhr.send();
-      // });
+      });
     }
     return xhr;
   },
