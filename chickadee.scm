@@ -219,7 +219,9 @@
              (if (> pause 0)
                  (thread-sleep! (/ pause 1000))))
            ;; Send last-modified headers? May not be worth it.
-           (cache-for
+           ;; We allow browser to cache responses, but not intermediate
+           ;; proxies as the latency may be too high (esp. nginx proxy_cache).
+           (cache-privately-for
             (cache-nodes-for)
             (lambda ()
               ;; (send-response
@@ -396,6 +398,8 @@
 
 (define (cache-for seconds thunk)
   (with-headers `((cache-control (max-age . ,seconds))) thunk))
+(define (cache-privately-for seconds thunk)
+  (with-headers `((cache-control (private . #t) (max-age . ,seconds))) thunk))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
