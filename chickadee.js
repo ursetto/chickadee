@@ -84,7 +84,7 @@ var prefix = {
   send: function(cb) {
     var self = this;
     if (this.xhr) {
-      this.schedule(function() { self.send(cb); });
+      self.enqueued_cb = cb;
       return this.xhr;
     }
     var xhr = getHTTPObject();
@@ -97,6 +97,13 @@ var prefix = {
 	    is.innerHTML = xhr.responseText;
 	    is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
 	    self.xhr = null;
+
+	    /* If send was enqueued during XHR, reschedule it. */
+	    var ecb = self.enqueued_cb;
+	    delete self.enqueued_cb;
+	    if (ecb) {
+	      self.schedule(function() { self.send(ecb) });
+	    }
 	  }
 	}
       };
