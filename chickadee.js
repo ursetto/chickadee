@@ -72,6 +72,7 @@ var prefix = {
     }
   },
   schedule: function(cb) {
+    var self = this;
     this.cancel();
     this.timeoutID = window.setTimeout(
       function() {
@@ -119,7 +120,7 @@ var prefix = {
       });
     }
     return xhr;
-  },
+  }
 };
 
 
