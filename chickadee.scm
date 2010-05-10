@@ -192,7 +192,7 @@
 
 (define (handle-ajax _)
   ;; FIXME: Access logging should be disabled or at least greatly reduced here.
-  (with-request-vars
+  (with-request-vars*
    $ (prefix)
    (if (not prefix)
        (send-status 500 "Internal server error")
@@ -360,8 +360,8 @@
 (define ++ string-append)  ; legacy from awful
 (define (link href desc)
   (<a> href: href desc))
-(define ($ var #!optional default converter)  ; from awful
-    ((http-request-variables) var default (or converter identity)))
+(define ($ var #!optional converter/default)  ; from awful
+    ((http-request-variables) var converter/default))
 (define http-request-variables (make-parameter #f))
 
 ;; note: missing full node path should maybe generate 404
@@ -445,13 +445,13 @@
 
 (define (cdoc-handler p)
   p ;ignore
-  (with-request-vars
+  (with-request-vars*
    $ (id path q ajax)
      (cond (ajax => handle-ajax)
            (path => format-path)
            (id   => format-id)
            (q    => (lambda (p)
-                      (with-request-vars
+                      (with-request-vars*
                        $ (query-regex query-name)
                        (if query-regex
                            (if (string-index p #\space) ; hmm
