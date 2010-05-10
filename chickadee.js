@@ -115,7 +115,7 @@ var prefix = {
       this.schedule(
         function() {
           var pfx = cb();
-	  xhr.open("GET", "/cdoc?ajax=1&prefix=" + escape(pfx), true);
+	  xhr.open("GET", "/cdoc?ajax=1&prefix=" + encodeURIComponent(pfx), true);
 	  xhr.send();
       });
     }
