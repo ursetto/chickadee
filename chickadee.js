@@ -32,7 +32,7 @@ function init() {
       window.setTimeout(hide_incsearch, 100);
     };
 
-    function repositionIncSearch() {
+    var repositionIncSearch = function() {
       var pos = absolutePosition(sb);
       is.style.left = pos[0] + 2 + 'px';
       is.style.top = pos[1] + sb.offsetHeight + 3 + 'px';
@@ -102,7 +102,7 @@ var prefix = {
 	    var ecb = self.enqueued_cb;
 	    delete self.enqueued_cb;
 	    if (ecb) {
-	      self.schedule(function() { self.send(ecb) });
+	      self.schedule(function() { self.send(ecb); });
 	    }
 	  }
 	  // Note that, if XHR does not return successfully, the xhr
@@ -165,12 +165,14 @@ function textContent(elt) {
 }
 
 function absolutePosition(elt) {
-  var curleft = curtop = 0;
+  var curleft = 0;
+  var curtop = 0;
   if (elt.offsetParent) {
       do {
 	curleft += elt.offsetLeft;
 	curtop += elt.offsetTop;
-      } while (elt = elt.offsetParent);
+	elt = elt.offsetParent;
+      } while (elt);
   }
   return [curleft,curtop];
 }
