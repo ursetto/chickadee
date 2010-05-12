@@ -6,12 +6,18 @@
  (chickadee-start-server
   cdoc-uri-path
   chickadee-uri-path
+  incremental-search-uri-path
   chickadee-css-path
+  chickadee-js-path
   maximum-match-results
   maximum-match-signatures
+  incremental-search
   cache-nodes-for
   cache-static-content-for
   last-modified
+  ajax-log
+
+  %chickadee:debug-incremental-search-latency
   )
 
 (import scheme chicken)
@@ -27,8 +33,9 @@
 (use chicken-doc-html)
 (use doctype)
 (use regex) (import irregex)
-(use (only srfi-13 string-index))
+(use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
+(use srfi-18)
 
 ;;; Pages
 
@@ -36,9 +43,12 @@
   (<form> class: "lookup"
           action: (cdoc-page-path)
           method: 'get
-          (<input> class: "text" type: "text" name: "q")  ; query should redirect.
-          (<input> class: "button" type: "submit" name: "query-name" value: "Lookup")
-          (<input> class: "button" type: "submit" name: "query-regex" value: "Regex")))
+          (<input> id: "searchbox" class: "text" type: "text" name: "q"
+                   autocomplete: "off"  ;; apparently readonly in DOM
+                   autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
+                   )
+          (<input> class: "button" type: "submit" id: "query-name" name: "query-name" value: "Lookup")
+          (<input> class: "button" type: "submit" id: "query-regex" name: "query-regex" value: "Regex")))
 
 (define (format-id x)
   (match (match-nodes x)
@@ -48,7 +58,7 @@
           ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
-                     (<p> "No node found matching identifier " (<tt> x))))
+                     (<p> "No node found matching identifier " (<tt> (htmlize x)))))
          (nodes
           (match-page nodes x))))
 
@@ -183,6 +193,40 @@
            ;; (format-path p)
            ))))                 ;  API defect
 
+(define (incremental-search-handler _)
+  (with-request-vars*
+   $ (q)
+   ;; FIXME: doesn't skip 0 or #f incremental-search
+   (let ((M (vector->list
+             ((if (string-index q #\space)
+                  match-paths/prefix
+                  match-ids/prefix)
+              q (incremental-search)))))
+     (let ((body (if (null? M)
+                     ""
+                     (let ((plen (string-length q)))
+                       (tree->string
+                        `("<ul>"
+                          ,(map (lambda (x)
+                                  `("<li>"
+                                    "<b>" ,(htmlize (substring x 0 plen))
+                                    "</b>"
+                                    ,(htmlize (substring x plen)) "</li>"))
+                                M)
+                          "</ul>"))))))
+       ;; Latency pause for debugging
+       (let ((pause (%chickadee:debug-incremental-search-latency)))
+         (if (> pause 0)
+             (thread-sleep! (/ pause 1000))))
+       ;; Send last-modified headers? May not be worth it.
+       (cache-privately-for  ; `private` has no effect on nginx proxy cache
+        (cache-nodes-for)
+        (lambda ()
+          ;; (send-response
+          ;;   body: body)              
+          (parameterize ((access-log (ajax-log))) ; Logging is extremely slow
+            (send-response body: body))))))))
+
 (define (root-page)
   (++ (<h3> "Search")
       (input-form)
@@ -201,7 +245,8 @@
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  ))
+                  )
+      (<div> id: "incsearch"))
 )
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
@@ -222,6 +267,7 @@
        (<div> id: "body"
               (<div> id: "main"
                      body)))
+   headers: (<script> type: "text/javascript" src: (chickadee-js-path))
    css: (chickadee-css-path)
    charset: "UTF-8"
    doctype: xhtml-1.0-strict
@@ -248,6 +294,8 @@
                        (cdoc-page-path
                         (and x (uri-path->string x)))
                        x)))
+(define incremental-search-uri-path
+  (make-parameter #f))
 
 (define chickadee-page-path (make-parameter #f))
 (define chickadee-uri-path
@@ -259,6 +307,8 @@
 
 (define chickadee-css-path
   (make-parameter "chickadee.css"))
+(define chickadee-js-path
+  (make-parameter "chickadee.js"))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
@@ -267,6 +317,12 @@
 ;; Base time used for last-modified calculations, in seconds.
 ;; Set to (current)-seconds to invalidate pages when server is started.
 (define last-modified (make-parameter 0))
+;; Number of incremental search results to display; 0 or #f to disable.
+(define incremental-search (make-parameter 0))
+(define ajax-log (make-parameter #f)) ;; AJAX access log.  #f to disable.
+
+;; debugging: incremental search latency, in ms
+(define %chickadee:debug-incremental-search-latency (make-parameter 0))
 
 ;;; Helper functions
 
@@ -305,8 +361,8 @@
 (define ++ string-append)  ; legacy from awful
 (define (link href desc)
   (<a> href: href desc))
-(define ($ var #!optional default converter)  ; from awful
-    ((http-request-variables) var default (or converter identity)))
+(define ($ var #!optional converter/default)  ; from awful
+    ((http-request-variables) var converter/default))
 (define http-request-variables (make-parameter #f))
 
 ;; note: missing full node path should maybe generate 404
@@ -341,6 +397,11 @@
 
 (define (cache-for seconds thunk)
   (with-headers `((cache-control (max-age . ,seconds))) thunk))
+(define (cache-privately-for seconds thunk)
+  (with-headers `((x-accel-expires 0)  ; nginx hack
+                  (cache-control (private . #t)
+                                 (max-age . ,seconds)))
+                thunk))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
@@ -390,12 +451,12 @@
 
 (define (cdoc-handler p)
   p ;ignore
-  (with-request-vars
+  (with-request-vars*
    $ (id path q)
      (cond (path => format-path)
            (id   => format-id)
            (q    => (lambda (p)
-                      (with-request-vars
+                      (with-request-vars*
                        $ (query-regex query-name)
                        (if query-regex
                            (if (string-index p #\space) ; hmm
@@ -417,6 +478,9 @@
                           => cdoc-handler)
                          ((match-path (chickadee-uri-path) p)
                           => chickadee-handler)
+                         ((and (incremental-search-uri-path)
+                               (equal? (incremental-search-uri-path) p))
+                          => incremental-search-handler)
                          (else
                           (continue)))))))))
 
