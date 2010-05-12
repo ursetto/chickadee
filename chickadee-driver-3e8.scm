@@ -7,6 +7,7 @@
 (server-port 8383)
 (max-connections 8)
 
+(ajax-log #f)   ;; Slow; not recommended for production.
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
 (incremental-search-uri-path '(/ "cdoc" "ajax" "prefix"))

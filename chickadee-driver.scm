@@ -4,6 +4,7 @@
 (debug-log (current-error-port))
 (server-port 8080)
 (access-log "access.log")
+
 ;; Note: if connections is small and AJAX parallel requests
 ;; are allowed, spiffy may take tens of seconds to respond,
 ;; occasionally.  May be an issue with keepalives.
@@ -12,6 +13,7 @@
 ;; usually open two (keep-alive) connections per hostname.
 (max-connections 4)
 
+(ajax-log "/tmp/ajax.log")
 (cdoc-uri-path '(/ "cdoc"))
 (chickadee-uri-path '(/ "chickadee"))
 (incremental-search-uri-path '(/ "cdoc" "ajax" "prefix"))

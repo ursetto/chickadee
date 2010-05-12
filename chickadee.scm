@@ -15,6 +15,7 @@
   cache-nodes-for
   cache-static-content-for
   last-modified
+  ajax-log
 
   %chickadee:debug-incremental-search-latency
   )
@@ -223,10 +224,8 @@
         (lambda ()
           ;; (send-response
           ;;   body: body)              
-          (parameterize ((access-log #f)) ; Access logging is extremely slow
-            (send-response
-             body: body))
-          ))))))
+          (parameterize ((access-log (ajax-log))) ; Logging is extremely slow
+            (send-response body: body))))))))
 
 (define (root-page)
   (++ (<h3> "Search")
@@ -320,6 +319,7 @@
 (define last-modified (make-parameter 0))
 ;; Number of incremental search results to display; 0 or #f to disable.
 (define incremental-search (make-parameter 0))
+(define ajax-log (make-parameter #f)) ;; AJAX access log.  #f to disable.
 
 ;; debugging: incremental search latency, in ms
 (define %chickadee:debug-incremental-search-latency (make-parameter 0))
