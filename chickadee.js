@@ -1,4 +1,4 @@
-window.onload = init;
+/* chickadee */
 
 var last_search;
 
@@ -25,11 +25,9 @@ function init() {
 	}
       }
     };
+
     sb.onblur = function() {
-      // Blur fires before onclick, so click does not reach hidden incsearch.
-      // Hack around it by delaying onblur a bit (rather than adding
-      // an onclick handle to the entire document).
-      window.setTimeout(hide_incsearch, 100);
+	hide_incsearch();
     };
 
     var repositionIncSearch = function() {
@@ -45,17 +43,35 @@ function init() {
     repositionIncSearch();
 
     if (is) {
-      is.onclick = function(e) {
+      is.onmousedown = function(e) {
+	sb.onbeforedeactivate = function() {
+	  // Unfortunate hack for IE6~8, which do not allow
+	  // us to cancel mousedown events.  This forcibly
+	  // cancels the imminent blur.
+	  sb.onbeforedeactivate = null;
+	  return false;
+	};
+	return false;   // Cancel mousedown; don't fire blur nor allow text selection
+      };
+      is.onmouseup = function(e) {
 	e = e || window.event;
 	var elt = e.target || e.srcElement;
 
+	// Bail out if we somehow did not wind up on a
+	// list item.  Ensure we take bold tag's parent.
+	// (NB: since iPad requires an onclick or mousedown
+	// event attached to recognize as clickable, we
+	// might as well attach a mousedown on each LI
+	// and get rid of this code.
+	if (elt.tagName == "B") { elt = elt.parentNode;	}
+	if (elt.tagName != "LI") { return true; }
+
 	sb.value = textContent(elt);
-	sb.focus();
 
 	// This will submit the clicked item immediately.
 	hide_incsearch();
 	b = $('query-name');
-	b.focus();
+	// b.focus(); //?
 	b.click();
       };
     }
@@ -176,3 +192,7 @@ function absolutePosition(elt) {
   }
   return [curleft,curtop];
 }
+
+/* main */
+
+window.onload = init;

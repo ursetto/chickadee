@@ -44,6 +44,7 @@
           method: 'get
           (<input> id: "searchbox" class: "text" type: "text" name: "q"
                    autocomplete: "off"  ;; apparently readonly in DOM
+                   autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
                    )
           (<input> class: "button" type: "submit" id: "query-name" name: "query-name" value: "Lookup")
           (<input> class: "button" type: "submit" id: "query-regex" name: "query-regex" value: "Regex")))
