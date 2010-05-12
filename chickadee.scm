@@ -290,25 +290,26 @@
 
 (define cdoc-page-path (make-parameter #f))
 (define cdoc-uri-path
-  (make-parameter #f (lambda (x)
-                       (cdoc-page-path
-                        (and x (uri-path->string x)))
-                       x)))
+  (make-parameter '(/ "cdoc")
+                  (lambda (x)
+                    (cdoc-page-path
+                     (and x (uri-path->string x)))
+                    x)))
 (define incremental-search-uri-path
-  (make-parameter #f))
+  (make-parameter '(/ "cdoc" "ajax" "prefix")))
 
 (define chickadee-page-path (make-parameter #f))
 (define chickadee-uri-path
-  (make-parameter #f
+  (make-parameter '(/ "chickadee")
                   (lambda (x)
                     (chickadee-page-path   ;auto update (mostly for debugging)
                      (and x (uri-path->string x)))
                     x)))
 
 (define chickadee-css-path
-  (make-parameter "chickadee.css"))
+  (make-parameter "/cdoc/chickadee.css"))
 (define chickadee-js-path
-  (make-parameter "chickadee.js"))
+  (make-parameter "/cdoc/chickadee.js"))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
