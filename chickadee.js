@@ -1,17 +1,16 @@
 /* chickadee */
 
-var last_search;
-
 function init() {
   var sb = $('searchbox');
   if (sb) {
     sb.focus();
-    last_search = sb.value;
     var is = $('incsearch');
 
     var hide_incsearch = function() {  // lambda lift
       is.style.visibility = "hidden";
     };
+
+    var last_search = sb.value;
     sb.onkeyup = function() {
       var str = sb.value;
       if (str != last_search) {
