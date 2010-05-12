@@ -4,11 +4,11 @@
 
 (module chickadee
  (chickadee-start-server
-  cdoc-uri-path
-  chickadee-uri-path
-  incremental-search-uri-path
-  chickadee-css-path
-  chickadee-js-path
+  cdoc-uri
+  chickadee-uri
+  incremental-search-uri
+  chickadee-css-files
+  chickadee-js-files
   maximum-match-results
   maximum-match-signatures
   incremental-search
@@ -267,8 +267,10 @@
        (<div> id: "body"
               (<div> id: "main"
                      body)))
-   headers: (<script> type: "text/javascript" src: (chickadee-js-path))
-   css: (chickadee-css-path)
+   headers: (string-concatenate         ;; Note: cacheable
+             (map (lambda (x) (<script> type: "text/javascript" src: x))
+                  (map uri->string (chickadee-js-files))))
+   css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
    doctype: xhtml-1.0-strict
    ;; no good way to get a nice title yet
@@ -288,28 +290,28 @@
                  (%node-page-body (htmlize title)  ; quoting critical
                                   "" body)))
 
-(define cdoc-page-path (make-parameter #f))
-(define cdoc-uri-path
-  (make-parameter '(/ "cdoc")
+(define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
+(define cdoc-uri
+  (make-parameter (uri-reference "/cdoc")
                   (lambda (x)
                     (cdoc-page-path
                      (and x (uri-path->string x)))
                     x)))
-(define incremental-search-uri-path
+(define incremental-search-uri
   (make-parameter '(/ "cdoc" "ajax" "prefix")))
 
-(define chickadee-page-path (make-parameter #f))
-(define chickadee-uri-path
+(define chickadee-page-path (make-parameter #f)) ; cached -- probably not necessary
+(define chickadee-uri
   (make-parameter '(/ "chickadee")
                   (lambda (x)
                     (chickadee-page-path   ;auto update (mostly for debugging)
                      (and x (uri-path->string x)))
                     x)))
 
-(define chickadee-css-path
-  (make-parameter "/cdoc/chickadee.css"))
-(define chickadee-js-path
-  (make-parameter "/cdoc/chickadee.js"))
+(define chickadee-css-files
+  (make-parameter (list (uri-reference "/cdoc/chickadee.css"))))
+(define chickadee-js-files
+  (make-parameter (list (uri-reference "/cdoc/chickadee.js"))))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
@@ -441,7 +443,7 @@
 (define (rewrite-chickadee-uri u p)
   (let ((q (uri-query u)))
     (update-uri u
-                path: (cdoc-uri-path)
+                path: (uri-path (cdoc-uri))
                 query: (if (null? p)
                            q
                            (update-param 'path
@@ -475,12 +477,12 @@
   `((".*" . ,(lambda (continue)
                (let ((p (uri-path (request-uri (current-request)))))
                  (parameterize ((http-request-variables (request-vars))) ; for $
-                   (cond ((equal? (cdoc-uri-path) p)
+                   (cond ((equal? (uri-path (cdoc-uri)) p)
                           => cdoc-handler)
-                         ((match-path (chickadee-uri-path) p)
+                         ((match-path (uri-path (chickadee-uri)) p)
                           => chickadee-handler)
-                         ((and (incremental-search-uri-path)
-                               (equal? (incremental-search-uri-path) p))
+                         ((and (incremental-search-uri)
+                               (equal? (uri-path (incremental-search-uri)) p))
                           => incremental-search-handler)
                          (else
                           (continue)))))))))

@@ -1,4 +1,5 @@
-(use chickadee spiffy posix)
+(use chickadee spiffy posix uri-common)
+(define uri uri-reference)
 
 (root-path "./root")
 (debug-log (current-error-port))
@@ -14,11 +15,11 @@
 (max-connections 4)
 
 (ajax-log "/tmp/ajax.log")
-(cdoc-uri-path '(/ "cdoc"))
-(chickadee-uri-path '(/ "chickadee"))
-(incremental-search-uri-path '(/ "cdoc" "ajax" "prefix"))
-(chickadee-css-path "/cdoc/chickadee.css")
-(chickadee-js-path "/cdoc/chickadee.js?1")
+(cdoc-uri (uri "/cdoc"))
+(chickadee-uri (uri "/chickadee"))
+(incremental-search-uri (uri "/cdoc/ajax/prefix"))
+(chickadee-css-files (list (uri "/cdoc/chickadee.css")))
+(chickadee-js-files (list (uri "/cdoc/chickadee.js")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
