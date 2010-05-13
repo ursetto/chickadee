@@ -2,10 +2,9 @@
 
 $(document).ready(function() {
   var sbq = $('#searchbox');
-  var sb = sbq.get(0);
 
-  if (sb) {
-    sb.focus();
+  if (sbq.length) {
+    sbq.focus();
     var isq = $('#incsearch');
     var is = isq.get(0);
 
@@ -13,9 +12,9 @@ $(document).ready(function() {
       isq.hide();
     };
 
-    var last_search = sb.value;
-    sb.onkeyup = function() {
-      var str = sb.value;
+    var last_search = sbq.val();
+    sbq.keyup(function() {
+      var str = sbq.val();
       if (str != last_search) {
 	last_search = str;
 	if (str == "") {
@@ -26,11 +25,9 @@ $(document).ready(function() {
 	  prefix.send(function() { return str; });
 	}
       }
-    };
+    });
 
-    sb.onblur = function() {
-	hide_incsearch();
-    };
+    sbq.blur(function() { hide_incsearch(); });
 
     var repositionIncSearch = function() {
       var pos = sbq.offset();
@@ -49,6 +46,7 @@ $(document).ready(function() {
     
     if (is) {
       // Can we unbind ourselves?
+      var sb = sbq.get(0);
       var deact = function() { sb.onbeforedeactivate = null; return false; };
       // Cancel mousedown; don't fire blur nor allow text selection.
       isq.mousedown(function(e) {
