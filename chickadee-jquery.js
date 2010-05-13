@@ -46,7 +46,6 @@ $(document).ready(function() {
      * visible. */
     $(window).resize(function(e) { repositionIncSearch(); });
     repositionIncSearch();
-
     
     if (is) {
       // Can we unbind ourselves?
@@ -158,9 +157,3 @@ function getHTTPObject() {
   return xhr;
 }
 
-/* Poor man's elt.textContent, only available in DOM Level 3.
- * Just strip out all tags. */
-function textContent(elt) {
-  return (elt.textContent ||
-	  elt.innerHTML.replace(/<[^>]+>/g, ""));  /* precompiled re */
-}
