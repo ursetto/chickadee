@@ -19,7 +19,8 @@
 (chickadee-uri (uri "/chickadee"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 (chickadee-css-files (list (uri "/cdoc/chickadee.css")))
-(chickadee-js-files (list (uri "/cdoc/chickadee.js")))
+(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
+                          (uri "/cdoc/chickadee-jquery.js")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
