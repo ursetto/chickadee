@@ -271,7 +271,7 @@ div#incsearch {
   /* Absolute position must be written on window resize (specifically,
      when input elt changes position or size */
   left: 18px; top: 110px;
-  visibility: hidden;
+  display: none;
   background-color: #ffffff;
   cursor: default;
 }

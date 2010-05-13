@@ -7,7 +7,7 @@ $(document).ready(function() {
     var is = $('#incsearch').get(0);
 
     var hide_incsearch = function() {  // lambda lift
-      is.style.visibility = "hidden";
+      $('#incsearch').hide();
     };
 
     var last_search = sb.value;
@@ -69,9 +69,7 @@ $(document).ready(function() {
 
 	// This will submit the clicked item immediately.
 	hide_incsearch();
-	b = $('#query-name').get(0);
-	// b.focus(); //?
-	b.click();
+	$('#query-name').click();
       };
     }
   }
@@ -108,9 +106,9 @@ var prefix = {
       xhr.onreadystatechange = function() {
 	if (xhr.readyState == 4) {
 	  if (xhr.status == 200) {
-	    var is = $('#incsearch').get(0);
-	    is.innerHTML = xhr.responseText;
-	    is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
+            var is = $('#incsearch');
+            is.html(xhr.responseText);
+            xhr.responseText == "" ? is.hide() : is.show();
 	    self.xhr = null;
 
 	    /* If send was enqueued during XHR, reschedule it. */
