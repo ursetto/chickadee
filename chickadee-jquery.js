@@ -41,35 +41,25 @@ $(document).ready(function() {
 
     /* It's possible to delay repositioning incsearch until it becomes
      * visible. */
-    window.onresize = repositionIncSearch;
+    $(window).resize(function(e) { repositionIncSearch(); });
     repositionIncSearch();
 
     if (is) {
-      is.onmousedown = function(e) {
-	sb.onbeforedeactivate = function() {
-	  // Unfortunate hack for IE6~8, which do not allow
-	  // us to cancel mousedown events.  This forcibly
-	  // cancels the imminent blur.
-	  sb.onbeforedeactivate = null;
-	  return false;
-	};
-	return false;   // Cancel mousedown; don't fire blur nor allow text selection
-      };
-      isq.mouseup(function(e) {
-        var elt = e.target;
-        var t = $(elt);
-
-	// Bail out if we somehow did not wind up on a
-	// list item.  Ensure we take bold tag's parent.
-	// (NB: since iPad requires an onclick or mousedown
-	// event attached to recognize as clickable, we
-	// might as well attach a mousedown on each LI
-	// and get rid of this code.
-	if (elt.tagName == "B") { elt = elt.parentNode;	}
-	if (elt.tagName != "LI") { return true; }
-
+      // Can we unbind ourselves?
+      var deact = function() { sb.onbeforedeactivate = null; return false; };
+      // Cancel mousedown; don't fire blur nor allow text selection.
+      isq.mousedown(function(e) {
+        // Unfortunate hack for IE6~8, which do not allow
+	// us to cancel mousedown events.  This forcibly
+	// cancels the imminent blur (but allows text select).
+	sb.onbeforedeactivate = deact;
+	return false;
+      });
+      isq.delegate("li", "mouseup", function(e) {
+	// (NB: iPad requires onclick/mousedown event individually
+        // attached to recognize as clickable!
+        var t = $(this);
 	sbq.val(t.text());
-	// Submit the clicked item immediately.
 	hide_incsearch();  // ?
 	$('#query-name').click();
       });
