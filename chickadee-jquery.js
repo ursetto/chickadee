@@ -6,20 +6,19 @@
 */
 
 $(document).ready(function() {
-  var sbq = $('#searchbox');
+  var sb = $('#searchbox');
 
-  if (sbq.length) {
-    sbq.focus();
-    var isq = $('#incsearch');
-    var is = isq.get(0);
+  if (sb.length) {
+    sb.focus();
+    var is = $('#incsearch');
 
     var hide_incsearch = function() {  // lambda lift
-      isq.hide();
+      is.hide();
     };
 
-    var last_search = sbq.val();
-    sbq.keyup(function() {
-      var str = sbq.val();
+    var last_search = sb.val();
+    sb.keyup(function() {
+      var str = sb.val();
       if (str != last_search) {
 	last_search = str;
 	if (str == "") {
@@ -32,16 +31,16 @@ $(document).ready(function() {
       }
     });
 
-    sbq.blur(function() { hide_incsearch(); });
+    sb.blur(function() { hide_incsearch(); });
 
     var repositionIncSearch = function() {
-      var pos = sbq.offset();
+      var pos = sb.offset();
       // Using .offset(pos) causes jumpiness on FF and
       // wrong position on Safari.
-      isq.css({left: pos.left + 2,
-               top:  pos.top + sbq.outerHeight() + 3,
-               width: sbq.innerWidth() - 4
-              });
+      is.css({left: pos.left + 2,
+              top:  pos.top + sb.outerHeight() + 3,
+              width: sb.innerWidth() - 4
+             });
     };
 
     /* It's possible to delay repositioning incsearch until it becomes
@@ -49,23 +48,22 @@ $(document).ready(function() {
     $(window).resize(function(e) { repositionIncSearch(); });
     repositionIncSearch();
     
-    if (is) {
-      // Can we unbind ourselves?
-      var sb = sbq.get(0);
-      var deact = function() { sb.onbeforedeactivate = null; return false; };
+    if (is.length) {
+      var sbelt = sb.get(0);
+      var deact = function() { sbelt.onbeforedeactivate = null; return false; };  //oneshot
       // Cancel mousedown; don't fire blur nor allow text selection.
-      isq.mousedown(function(e) {
+      is.mousedown(function(e) {
         // Unfortunate hack for IE6~8, which do not allow
 	// us to cancel mousedown events.  This forcibly
 	// cancels the imminent blur (but allows text select).
-	sb.onbeforedeactivate = deact;
+	sbelt.onbeforedeactivate = deact;
 	return false;
       });
-      isq.delegate("li", "mouseup", function(e) {
+      is.delegate("li", "mouseup", function(e) {
 	// (NB: iPad requires onclick/mousedown event individually
         // attached to recognize as clickable!
         var t = $(this);
-	sbq.val(t.text());
+	sb.val(t.text());
 	hide_incsearch();  // ?
 	$('#query-name').click();
       });
