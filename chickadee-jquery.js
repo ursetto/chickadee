@@ -1,13 +1,16 @@
 /* chickadee */
 
 $(document).ready(function() {
-  var sb = $('#searchbox').get(0);
+  var sbq = $('#searchbox');
+  var sb = sbq.get(0);
+
   if (sb) {
     sb.focus();
-    var is = $('#incsearch').get(0);
+    var isq = $('#incsearch');
+    var is = isq.get(0);
 
     var hide_incsearch = function() {  // lambda lift
-      $('#incsearch').hide();
+      isq.hide();
     };
 
     var last_search = sb.value;
@@ -52,9 +55,9 @@ $(document).ready(function() {
 	};
 	return false;   // Cancel mousedown; don't fire blur nor allow text selection
       };
-      is.onmouseup = function(e) {
-	e = e || window.event;
-	var elt = e.target || e.srcElement;
+      isq.mouseup(function(e) {
+        var elt = e.target;
+        var t = $(elt);
 
 	// Bail out if we somehow did not wind up on a
 	// list item.  Ensure we take bold tag's parent.
@@ -65,12 +68,11 @@ $(document).ready(function() {
 	if (elt.tagName == "B") { elt = elt.parentNode;	}
 	if (elt.tagName != "LI") { return true; }
 
-	sb.value = textContent(elt);
-
-	// This will submit the clicked item immediately.
-	hide_incsearch();
+	sbq.val(t.text());
+	// Submit the clicked item immediately.
+	hide_incsearch();  // ?
 	$('#query-name').click();
-      };
+      });
     }
   }
 });
