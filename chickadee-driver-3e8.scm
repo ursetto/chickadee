@@ -1,4 +1,4 @@
-(use chickadee spiffy)
+(use chickadee spiffy uri-common)
 
 (root-path "./root")
 (debug-log (current-error-port))
@@ -8,11 +8,12 @@
 (max-connections 8)
 
 (ajax-log #f)   ;; Slow; not recommended for production.
-(cdoc-uri-path '(/ "cdoc"))
-(chickadee-uri-path '(/ "chickadee"))
-(incremental-search-uri-path '(/ "cdoc" "ajax" "prefix"))
-(chickadee-css-path "/cdoc/chickadee.css")
-(chickadee-js-path "/cdoc/chickadee.js?1")
+(define uri uri-reference)
+(cdoc-uri (uri "/cdoc"))
+(chickadee-uri (uri "/chickadee"))
+(incremental-search-uri (uri "/cdoc/ajax/prefix"))
+(chickadee-css-files (list (uri "/cdoc/chickadee.css")))
+(chickadee-js-files (list (uri "/cdoc/chickadee.js?1")))
 
 (cache-static-content-for 1800)
 (cache-nodes-for 600)

@@ -4,11 +4,11 @@
 
 (module chickadee
  (chickadee-start-server
-  cdoc-uri-path
-  chickadee-uri-path
-  incremental-search-uri-path
-  chickadee-css-path
-  chickadee-js-path
+  cdoc-uri
+  chickadee-uri
+  incremental-search-uri
+  chickadee-css-files
+  chickadee-js-files
   maximum-match-results
   maximum-match-signatures
   incremental-search
@@ -267,8 +267,10 @@
        (<div> id: "body"
               (<div> id: "main"
                      body)))
-   headers: (<script> type: "text/javascript" src: (chickadee-js-path))
-   css: (chickadee-css-path)
+   headers: (string-concatenate         ;; Note: cacheable
+             (map (lambda (x) (<script> type: "text/javascript" src: x))
+                  (map uri->string (chickadee-js-files))))
+   css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
    doctype: xhtml-1.0-strict
    ;; no good way to get a nice title yet
@@ -288,27 +290,28 @@
                  (%node-page-body (htmlize title)  ; quoting critical
                                   "" body)))
 
-(define cdoc-page-path (make-parameter #f))
-(define cdoc-uri-path
-  (make-parameter #f (lambda (x)
-                       (cdoc-page-path
-                        (and x (uri-path->string x)))
-                       x)))
-(define incremental-search-uri-path
-  (make-parameter #f))
+(define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
+(define cdoc-uri
+  (make-parameter (uri-reference "/cdoc")
+                  (lambda (x)
+                    (cdoc-page-path
+                     (and x (uri->string x)))
+                    x)))
+(define incremental-search-uri
+  (make-parameter (uri-reference "/cdoc/ajax/prefix")))
 
-(define chickadee-page-path (make-parameter #f))
-(define chickadee-uri-path
-  (make-parameter #f
+(define chickadee-page-path (make-parameter #f)) ; cached -- probably not necessary
+(define chickadee-uri
+  (make-parameter (uri-reference "/chickadee")
                   (lambda (x)
                     (chickadee-page-path   ;auto update (mostly for debugging)
-                     (and x (uri-path->string x)))
+                     (and x (uri->string x)))
                     x)))
 
-(define chickadee-css-path
-  (make-parameter "chickadee.css"))
-(define chickadee-js-path
-  (make-parameter "chickadee.js"))
+(define chickadee-css-files
+  (make-parameter (list (uri-reference "/cdoc/chickadee.css"))))
+(define chickadee-js-files
+  (make-parameter (list (uri-reference "/cdoc/chickadee.js"))))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
@@ -395,17 +398,33 @@
                       thunk)
         (not-modified mtime))))
 
+;; SECONDS: number of seconds to cache for; or #t to set a far-future
+;; expiration date (1 year as per RFC); or #f to force no caching.
 (define (cache-for seconds thunk)
-  (with-headers `((cache-control (max-age . ,seconds))) thunk))
+  (if (not seconds)
+      (with-headers `((cache-control (max-age . 0)   ; use "no-cache" ?
+                                     (must-revalidate . #t))) thunk)
+      (let ((seconds (if (integer? seconds)
+                         (min seconds 31536000)
+                         31536000)))
+        (with-headers `((cache-control (max-age . ,seconds))) thunk))))
 (define (cache-privately-for seconds thunk)
-  (with-headers `((x-accel-expires 0)  ; nginx hack
-                  (cache-control (private . #t)
-                                 (max-age . ,seconds)))
-                thunk))
+  (if (not seconds)
+      (with-headers `((x-accel-expires 0)  ; nginx hack
+                      (cache-control (max-age . 0)
+                                     (must-revalidate . #t)
+                                     (private . #t))))
+      (let ((seconds (if (integer? seconds)
+                         (min seconds 31536000)
+                         31536000)))
+        (with-headers `((x-accel-expires 0) ; nginx hack
+                        (cache-control (private . #t)
+                                       (max-age . ,seconds)))
+                      thunk))))
 
-(define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
-  (uri->string (update-uri (uri-reference "")
-                           path: p)))
+;; (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
+;;   (uri->string (update-uri (uri-reference "")
+;;                            path: p)))
 
 (define (proxy-logger)
   ;; access logger with X-Forwarded-For: header
@@ -440,7 +459,7 @@
 (define (rewrite-chickadee-uri u p)
   (let ((q (uri-query u)))
     (update-uri u
-                path: (cdoc-uri-path)
+                path: (uri-path (cdoc-uri))
                 query: (if (null? p)
                            q
                            (update-param 'path
@@ -474,12 +493,12 @@
   `((".*" . ,(lambda (continue)
                (let ((p (uri-path (request-uri (current-request)))))
                  (parameterize ((http-request-variables (request-vars))) ; for $
-                   (cond ((equal? (cdoc-uri-path) p)
+                   (cond ((equal? (uri-path (cdoc-uri)) p)
                           => cdoc-handler)
-                         ((match-path (chickadee-uri-path) p)
+                         ((match-path (uri-path (chickadee-uri)) p)
                           => chickadee-handler)
-                         ((and (incremental-search-uri-path)
-                               (equal? (incremental-search-uri-path) p))
+                         ((and (incremental-search-uri)
+                               (equal? (uri-path (incremental-search-uri)) p))
                           => incremental-search-handler)
                          (else
                           (continue)))))))))
@@ -505,7 +524,10 @@
                  (handle-not-found +not-found-handler+)
                  (handle-file +static-file-handler+)
                  (handle-access-logging proxy-logger)
-                 (tcp-buffer-size 1024))
+                 (tcp-buffer-size 1024)
+                 (mime-type-map
+                  `(("js" . application/x-javascript)  ;; spiffy has subpar mime-type
+                    . ,(mime-type-map))))
     (start-server))))
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
