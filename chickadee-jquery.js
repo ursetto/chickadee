@@ -1,5 +1,10 @@
 /* chickadee */
 
+/* thoughts for the future:
+   $('h2').toggle(function() { $('dt.defsig').next('dd').hide(); }
+                  function() { $('dt.defsig').next('dd').show(); });
+*/
+
 $(document).ready(function() {
   var sbq = $('#searchbox');
 
