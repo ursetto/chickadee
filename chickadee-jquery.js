@@ -1,10 +1,10 @@
 /* chickadee */
 
-function init() {
-  var sb = $('searchbox');
+$(document).ready(function() {
+  var sb = $('#searchbox').get(0);
   if (sb) {
     sb.focus();
-    var is = $('incsearch');
+    var is = $('#incsearch').get(0);
 
     var hide_incsearch = function() {  // lambda lift
       is.style.visibility = "hidden";
@@ -69,13 +69,13 @@ function init() {
 
 	// This will submit the clicked item immediately.
 	hide_incsearch();
-	b = $('query-name');
+	b = $('#query-name').get(0);
 	// b.focus(); //?
 	b.click();
       };
     }
   }
-}
+});
 
 var prefix = {
   xhr: null,
@@ -108,7 +108,7 @@ var prefix = {
       xhr.onreadystatechange = function() {
 	if (xhr.readyState == 4) {
 	  if (xhr.status == 200) {
-	    var is = $('incsearch');
+	    var is = $('#incsearch').get(0);
 	    is.innerHTML = xhr.responseText;
 	    is.style.visibility = (is.innerHTML == "") ? "hidden" : "visible";
 	    self.xhr = null;
@@ -140,6 +140,8 @@ var prefix = {
 };
 
 
+/* generic utilities */
+
 function getHTTPObject() {
   var xhr = false;
   if (window.ActiveXObject) {
@@ -162,16 +164,6 @@ function getHTTPObject() {
   return xhr;
 }
 
-/* generic utilities */
-
-function $(id) {
-    if (typeof id == 'string') {
-	var get = document.getElementById;
-	return get ? document.getElementById(id) : null;
-    }
-    return id;
-}
-
 /* Poor man's elt.textContent, only available in DOM Level 3.
  * Just strip out all tags. */
 function textContent(elt) {
@@ -192,6 +184,3 @@ function absolutePosition(elt) {
   return [curleft,curtop];
 }
 
-/* main */
-
-window.onload = init;
