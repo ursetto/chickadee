@@ -398,13 +398,29 @@
                       thunk)
         (not-modified mtime))))
 
+;; SECONDS: number of seconds to cache for; or #t to set a far-future
+;; expiration date (1 year as per RFC); or #f to force no caching.
 (define (cache-for seconds thunk)
-  (with-headers `((cache-control (max-age . ,seconds))) thunk))
+  (if (not seconds)
+      (with-headers `((cache-control (max-age . 0)   ; use "no-cache" ?
+                                     (must-revalidate . #t))) thunk)
+      (let ((seconds (if (integer? seconds)
+                         (min seconds 31536000)
+                         31536000)))
+        (with-headers `((cache-control (max-age . ,seconds))) thunk))))
 (define (cache-privately-for seconds thunk)
-  (with-headers `((x-accel-expires 0)  ; nginx hack
-                  (cache-control (private . #t)
-                                 (max-age . ,seconds)))
-                thunk))
+  (if (not seconds)
+      (with-headers `((x-accel-expires 0)  ; nginx hack
+                      (cache-control (max-age . 0)
+                                     (must-revalidate . #t)
+                                     (private . #t))))
+      (let ((seconds (if (integer? seconds)
+                         (min seconds 31536000)
+                         31536000)))
+        (with-headers `((x-accel-expires 0) ; nginx hack
+                        (cache-control (private . #t)
+                                       (max-age . ,seconds)))
+                      thunk))))
 
 (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
   (uri->string (update-uri (uri-reference "")
@@ -508,7 +524,10 @@
                  (handle-not-found +not-found-handler+)
                  (handle-file +static-file-handler+)
                  (handle-access-logging proxy-logger)
-                 (tcp-buffer-size 1024))
+                 (tcp-buffer-size 1024)
+                 (mime-type-map
+                  `(("js" . application/x-javascript)  ;; spiffy has subpar mime-type
+                    . ,(mime-type-map))))
     (start-server))))
 
 ;; time echo "GET /cdoc?q=p&query-regex=Regex HTTP/1.0" | nc localhost 8080 >/dev/null
