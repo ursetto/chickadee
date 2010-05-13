@@ -33,10 +33,13 @@ $(document).ready(function() {
     };
 
     var repositionIncSearch = function() {
-      var pos = absolutePosition(sb);
-      is.style.left = pos[0] + 2 + 'px';
-      is.style.top = pos[1] + sb.offsetHeight + 3 + 'px';
-      is.style.width = sb.clientWidth - 4 + 'px';
+      var pos = sbq.offset();
+      // Using .offset(pos) causes jumpiness on FF and
+      // wrong position on Safari.
+      isq.css({left: pos.left + 2,
+               top:  pos.top + sbq.outerHeight() + 3,
+               width: sbq.innerWidth() - 4
+              });
     };
 
     /* It's possible to delay repositioning incsearch until it becomes
@@ -44,6 +47,7 @@ $(document).ready(function() {
     $(window).resize(function(e) { repositionIncSearch(); });
     repositionIncSearch();
 
+    
     if (is) {
       // Can we unbind ourselves?
       var deact = function() { sb.onbeforedeactivate = null; return false; };
@@ -160,17 +164,3 @@ function textContent(elt) {
   return (elt.textContent ||
 	  elt.innerHTML.replace(/<[^>]+>/g, ""));  /* precompiled re */
 }
-
-function absolutePosition(elt) {
-  var curleft = 0;
-  var curtop = 0;
-  if (elt.offsetParent) {
-      do {
-	curleft += elt.offsetLeft;
-	curtop += elt.offsetTop;
-	elt = elt.offsetParent;
-      } while (elt);
-  }
-  return [curleft,curtop];
-}
-
