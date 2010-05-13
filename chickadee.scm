@@ -295,17 +295,17 @@
   (make-parameter (uri-reference "/cdoc")
                   (lambda (x)
                     (cdoc-page-path
-                     (and x (uri-path->string x)))
+                     (and x (uri->string x)))
                     x)))
 (define incremental-search-uri
-  (make-parameter '(/ "cdoc" "ajax" "prefix")))
+  (make-parameter (uri-reference "/cdoc/ajax/prefix")))
 
 (define chickadee-page-path (make-parameter #f)) ; cached -- probably not necessary
 (define chickadee-uri
-  (make-parameter '(/ "chickadee")
+  (make-parameter (uri-reference "/chickadee")
                   (lambda (x)
                     (chickadee-page-path   ;auto update (mostly for debugging)
-                     (and x (uri-path->string x)))
+                     (and x (uri->string x)))
                     x)))
 
 (define chickadee-css-files
@@ -422,9 +422,9 @@
                                        (max-age . ,seconds)))
                       thunk))))
 
-(define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
-  (uri->string (update-uri (uri-reference "")
-                           path: p)))
+;; (define (uri-path->string p)   ; (/ "foo" "bar") -> "/foo/bar"
+;;   (uri->string (update-uri (uri-reference "")
+;;                            path: p)))
 
 (define (proxy-logger)
   ;; access logger with X-Forwarded-For: header
