@@ -57,8 +57,8 @@ $(document).ready(function() {
       return false;
     });
     is.delegate("li", "mouseup", function(e) {
-      // (NB: iPad requires onclick/mousedown event individually
-      // attached to recognize as clickable!
+      // (NB: iPad requires onclick/mousedown event on each LI.
+      // We did this below; so this delegation may be pointless.
       var t = $(this);
       sb.val(t.text());
       hide_incsearch();  // ?
@@ -115,6 +115,9 @@ var prefix = {
         success: function(data, status, xhr) {
           var is = $(self.incsearch);
           is.html(data);
+          // Hack for iPad -- clickable elements must have at least a
+          // no-op click event attached.  Should move this to callback
+          $("li", is).click($.noop);
           data == "" ? is.hide() : is.show();
 	  /* If send was enqueued during XHR, reschedule it. */
 	  var ecb = self.enqueued_cb;
