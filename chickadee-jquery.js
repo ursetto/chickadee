@@ -68,14 +68,15 @@ $(document).ready(function() {
   }
 });
 
-var alarm = {
-  cancel: function() {
+/* Alarm */
+function Alarm() {}
+Alarm.prototype.cancel = function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
       delete this.timeoutID;
     }
-  },
-  schedule: function(callback, delay) {
+};
+Alarm.prototype.schedule = function(callback, delay) {
     var self = this;
     this.cancel();
     this.timeoutID = window.setTimeout(
@@ -83,7 +84,6 @@ var alarm = {
 	delete self.timeoutID;
 	callback();
       }, delay);
-  }  
 };
 
 var prefix = {
@@ -92,6 +92,7 @@ var prefix = {
   delay: 50,                   // should be configurable
   incsearch: '#incsearch',
   timeout: 1500,
+  alarm: new Alarm(),
 
   send: function(cb) {
     /* Only one outstanding prefix request is allowed at a time.
@@ -128,8 +129,8 @@ var prefix = {
 	  var ecb = self.enqueued_cb;
 	  delete self.enqueued_cb;
 	  if (ecb) {
-	    alarm.schedule(function() { self.send(ecb); },
-                           self.delay);
+	    self.alarm.schedule(function() { self.send(ecb); },
+                                self.delay);
 	  }
           self.sending = false;
         },
@@ -138,10 +139,10 @@ var prefix = {
     };
 
     if (this.delay == 0) {
-      alarm.cancel();
+      this.alarm.cancel();
       ajax();
     } else {
-      alarm.schedule(ajax, this.delay);
+      this.alarm.schedule(ajax, this.delay);
     }
   }
 };
