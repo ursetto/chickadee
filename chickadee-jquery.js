@@ -104,9 +104,9 @@ var prefix = {
       self.enqueued_cb = cb;
       return;
     }
-    self.sending = true;
 
     var ajax = function() {
+      self.sending = true;
       $.ajax({
         url: self.uri,
         timeout: self.timeout,   // FIXME: Don't want to set if undefined
