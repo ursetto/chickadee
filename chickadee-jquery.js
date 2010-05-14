@@ -76,6 +76,7 @@ var prefix = {
   uri: "/cdoc/ajax/prefix",    // should be configurable
   delay: 50,                   // should be configurable
   incsearch: '#incsearch',
+  timeout: 1500,
   cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
@@ -103,7 +104,7 @@ var prefix = {
     if (self.sending) {
       /* Sending flag is not cleared on error,
          so further requests will take place.  But due to jQuery
-         (browser?) bug, no error occurs on network failure. */
+         bug (?) in 1.4.2, no error occurs on network failure. */
       self.enqueued_cb = cb;
       return;
     }
@@ -112,7 +113,7 @@ var prefix = {
     var ajax = function() {
       $.ajax({
         url: self.uri,
-        timeout: 1500,
+        timeout: self.timeout,   // FIXME: Don't want to set if undefined
         type: 'GET',
         data: { q: cb() },
         success: function(data, status, xhr) {
@@ -141,29 +142,3 @@ var prefix = {
     }
   }
 };
-
-
-/* generic utilities */
-
-function getHTTPObject() {
-  var xhr = false;
-  if (window.ActiveXObject) {
-    try {
-      xhr = new ActiveXObject("Msxml2.XMLHTTP");
-    } catch(e) {
-      try {
-        xhr = new ActiveXObject("Microsoft.XMLHTTP");
-      } catch(e) {
-        xhr = false;
-      }
-    }
-  } else if (window.XMLHttpRequest) {
-    try {
-      xhr = new XMLHttpRequest();
-    } catch(e) {
-      xhr = false;
-    }
-  }
-  return xhr;
-}
-
