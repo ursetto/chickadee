@@ -72,64 +72,73 @@ $(document).ready(function() {
 });
 
 var prefix = {
-  xhr: null,
+  sending: false,
   uri: "/cdoc/ajax/prefix",    // should be configurable
   delay: 50,                   // should be configurable
+  incsearch: '#incsearch',
   cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
       delete this.timeoutID;
     }
   },
-  schedule: function(cb) {
+  schedule: function(cb, delay) {
     var self = this;
     this.cancel();
     this.timeoutID = window.setTimeout(
       function() {
 	delete self.timeoutID;
 	cb();
-      }, this.delay);
+      }, delay);
   },
   send: function(cb) {
+    /* Only one outstanding prefix request is allowed at a time.
+       Incoming requests are sent after DELAY ms; if another request
+       comes in before that, the countdown is reset.  If a request
+       comes in during the send, it is queued for retransmission
+       for DELAY ms after the send completes successfully
+       (any existing queued request is cancelled).
+    */
     var self = this;
-    if (this.xhr) {
+    if (self.sending) {
+      /* Sending flag is not cleared on error,
+         so further requests will take place.  But due to jQuery
+         (browser?) bug, no error occurs on network failure. */
       self.enqueued_cb = cb;
-      return this.xhr;
+      return;
     }
-    var xhr = getHTTPObject();
-    this.xhr = xhr;
-    if (xhr) {
-      xhr.onreadystatechange = function() {
-	if (xhr.readyState == 4) {
-	  if (xhr.status == 200) {
-            var is = $('#incsearch');
-            is.html(xhr.responseText);
-            xhr.responseText == "" ? is.hide() : is.show();
-	    self.xhr = null;
+    self.sending = true;
 
-	    /* If send was enqueued during XHR, reschedule it. */
-	    var ecb = self.enqueued_cb;
-	    delete self.enqueued_cb;
-	    if (ecb) {
-	      self.schedule(function() { self.send(ecb); });
-	    }
+    var ajax = function() {
+      $.ajax({
+        url: self.uri,
+        timeout: 1500,
+        type: 'GET',
+        data: { q: cb() },
+        success: function(data, status, xhr) {
+          alert('st:' + status);
+          var is = $(self.incsearch);
+          is.html(data);
+          data == "" ? is.hide() : is.show();
+	  /* If send was enqueued during XHR, reschedule it. */
+	  var ecb = self.enqueued_cb;
+	  delete self.enqueued_cb;
+	  if (ecb) {
+	    self.schedule(function() { self.send(ecb); },
+                          self.delay);
 	  }
-	  // Note that, if XHR does not return successfully, the xhr
-	  // object is never deleted and future callbacks will just
-	  // be enqueued instead of sent.
-	}
-      };
-//    this.cancel();  // We need to cancel any outstanding timeout (e.g.
-                      // from an enqueued callback), whether implicitly
-		      // via another schedule() call, or explicitly via cancel().
-      this.schedule(
-        function() {
-          var pfx = cb();
-	  xhr.open("GET", self.uri + "?q=" + encodeURIComponent(pfx), true);
-	  xhr.send();
+          self.sending = false;
+        },
+        error: function() { $(self.incsearch).hide(); }
       });
+    };
+
+    if (this.delay == 0) {
+      this.cancel();
+      ajax();
+    } else {
+      this.schedule(ajax, this.delay);
     }
-    return xhr;
   }
 };
 
