@@ -50,9 +50,8 @@ $(document).ready(function() {
     
     // Cancel mousedown; don't fire blur nor allow text selection.
     is.mousedown(function(e) {
-      // Unfortunate hack for IE6~8, which do not allow
-      // us to cancel mousedown events.  This forcibly
-      // cancels the imminent blur from the text input.
+      // IE6~8 don't allow us to cancel mousedown.  Use IE specific
+      // event to cancel the imminent blur instead.
       $(sb).one('beforedeactivate', function() { return false; });
       return false;
     });
@@ -67,27 +66,31 @@ $(document).ready(function() {
   }
 });
 
-var prefix = {
-  sending: false,
-  uri: "/cdoc/ajax/prefix",    // should be configurable
-  delay: 50,                   // should be configurable
-  incsearch: '#incsearch',
-  timeout: 1500,
+var alarm = {
   cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
       delete this.timeoutID;
     }
   },
-  schedule: function(cb, delay) {
+  schedule: function(callback, delay) {
     var self = this;
     this.cancel();
     this.timeoutID = window.setTimeout(
       function() {
 	delete self.timeoutID;
-	cb();
+	callback();
       }, delay);
-  },
+  }  
+};
+
+var prefix = {
+  sending: false,
+  uri: "/cdoc/ajax/prefix",    // should be configurable
+  delay: 50,                   // should be configurable
+  incsearch: '#incsearch',
+  timeout: 1500,
+
   send: function(cb) {
     /* Only one outstanding prefix request is allowed at a time.
        Incoming requests are sent after DELAY ms; if another request
@@ -123,8 +126,8 @@ var prefix = {
 	  var ecb = self.enqueued_cb;
 	  delete self.enqueued_cb;
 	  if (ecb) {
-	    self.schedule(function() { self.send(ecb); },
-                          self.delay);
+	    alarm.schedule(function() { self.send(ecb); },
+                           self.delay);
 	  }
           self.sending = false;
         },
@@ -133,10 +136,10 @@ var prefix = {
     };
 
     if (this.delay == 0) {
-      this.cancel();
+      alarm.cancel();
       ajax();
     } else {
-      this.schedule(ajax, this.delay);
+      alarm.schedule(ajax, this.delay);
     }
   }
 };
