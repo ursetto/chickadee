@@ -48,26 +48,22 @@ $(document).ready(function() {
     $(window).resize(function(e) { repositionIncSearch(); });
     repositionIncSearch();
     
-    if (is.length) {
-      var sbelt = sb.get(0);
-      var deact = function() { sbelt.onbeforedeactivate = null; return false; };  //oneshot
-      // Cancel mousedown; don't fire blur nor allow text selection.
-      is.mousedown(function(e) {
-        // Unfortunate hack for IE6~8, which do not allow
-	// us to cancel mousedown events.  This forcibly
-	// cancels the imminent blur (but allows text select).
-	sbelt.onbeforedeactivate = deact;
-	return false;
-      });
-      is.delegate("li", "mouseup", function(e) {
-	// (NB: iPad requires onclick/mousedown event individually
-        // attached to recognize as clickable!
-        var t = $(this);
-	sb.val(t.text());
-	hide_incsearch();  // ?
-	$('#query-name').click();
-      });
-    }
+    // Cancel mousedown; don't fire blur nor allow text selection.
+    is.mousedown(function(e) {
+      // Unfortunate hack for IE6~8, which do not allow
+      // us to cancel mousedown events.  This forcibly
+      // cancels the imminent blur from the text input.
+      $(sb).one('beforedeactivate', function() { return false; });
+      return false;
+    });
+    is.delegate("li", "mouseup", function(e) {
+      // (NB: iPad requires onclick/mousedown event individually
+      // attached to recognize as clickable!
+      var t = $(this);
+      sb.val(t.text());
+      hide_incsearch();  // ?
+      $('#query-name').click();
+    });
   }
 });
 
@@ -117,7 +113,6 @@ var prefix = {
         type: 'GET',
         data: { q: cb() },
         success: function(data, status, xhr) {
-          alert('st:' + status);
           var is = $(self.incsearch);
           is.html(data);
           data == "" ? is.hide() : is.show();
