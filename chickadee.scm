@@ -23,8 +23,7 @@
 (import scheme chicken)
 (import tcp data-structures srfi-1)
 (use spiffy-request-vars html-tags html-utils chicken-doc)
-(use (except spiffy server-root-uri))
-(import (prefix (only spiffy server-root-uri) spiffy:))
+(use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
 (use uri-common)
@@ -445,14 +444,6 @@
               (if product
                   (product-unparser product)   ; undocumented intarweb proc
                   "**Unknown product**")))))
-
-;; Enhanced server-root-uri which honors any Host: port.
-(define (server-root-uri)
-  (let ((u (spiffy:server-root-uri)))
-    (let ((h (header-value 'host (request-headers (current-request)))))
-      (if h
-          (update-uri u port: (cdr h))
-          u))))
 
 ;;;
 
