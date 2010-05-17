@@ -12,7 +12,7 @@ $(document).ready(function() {
 
   if (sb.length) {
     sb.focus();
-    var is = $('#incsearch');
+    var is = $('<div/>', { id: 'incsearch' }).appendTo('body');
 
     var hide_incsearch = function() {  // lambda lift
       is.hide();
