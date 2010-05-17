@@ -7,66 +7,81 @@
                   function() { $('dt.defsig').next('dd').show(); });
 */
 
-$(document).ready(function() {
-  var sb = $('#searchbox');
-
-  if (sb.length) {
-    sb.focus();
-    var is = $('<div/>', { id: 'incsearch' }).appendTo('body');
-
-    var hide_incsearch = function() {  // lambda lift
-      is.hide();
-    };
-
-    var last_search = sb.val();
-    sb.keyup(function() {
-      var str = sb.val();
-      if (str != last_search) {
-	last_search = str;
-	if (str == "") {
-	  hide_incsearch();
-	} else {
-	  // send does not currently require you to determine
-	  // the value of the prefix at callback time.
-	  prefix.send(function() { return str; });
-	}
-      }
-    });
-
-    sb.blur(function() { hide_incsearch(); });
-
-    var repositionIncSearch = function() {
-      var pos = sb.offset();
-      // Using .offset(pos) causes jumpiness on FF and
-      // wrong position on Safari.
-      is.css({left: pos.left + 2,
-              top:  pos.top + sb.outerHeight() + 3,
-              width: sb.innerWidth() - 4
-             });
-    };
-
-    /* It's possible to delay repositioning incsearch until it becomes
-     * visible. */
-    $(window).resize(function(e) { repositionIncSearch(); });
-    repositionIncSearch();
-    
-    // Cancel mousedown; don't fire blur nor allow text selection.
-    is.mousedown(function(e) {
-      // IE6~8 don't allow us to cancel mousedown.  Use IE specific
-      // event to cancel the imminent blur instead.
-      $(sb).one('beforedeactivate', function() { return false; });
-      return false;
-    });
-    is.delegate("li", "mouseup", function(e) {
-      // (NB: iPad requires onclick/mousedown event on each LI.
-      // We did this below; so this delegation may be pointless.
-      var t = $(this);
-      sb.val(t.text());
-      hide_incsearch();  // ?
-      $('#query-name').click();
-    });
-  }
+jQuery(document).ready(function($) {
+  $('#searchbox').incsearch().focus();
 });
+
+/* incsearch plugin */
+/* FIXME: submit action/id hardcoded; position hardcoded; */
+(function($) {
+  $.fn.incsearch = function(options) {
+    var opts = $.extend({}, $.fn.incsearch.defaults, options);
+    return this.each(function(index) {
+      var $sb = $(this);
+      var $is = $('<div/>', { id: opts.isclass + (index==0?'':'0'),   // id wrong
+                              'class': opts.isclass
+                            })
+        .appendTo('body');
+      var last_search = $sb.val();
+      
+      function hide() {
+        $is.hide();
+      }
+      function reposition() {
+        var pos = $sb.offset();
+        // Using .offset(pos) causes jumpiness on FF and
+        // wrong position on Safari.
+        $is.css({left: pos.left + 2,
+                 top:  pos.top + $sb.outerHeight() + 3,
+                 width: $sb.innerWidth() - 4
+                });
+      }
+
+      /* init */
+      $sb.keyup(function() {
+        var str = $sb.val();
+        if (str != last_search) {
+	  last_search = str;
+	  if (str == "") {
+	    hide();
+	  } else {
+	    // send does not currently require you to determine
+	    // the value of the prefix at callback time.
+	    prefix.send(function() { return str; });
+	  }
+        }
+      });
+
+      $sb.blur(function() { hide(); });
+
+      /* FIXME Should probably not reposition incsearch until it
+       * becomes visible. */
+      $(window).resize(reposition);
+      reposition();
+
+      // Cancel mousedown; don't fire blur nor allow text selection.
+      $is.mousedown(function() {
+        // IE6~8 don't allow us to cancel mousedown.  Use IE specific
+        // event to cancel the imminent blur instead.
+        $sb.one('beforedeactivate', function() { return false; });
+        return false;
+      });
+      $is.delegate("li", "mouseup", function() {
+        // (NB: iPad requires onclick/mousedown event on each LI.
+        // We did this below; so this delegation may be pointless.
+        var t = $(this);
+        $sb.val(t.text());
+        hide();  // ?
+        $('#query-name').click();        // FIXME
+      });      
+    });
+  };
+  $.fn.incsearch.defaults = {
+    delay: 50,
+    timeout: 1500,
+    isclass: 'incsearch'
+  };
+})(jQuery);
 
 /* Alarm */
 function Alarm() {}
