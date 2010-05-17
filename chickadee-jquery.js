@@ -70,13 +70,14 @@ $(document).ready(function() {
 
 /* Alarm */
 function Alarm() {}
-Alarm.prototype.cancel = function() {
+Alarm.prototype = {
+  cancel: function() {
     if (typeof this.timeoutID == "number") {
       window.clearTimeout(this.timeoutID);
       delete this.timeoutID;
     }
-};
-Alarm.prototype.schedule = function(callback, delay) {
+  },
+  schedule: function(callback, delay) {
     var self = this;
     this.cancel();
     this.timeoutID = window.setTimeout(
@@ -84,6 +85,7 @@ Alarm.prototype.schedule = function(callback, delay) {
 	delete self.timeoutID;
 	callback();
       }, delay);
+  }
 };
 
 var prefix = {
