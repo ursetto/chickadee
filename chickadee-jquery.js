@@ -94,7 +94,7 @@ jQuery(document).ready(function($) {
       /* init */
       $sb.keyup(function(e) {
         /* Assume up/down arrow keys are handled in keydown. */
-        if (e.which == 38 || e.which == 40) return;
+        if (e.which == 38 || e.which == 40 || e.which == 13) return true;
         var str = $sb.val();
         if (str != last_search) {
 	  last_search = str;
