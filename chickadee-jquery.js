@@ -8,24 +8,58 @@
 */
 
 jQuery(document).ready(function($) {
-  $('#searchbox').incsearch().focus();
+  $('input.incsearch')
+    .incsearch()
+    .focus();
 });
 
 /* incsearch plugin */
-/* FIXME: submit action/id hardcoded; position hardcoded; */
+/* options:
+   'url': AJAX request URL, defaults to ACTION of element form
+   query: param name to send with query (default: element 'name' attr)
+          also accepts callback taking STR and returning data: value
+   delay: delay in ms before request is sent
+   timeout: request timeout in ms
+   isclass: class to apply to incremental search div
+   submit: selector of input to click for submit, true to click first
+           submit input, false to skip submit
+*/
+/* deps: QueuedAjax */
 (function($) {
   $.fn.incsearch = function(options) {
     var opts = $.extend({}, $.fn.incsearch.defaults, options);
     return this.each(function(index) {
       var $sb = $(this);
+      if ($.metadata) { $.extend(opts, $sb.metadata()); }
+
       var $is = $('<div/>', { id: opts.isclass + (index==0?'':'0'),   // id wrong
                               'class': opts.isclass
                             })
         .appendTo('body');
       var last_search = $sb.val();
+      var query = opts.query || this.name;
+      var url = opts.url || this.form.action;
       
+      var qajax = QueuedAjax({
+        timeout: opts.timeout,
+        delay: opts.delay,
+        url: url,
+        /* send type? */
+        success: function(data, status, xhr) {
+          $is.html(data);
+          // Hack for iPad -- clickable elements must have at least a
+          // no-op click event attached.
+          $("li", $is).click($.noop);
+          data == "" ? hide() : show();
+        },
+        error: function() { hide(); }
+      });
+
       function hide() {
         $is.hide();
+      }
+      function show() {
+        $is.show();
       }
       function reposition() {
         var pos = $sb.offset();
@@ -36,6 +70,16 @@ jQuery(document).ready(function($) {
                  width: $sb.innerWidth() - 4
                 });
       }
+      function maybe_submit() {
+        var submit = opts.submit;
+        if (submit) {
+          if (submit === true) {
+            $('input:submit', this.form).first().click();
+          } else {
+            $(submit).click();
+          }
+        }
+      }
 
       /* init */
       $sb.keyup(function() {
@@ -45,9 +89,13 @@ jQuery(document).ready(function($) {
 	  if (str == "") {
 	    hide();
 	  } else {
-	    // send does not currently require you to determine
-	    // the value of the prefix at callback time.
-	    prefix.send(function() { return str; });
+            if (typeof query === 'function') {
+              qajax.send(query(str));
+            } else {
+              var args = {};
+              args[query] = str;
+	      qajax.send(args);
+            }
 	  }
         }
       });
@@ -67,19 +115,19 @@ jQuery(document).ready(function($) {
         return false;
       });
       $is.delegate("li", "mouseup", function() {
-        // (NB: iPad requires onclick/mousedown event on each LI.
-        // We did this below; so this delegation may be pointless.
-        var t = $(this);
-        $sb.val(t.text());
+        var $t = $(this);
+        $sb.val($t.text());
         hide();  // ?
-        $('#query-name').click();        // FIXME
+        maybe_submit();
       });      
     });
   };
+
   $.fn.incsearch.defaults = {
     delay: 50,
     timeout: 1500,
-    isclass: 'incsearch'
+    isclass: 'incsearch',
+    submit: true
   };
 })(jQuery);
 
@@ -103,63 +151,69 @@ Alarm.prototype = {
   }
 };
 
-var prefix = {
-  sending: false,
-  uri: "/cdoc/ajax/prefix",    // should be configurable
-  delay: 50,                   // should be configurable
-  incsearch: '#incsearch',
-  timeout: 1500,
-  alarm: new Alarm(),
+/* Only one outstanding prefix request is allowed at a time.
+   Incoming requests are sent after DELAY ms; if another request
+   comes in before that, the countdown is reset.  If a request
+   comes in during the send, it is queued for retransmission
+   for DELAY ms after the send completes successfully
+   (any existing queued request is cancelled).
+*/
+function QueuedAjax(options) {
+  var sending = false;
+  var enqueued_data = null;
+  var alarm = new Alarm();
+  var defaults = {
+    url: "",
+    delay: 50,
+    timeout: 1500,
+    type: 'GET',
+    success: $.noop,
+    error: $.noop
+  };
+  var opts = $.extend({}, defaults, options);
 
-  send: function(cb) {
-    /* Only one outstanding prefix request is allowed at a time.
-       Incoming requests are sent after DELAY ms; if another request
-       comes in before that, the countdown is reset.  If a request
-       comes in during the send, it is queued for retransmission
-       for DELAY ms after the send completes successfully
-       (any existing queued request is cancelled).
-    */
-    var self = this;
-    if (self.sending) {
-      /* Sending flag is not cleared on error,
-         so further requests will take place.  But due to jQuery
-         bug (?) in 1.4.2, no error occurs on network failure. */
-      self.enqueued_cb = cb;
-      return;
+  return {
+    send: function(data) {
+      var self = this;
+      if (sending) {
+        /* Sending flag is not cleared on error,
+           so further requests will take place.  But due to jQuery
+           bug (?) in 1.4.2, no error occurs on network failure. */
+        enqueued_data = data;
+        return;
+      }
+
+      var ajax = function() {
+        sending = true;
+        /* TODO url, type and timeout can perhaps be omitted if not set
+           by caller, accepting $.ajax defaults. */
+        $.ajax({
+          url: opts.url,
+          type: opts.type,
+          data: typeof data === 'function' ? data() : data,
+          timeout: opts.timeout,   // FIXME: Don't want to set if undefined
+          success: function(data, status, xhr) {
+            opts.success(data, status, xhr);
+	    /* If send was enqueued during XHR, reschedule it. */
+            var enq = enqueued_data;
+	    if (enq) {
+              enqueued_data = null;
+	      alarm.schedule(function() { self.send(enq); },
+                             opts.delay);
+	    }
+            sending = false;
+          },
+          error: opts.error
+        });
+      };
+
+      if (opts.delay == 0) {
+        alarm.cancel();
+        ajax();
+      } else {
+        alarm.schedule(ajax, opts.delay);
+      }
     }
-
-    var ajax = function() {
-      self.sending = true;
-      $.ajax({
-        url: self.uri,
-        timeout: self.timeout,   // FIXME: Don't want to set if undefined
-        type: 'GET',
-        data: { q: cb() },
-        success: function(data, status, xhr) {
-          var is = $(self.incsearch);
-          is.html(data);
-          // Hack for iPad -- clickable elements must have at least a
-          // no-op click event attached.  Should move this to callback
-          $("li", is).click($.noop);
-          data == "" ? is.hide() : is.show();
-	  /* If send was enqueued during XHR, reschedule it. */
-	  var ecb = self.enqueued_cb;
-	  delete self.enqueued_cb;
-	  if (ecb) {
-	    self.alarm.schedule(function() { self.send(ecb); },
-                                self.delay);
-	  }
-          self.sending = false;
-        },
-        error: function() { $(self.incsearch).hide(); }
-      });
-    };
-
-    if (this.delay == 0) {
-      this.alarm.cancel();
-      ajax();
-    } else {
-      this.alarm.schedule(ajax, this.delay);
-    }
-  }
-};
+    
+  };
+}

@@ -12,6 +12,7 @@
   maximum-match-results
   maximum-match-signatures
   incremental-search
+  incremental-search-delay
   cache-nodes-for
   cache-static-content-for
   last-modified
@@ -42,7 +43,11 @@
   (<form> class: "lookup"
           action: (cdoc-page-path)
           method: 'get
-          (<input> id: "searchbox" class: "text" type: "text" name: "q"
+          (<input> id: "searchbox" class: (string-append "text incsearch { "
+                                                         "url: \"" (uri->string (incremental-search-uri)) "\","
+                                                         "delay: " (number->string (incremental-search-delay))
+                                                         " }")
+                   type: "text" name: "q"
                    autocomplete: "off"  ;; apparently readonly in DOM
                    autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
                    )
@@ -296,6 +301,8 @@
                     x)))
 (define incremental-search-uri
   (make-parameter (uri-reference "/cdoc/ajax/prefix")))
+(define incremental-search-delay     ; time in MS to delay incremental search requests
+  (make-parameter 50))
 
 (define chickadee-page-path (make-parameter #f)) ; cached -- probably not necessary
 (define chickadee-uri
