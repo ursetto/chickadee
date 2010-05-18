@@ -114,13 +114,11 @@ jQuery(document).ready(function($) {
       $sb.keydown(function(e) {
         if (item_count == 0)
           return;
-        show();
         var oldsel = selected;
         if (e.which == 38) {             /* up */
         } else if (e.which == 40) {      /* down */
           if (selected == null) {
             selected = 0;
-            saved_value = $sb.val();
             // show()?
           } else if (selected >= item_count - 1) {
             selected = null;
@@ -130,9 +128,12 @@ jQuery(document).ready(function($) {
         } else {
           return true;
         }
+        show();
         if (oldsel !== null) {
           var $oli = $is.find('li:eq(' + oldsel + ')');
           $oli.removeClass(opts.selectedClass);
+        } else {
+          saved_value = $sb.val();
         }
         if (selected !== null) {
           var $li = $is.find('li:eq(' + selected + ')');
@@ -170,6 +171,8 @@ jQuery(document).ready(function($) {
                      if (selected !== null) {
                        var $li = $is.find('li:eq(' + selected + ')');
                        $li.removeClass(opts.selectedClass);
+                     } else {
+                       saved_value = $sb.val();
                      }
                      $(this).addClass(opts.selectedClass);
                      selected = $(this).index();
