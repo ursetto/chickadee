@@ -116,6 +116,13 @@ jQuery(document).ready(function($) {
           return;
         var oldsel = selected;
         if (e.which == 38) {             /* up */
+          if (selected == null) {
+            selected = item_count - 1;
+          } else if (selected == 0) {
+            selected = null;
+          } else {
+            selected--;
+          }
         } else if (e.which == 40) {      /* down */
           if (selected == null) {
             selected = 0;
