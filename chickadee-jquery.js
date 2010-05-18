@@ -126,7 +126,6 @@ jQuery(document).ready(function($) {
         } else if (e.which == 40) {      /* down */
           if (selected == null) {
             selected = 0;
-            // show()?
           } else if (selected >= item_count - 1) {
             selected = null;
           } else {
