@@ -21,6 +21,7 @@ jQuery(document).ready(function($) {
    delay: delay in ms before request is sent
    timeout: request timeout in ms
    isclass: class to apply to incremental search div
+   selectedClass: class to apply to selected (hovered) items
    submit: selector of input to click for submit, true to click first
            submit input, false to skip submit
 */
@@ -39,6 +40,10 @@ jQuery(document).ready(function($) {
       var last_search = $sb.val();
       var query = opts.query || this.name;
       var url = opts.url || this.form.action;
+
+      var selected = null;         // which 0-based item index is selected, or null
+      var saved_value;
+      var item_count = 0;          // number of items in the incsearch box
       
       var qajax = QueuedAjax({
         timeout: opts.timeout,
@@ -47,10 +52,15 @@ jQuery(document).ready(function($) {
         /* send type? */
         success: function(data, status, xhr) {
           $is.html(data);
+          data == "" ? hide() : show();
+
+          var items = $("li", $is);
           // Hack for iPad -- clickable elements must have at least a
           // no-op click event attached.
-          $("li", $is).click($.noop);
-          data == "" ? hide() : show();
+          items.click($.noop);
+
+          item_count = items.length;
+          selected = null;
         },
         error: function() { hide(); }
       });
@@ -82,7 +92,9 @@ jQuery(document).ready(function($) {
       }
 
       /* init */
-      $sb.keyup(function() {
+      $sb.keyup(function(e) {
+        /* Assume up/down arrow keys are handled in keydown. */
+        if (e.which == 38 || e.which == 40) return;
         var str = $sb.val();
         if (str != last_search) {
 	  last_search = str;
@@ -98,6 +110,38 @@ jQuery(document).ready(function($) {
             }
 	  }
         }
+      });
+      $sb.keydown(function(e) {
+        if (item_count == 0)
+          return;
+        show();
+        var oldsel = selected;
+        if (e.which == 38) {             /* up */
+        } else if (e.which == 40) {      /* down */
+          if (selected == null) {
+            selected = 0;
+            saved_value = $sb.val();
+            // show()?
+          } else if (selected >= item_count - 1) {
+            selected = null;
+          } else {
+            selected++;
+          }
+        } else {
+          return true;
+        }
+        if (oldsel !== null) {
+          var $oli = $is.find('li:eq(' + oldsel + ')');
+          $oli.removeClass(opts.selectedClass);
+        }
+        if (selected !== null) {
+          var $li = $is.find('li:eq(' + selected + ')');
+          $li.addClass(opts.selectedClass);
+          $sb.val($li.text());
+        } else {
+          $sb.val(saved_value);
+        }
+        return false;
       });
 
       $sb.blur(function() { hide(); });
@@ -119,7 +163,17 @@ jQuery(document).ready(function($) {
         $sb.val($t.text());
         hide();  // ?
         maybe_submit();
-      });      
+      });
+      $is.delegate("li", "mouseover",
+                   function() {
+                     /* CODE DUPLICATION */
+                     if (selected !== null) {
+                       var $li = $is.find('li:eq(' + selected + ')');
+                       $li.removeClass(opts.selectedClass);
+                     }
+                     $(this).addClass(opts.selectedClass);
+                     selected = $(this).index();
+                   });
     });
   };
 
@@ -127,6 +181,7 @@ jQuery(document).ready(function($) {
     delay: 50,
     timeout: 1500,
     isclass: 'incsearch',
+    selectedClass: 'hover',
     submit: true
   };
 })(jQuery);
