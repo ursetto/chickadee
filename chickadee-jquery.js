@@ -132,6 +132,10 @@ jQuery(document).ready(function($) {
           } else {
             selected++;
           }
+        } else if (e.which == 13) {
+          // Counterpart to hide on mouseup.
+          hide();
+          return true;
         } else {
           return true;
         }
