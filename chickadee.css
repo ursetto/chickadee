@@ -227,7 +227,7 @@ ul li {
   margin-bottom: 3px;  /* > 0 helps avoid cutoff of bottom link border */
 }
 
-form.lookup input.text, #incsearch {
+form.lookup input.text, div.incsearch {
   width: 40%;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
@@ -254,6 +254,30 @@ form.lookup input.button {
   cursor: pointer;
 }
 
+#hdr-lookup {
+    float: right;
+    overflow: hidden;
+    border-left: 1px solid black;
+    width: 30%;
+}
+#hdr-searchbox {
+    padding: 0 0.2em;
+    border: none;
+    font-size: 14px;
+    font-family: "Georgia", "Times New Roman", serif;
+    width: 75%;
+/*     width: 100%; */
+}
+#hdr-submit {
+    float: right;
+/*    visibility: hidden; */
+    width: 20%;
+    overflow: hidden;
+}
+#hdr-searchbox-incsearch {
+    font-size: 14px;
+}
+
 #navskip {
   display: none;
 }
@@ -261,30 +285,28 @@ form.lookup input.button {
   display: none;
 }
 
-#incsearch {
+div.incsearch {
   border: 1px solid #000000;
   overflow: hidden;
   zoom: 1;
   min-height: 0;
   padding: 0;
   position: absolute;
-  /* Absolute position must be written on window resize (specifically,
-     when input elt changes position or size */
-  left: 18px; top: 110px;
   display: none;
   background-color: #ffffff;
   cursor: default;
 }
-#incsearch ul {
+
+div.incsearch ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
-#incsearch ul li {
+div.incsearch ul li {
   margin: 0;
   padding: 0 0.5em;
 }
-#incsearch li.hover {
+div.incsearch li.hover {
   /* IE6 doesn't support :hover on non-A. */
   background-color: #bbbbbb;
 }

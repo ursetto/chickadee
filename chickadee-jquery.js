@@ -8,9 +8,8 @@
 */
 
 jQuery(document).ready(function($) {
-  $('input.incsearch')
-    .incsearch()
-    .focus();
+  $('input.incsearch').incsearch();
+  $('#searchbox').focus();   // but only focus if primary searchbox
 });
 
 /* incsearch plugin */
@@ -33,7 +32,8 @@ jQuery(document).ready(function($) {
       var $sb = $(this);
       if ($.metadata) { $.extend(opts, $sb.metadata()); }
 
-      var $is = $('<div/>', { id: opts.isclass + (index==0?'':'0'),   // id wrong
+      var $is = $('<div/>', { id: this.id ? this.id + "-" + opts.isclass
+                              : opts.isclass + (index==0?'':index),   // id wrong
                               'class': opts.isclass
                             })
         .appendTo('body');

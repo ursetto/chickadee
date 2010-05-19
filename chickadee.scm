@@ -263,7 +263,23 @@
                  (string-append " | "
                                 (link (path->href '(chicken-doc))
                                       "chicken-doc")
-                                " server")))
+                                " server"))
+             (<form> id: "hdr-lookup"
+                     class: "hdr-lookup"
+                     action: (cdoc-page-path)
+                     method: 'get
+                     (<input> id: "hdr-searchbox" name: "q"
+                              class: (string-append
+                                      "text incsearch { "
+                                      "url: \"" (uri->string (incremental-search-uri)) "\","
+                                      "delay: " (number->string (incremental-search-delay)) " }")
+                              type: "text"
+                              autocomplete: "off" autocorrect: "off"
+                              autocapitalize: "off"
+                              tabindex: "1")
+                     (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
+                              type: "submit"
+                              tabindex: "2")))
        (<div> id: "contents"
               contents)
        (<div> id: "body"
