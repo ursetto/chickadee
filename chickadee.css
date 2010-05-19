@@ -270,7 +270,8 @@ form.lookup input.button {
 }
 #hdr-searchbox {
     padding: 0 0.2em;
-    border: none;
+    margin: 0;
+    border: 0;      /* not none -- fixes border in IE6 */
     font-size: 13px;
     font-family: "Georgia", "Times New Roman", serif;
     width: 18em;
@@ -285,10 +286,11 @@ form.lookup input.button {
 /*    float: right; */
     margin: 0;
     padding: 0;
-    border: none;
+    border: 0;
     background-color: transparent;
     background-image: url('mag.png');
     background-position: center center;
+    margin-left: 2px;
     margin-right: 2px;
     width: 12px;
     height: 13px;
