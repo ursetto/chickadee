@@ -288,6 +288,7 @@ form.lookup input.button {
     background-color: transparent;
     background-image: url('mag.png');
     background-position: center center;
+    background-repeat: no-repeat;
     margin-left: 2px;
     margin-right: 3px;
 /*    margin-right: 0.5em; */   /* matches left indent */
