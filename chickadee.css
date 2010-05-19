@@ -274,21 +274,30 @@ form.lookup input.button {
     font-size: 13px;
     font-family: "Georgia", "Times New Roman", serif;
     width: 18em;
+    outline: none;
 /*    float: left; */
 /*     width: 100%; */
-}
-#hdr-submit {
-    float: right;
-    overflow: hidden;
 }
 #hdr-searchbox-incsearch {
     font-size: 13px;
 }
-#hdr-lookup .button {
-    margin-left: 0;
-    font-size: 11px;
+#hdr-submit {
+/*    float: right; */
+    margin: 0;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    background-image: url('mag.png');
+    background-position: center center;
+    margin-right: 2px;
+    width: 12px;
+    height: 13px;
+    outline: none;
 /*    border: none;
     border-left: 1px solid #888888; */
+}
+#hdr-submit:focus {
+    outline: 1px dotted #888888;
 }
 
 #navskip {
