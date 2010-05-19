@@ -276,8 +276,6 @@ form.lookup input.button {
     font-family: "Georgia", "Times New Roman", serif;
     width: 18em;
     outline: none;
-/*    float: left; */
-/*     width: 100%; */
 }
 #hdr-searchbox-incsearch {
     font-size: 13px;

@@ -284,7 +284,7 @@
                                tabindex: "1")
                       (<button> id: "hdr-submit" name: "query-name"
                                 title: "Search chicken-doc for this identifier"
-                                class: "button"
+                                class: "button" type: "submit"
                                 "&nbsp;")
                       ;; (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
                       ;;          class: "button"

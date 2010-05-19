@@ -84,7 +84,7 @@ jQuery(document).ready(function($) {
         var submit = opts.submit;
         if (submit) {
           if (submit === true) {
-            $('input:submit', this.form).first().click();
+            $(':submit', this.form).first().click();
           } else {
             $(submit).click();
           }
