@@ -278,6 +278,8 @@
                                autocomplete: "off" autocorrect: "off"
                                autocapitalize: "off"
                                tabindex: "1")
+                      ;; fixme: add "title" attr, accesskey
+                      ;; fixme: change this to a "button"
                       (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
                                class: "button"
                                type: "submit"
