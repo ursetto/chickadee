@@ -292,7 +292,9 @@
                       ;;          tabindex: "2")
                       ))
        (<div> id: "contents"
-              contents)
+              (if (string=? contents "")
+                  "<!-- ie sux -->"         ; collapse empty div for IE
+                  contents))
        (<div> id: "body"
               (<div> id: "main"
                      body)))
