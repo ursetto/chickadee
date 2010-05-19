@@ -265,6 +265,8 @@
                                        (link (path->href '(chicken-doc))
                                              "chicken-doc")
                                        " server")))
+              (<h5> (<label> for: "hdr-searchbox"
+                             "Identifier search"))
               (<form> id: "hdr-lookup"
                       class: "hdr-lookup"
                       action: (cdoc-page-path)
@@ -275,15 +277,20 @@
                                        "url: \"" (uri->string (incremental-search-uri)) "\","
                                        "delay: " (number->string (incremental-search-delay)) " }")
                                type: "text"
+                               accesskey: "f"
+                               title: "chickadee search (Ctrl-F)"
                                autocomplete: "off" autocorrect: "off"
                                autocapitalize: "off"
                                tabindex: "1")
-                      ;; fixme: add "title" attr, accesskey
-                      ;; fixme: change this to a "button"
-                      (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
-                               class: "button"
-                               type: "submit"
-                               tabindex: "2")))
+                      (<button> id: "hdr-submit" name: "query-name"
+                                title: "Search chicken-doc for this identifier"
+                                class: "button"
+                                "&nbsp;")
+                      ;; (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
+                      ;;          class: "button"
+                      ;;          type: "submit"
+                      ;;          tabindex: "2")
+                      ))
        (<div> id: "contents"
               contents)
        (<div> id: "body"
