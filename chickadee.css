@@ -146,13 +146,17 @@ a:hover {
   background-color: black;
 }
 
-h1 {
+#hdr h1 {
   font-size: medium;
   padding-left: 0.3em;
-  border-bottom: 3px double black;
   background-color: #ffffff;
   margin-bottom: 0;
   margin-top: 0;
+  float: left;
+}
+#hdr {
+  /* BFC set elsewhere */
+  border-bottom: 3px double black;
 }
 
 h1 a {
@@ -211,7 +215,8 @@ ul.contents-list li a {
    elts, such as table cells, get a BFC automatically. */
 #main dl, #main ul, #main ol,
 #main h1, #main h2, #main h3,
-#main h4, #main h5, #main h6 {
+#main h4, #main h5, #main h6,
+#hdr {
   overflow: hidden;
   /* Also set hasLayout in IE6 and IE7 */
   zoom: 1;
@@ -245,13 +250,15 @@ form.lookup input.button:focus {
   outline: none;
   background-color: #f4f4f4;
 }
-form.lookup input.button {
-  margin-left: 1em;
+input.button {
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
   border: 1px solid #888888;
   background-color: #fcfcfc;
   cursor: pointer;
+}
+form.lookup input.button {
+  margin-left: 1em;
 }
 
 #hdr-lookup {
@@ -263,9 +270,10 @@ form.lookup input.button {
 #hdr-searchbox {
     padding: 0 0.2em;
     border: none;
-    font-size: 14px;
+    font-size: 13px;
     font-family: "Georgia", "Times New Roman", serif;
     width: 75%;
+/*    float: left; */
 /*     width: 100%; */
 }
 #hdr-submit {
@@ -275,7 +283,13 @@ form.lookup input.button {
     overflow: hidden;
 }
 #hdr-searchbox-incsearch {
-    font-size: 14px;
+    font-size: 13px;
+}
+#hdr-lookup .button {
+    margin-left: 0;    
+    font-size: 13px;
+    border: none;
+    border-left: 1px solid #888888;
 }
 
 #navskip {
