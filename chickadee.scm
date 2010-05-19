@@ -12,6 +12,7 @@
   maximum-match-results
   maximum-match-signatures
   incremental-search
+  incremental-search-delay
   cache-nodes-for
   cache-static-content-for
   last-modified
@@ -23,8 +24,7 @@
 (import scheme chicken)
 (import tcp data-structures srfi-1)
 (use spiffy-request-vars html-tags html-utils chicken-doc)
-(use (except spiffy server-root-uri))
-(import (prefix (only spiffy server-root-uri) spiffy:))
+(use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
 (use uri-common)
@@ -43,7 +43,11 @@
   (<form> class: "lookup"
           action: (cdoc-page-path)
           method: 'get
-          (<input> id: "searchbox" class: "text" type: "text" name: "q"
+          (<input> id: "searchbox" class: (string-append "text incsearch { "
+                                                         "url: \"" (uri->string (incremental-search-uri)) "\","
+                                                         "delay: " (number->string (incremental-search-delay))
+                                                         " }")
+                   type: "text" name: "q"
                    autocomplete: "off"  ;; apparently readonly in DOM
                    autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
                    )
@@ -245,9 +249,7 @@
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  )
-      (<div> id: "incsearch"))
-)
+                  )))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
@@ -299,6 +301,8 @@
                     x)))
 (define incremental-search-uri
   (make-parameter (uri-reference "/cdoc/ajax/prefix")))
+(define incremental-search-delay     ; time in MS to delay incremental search requests
+  (make-parameter 50))
 
 (define chickadee-page-path (make-parameter #f)) ; cached -- probably not necessary
 (define chickadee-uri
@@ -445,14 +449,6 @@
               (if product
                   (product-unparser product)   ; undocumented intarweb proc
                   "**Unknown product**")))))
-
-;; Enhanced server-root-uri which honors any Host: port.
-(define (server-root-uri)
-  (let ((u (spiffy:server-root-uri)))
-    (let ((h (header-value 'host (request-headers (current-request)))))
-      (if h
-          (update-uri u port: (cdr h))
-          u))))
 
 ;;;
 

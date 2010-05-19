@@ -20,17 +20,18 @@ tt {
   font-size: 16px;
 }
 
-div#body {
+#body {
 }
-div#main {
+#main {
   padding-left: 1em;
   padding-right: 1em;
   margin-top: 1em;
 }
-div#contents {
+#contents {
   float: right; width: 20%;
   border-left: 1px solid black;
   margin-left: 1em;
+  overflow: hidden;
 }
 
 dt {
@@ -226,7 +227,7 @@ ul li {
   margin-bottom: 3px;  /* > 0 helps avoid cutoff of bottom link border */
 }
 
-form.lookup input.text, div#incsearch {
+form.lookup input.text, #incsearch {
   width: 40%;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
@@ -256,12 +257,11 @@ form.lookup input.button {
 #navskip {
   display: none;
 }
-div#contents h2{
+#contents h2{
   display: none;
 }
 
-
-div#incsearch {
+#incsearch {
   border: 1px solid #000000;
   overflow: hidden;
   zoom: 1;
@@ -271,20 +271,20 @@ div#incsearch {
   /* Absolute position must be written on window resize (specifically,
      when input elt changes position or size */
   left: 18px; top: 110px;
-  visibility: hidden;
+  display: none;
   background-color: #ffffff;
   cursor: default;
 }
-div#incsearch ul {
+#incsearch ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
-div#incsearch ul li {
+#incsearch ul li {
   margin: 0;
   padding: 0 0.5em;
 }
-div#incsearch ul li:hover {
+#incsearch li.hover {
   /* IE6 doesn't support :hover on non-A. */
   background-color: #bbbbbb;
 }
