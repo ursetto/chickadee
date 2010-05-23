@@ -232,15 +232,15 @@
             (send-response body: body))))))))
 
 (define (root-page)
-  (++ (<h3> "Search")
+  (++ (<h3> "Search Chicken documentation")
       (input-form)
       (<p> "Enter a documentation node name or path in the search box above."
-           (<ul> (<li> "A node name is a single word, usually an identifier or egg name.  Examples: "
-                       (<tt> (<u> "posix")) ", " (<tt> (<u> "open/rdonly"))
-                       ", " (<tt> (<u> "+")) ".")
-                 (<li> "A node path is multiple words, separated by spaces, such as "
-                       (<tt> (<u> "posix open/rdonly")) ".")
-                 (<li> "Regular expression search is usually done on single identifiers, but if it contains a space, the match is against the full path.")
+           (<ul> (<li> "A node name is an identifier, egg, module or unit name, such as "
+                       (<i> "open/rdonly") ", " (<i> "awful") ", "
+                       (<i> "scheme") " or " (<i> "eval") ".")
+                 (<li> "A node path is a sequence of node names, such as "
+                       (<i> "eval load") " or " (<i> "foreign types") ".")
+                 (<li> "Regular expression matching is usually done against node names, but if a space is present, the full node path will be considered.")
                  ;; It might be more useful to match against each identifier level
                  ;; with a separate regex.
                  ))
