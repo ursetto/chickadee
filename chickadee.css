@@ -29,9 +29,13 @@ tt {
 }
 #contents {
   float: right; width: 20%;
-  border-left: 1px solid black;
-  margin: 0 0 0 1em;
+  margin: 0 0 1em 1em;
   overflow: hidden;
+  border-left: 2px solid #666;
+  border-bottom: 2px solid #666;
+  -moz-border-radius-bottomleft: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 dt {
@@ -199,16 +203,20 @@ ul.contents-list {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  font-size: 90%;
+  font-size: 14px;
 }
 ul.contents-list li {
   padding: 0;
-  border-bottom: 1px solid black;
+  border-top: 1px solid #ddd;
   margin: 0;
+  line-height: 1em;
+}
+ul.contents-list li:first-child {
+  border-top: none;
 }
 ul.contents-list li a {
   display: block;
-  padding: 0 0.5em;
+  padding: 0.25em 0.5em;
 }
 
 /* Introduce a new "Block formatting context" (9.4.1) 
