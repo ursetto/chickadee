@@ -32,17 +32,30 @@ tt {
 
 #contents {
   float: right; width: 20%;
-  margin: 0 0 1em 1em;
+  margin: 0 10px 1em 1em;
   overflow: hidden;
-  border-left: 1px solid #000;
-  border-bottom: 1px solid #000;
+  border: 1px solid #000;
+  border-top: none;
   -moz-border-radius-bottomleft: 6px;
   -webkit-border-bottom-left-radius: 6px;
   border-bottom-left-radius: 6px;
-  -moz-box-shadow: 0px 1px 10px #aaa;
+/*  -moz-box-shadow: -5px 3px 5px #ddd; */   /* mozilla hack to prevent right overflow */
+  -moz-box-shadow: 0px 1px 10px #aaa; 
   -webkit-box-shadow: 0px 1px 10px #aaa;
   box-shadow: 0px 1px 10px #aaa;
   background-color: white;
+}
+#contents h2 {
+  text-transform: lowercase;
+  background-color: #444;
+  color: #fff;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: normal;
+  margin: 0;
+  border: none;
+  line-height: 1em;
+  padding: 0.25em 0 0.25em 0.5em;
 }
 
 dt {
@@ -185,9 +198,10 @@ a:hover {
 #hdr {
   /* BFC set elsewhere */
   border-bottom: 3px double black;
-  -webkit-box-shadow: #bbb 0px 1px 5px;
-  -moz-box-shadow: #bbb 0px 1px 5px;
-  box-shadow: #bbb 0px 1px 5px;
+  /* box-shadow: #bbb 0px 1px 5px;  // desired box shadow, but right overflow issues */
+  -webkit-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
+  -moz-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
+  box-shadow: #bbb -5px 1px 5px;
 }
 
 h1 a {
@@ -235,9 +249,9 @@ ul.contents-list li {
   margin: 0;
   line-height: 1em;
 }
-ul.contents-list li:first-child {
-  border-top: none;
-}
+/* ul.contents-list li:first-child { */
+/*   border-top: none; */
+/* } */
 ul.contents-list li a {
   display: block;
   padding: 0.25em 0.5em;
@@ -304,6 +318,8 @@ form.lookup input.button {
 #hdr-lookup {
     float: right;
     border-left: 1px solid black;
+    border-right: 1px solid black;
+    margin-right: 10px;
 }
 #hdr-searchbox {
     padding: 0 0.2em;
@@ -340,9 +356,6 @@ form.lookup input.button {
 }
 
 #navskip {
-  display: none;
-}
-#contents h2{
   display: none;
 }
 
