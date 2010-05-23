@@ -142,15 +142,23 @@ dt {
 }
 
 a {
-  color: black;
   text-decoration: none;
-  border-bottom: 1px solid black;
-  font-weight: bold;
+  color: #000;
 }
 
 a:hover {
-  color: white;
-  background-color: black;
+  color: #fff;
+  background-color: #000;
+}
+
+#main a {
+  color: #224;
+  border-bottom: 1px solid #889;
+  font-style: italic;
+}
+#main a:hover {
+  color: #fff;
+  background-color: #002;
 }
 
 #hdr h1 {
@@ -221,6 +229,10 @@ ul.contents-list li a {
   display: block;
   padding: 0.25em 0.5em;
   color: #000;
+}
+ul.contents-list li a:hover {
+  color: #fff;
+  background-color: #222;
 }
 
 /* Introduce a new "Block formatting context" (9.4.1) 
