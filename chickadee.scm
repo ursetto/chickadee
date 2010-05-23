@@ -291,10 +291,16 @@
                       ;;          type: "submit"
                       ;;          tabindex: "2")
                       ))
-       (<div> id: "contents"
-              (if (string=? contents "")
-                  "<!-- ie sux -->"         ; collapse empty div for IE
+       (if (string=? contents "")
+           ""
+           (<div> id: "contents"
                   contents))
+       ;; We don't insert an empty contents div any more, because the bottom
+       ;; border shows up when it's empty.
+       ;; (<div> id: "contents"
+       ;;        (if (string=? contents "")
+       ;;            "<!-- ie sux -->"         ; collapse empty div for IE
+       ;;            contents))
        (<div> id: "body"
               (<div> id: "main"
                      body)))
