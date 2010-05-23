@@ -34,11 +34,15 @@ tt {
   float: right; width: 20%;
   margin: 0 0 1em 1em;
   overflow: hidden;
-  border-left: 2px solid #666;
-  border-bottom: 2px solid #666;
+  border-left: 1px solid #000;
+  border-bottom: 1px solid #000;
   -moz-border-radius-bottomleft: 6px;
   -webkit-border-bottom-left-radius: 6px;
   border-bottom-left-radius: 6px;
+  -moz-box-shadow: 0px 1px 10px #aaa;
+  -webkit-box-shadow: 0px 1px 10px #aaa;
+  box-shadow: 0px 1px 10px #aaa;
+  background-color: white;
 }
 
 dt {
@@ -175,6 +179,9 @@ a:hover {
 #hdr {
   /* BFC set elsewhere */
   border-bottom: 3px double black;
+  -webkit-box-shadow: #bbb 0px 1px 5px;
+  -moz-box-shadow: #bbb 0px 1px 5px;
+  box-shadow: #bbb 0px 1px 5px;
 }
 
 h1 a {
@@ -343,6 +350,9 @@ div.incsearch {
   display: none;
   background-color: #ffffff;
   cursor: default;
+  -webkit-box-shadow: 0px 1px 5px #bbb;
+  -moz-box-shadow: 0px 1px 5px #bbb;
+  box-shadow: 0px 1px 5px #bbb;
 }
 
 div.incsearch ul {
