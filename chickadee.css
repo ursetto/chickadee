@@ -26,6 +26,10 @@ tt {
   padding-right: 1em;
   margin-top: 1em;
 }
+#main ul {
+  list-style-type: circle;
+}
+
 #contents {
   float: right; width: 20%;
   margin: 0 0 1em 1em;
@@ -216,6 +220,7 @@ ul.contents-list li:first-child {
 ul.contents-list li a {
   display: block;
   padding: 0.25em 0.5em;
+  color: #000;
 }
 
 /* Introduce a new "Block formatting context" (9.4.1) 
