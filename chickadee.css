@@ -78,10 +78,10 @@ dl.defsig {
 
 dt.defsig {
   padding: 0.2em 1.0em;
-  background-color: #e8e8e8;
-  color: #000000;
+  background-color: #444;
+  color: #fff;
   border-bottom: 1px solid black;
-  font-weight: bold;
+  font-weight: normal;
   margin: 0;
 }
 
@@ -95,14 +95,22 @@ dt.defsig {
 
 dt.defsig span.type {
   float: right;
-  color: #404040;
-  font-weight: bold;
+  color: #eee;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: normal;
 /*  border-left: 3px double black; */
 }
 dt.defsig span.sig {
 /* monospace already set via tt */
   float: left;
 }
+
+/* dt.defsig span.sig tt {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+} */
 
 .operator {
   color: #800000;
