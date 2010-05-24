@@ -54,8 +54,9 @@ tt {
   margin: 0;
   border: none;
   line-height: 1em;
-  padding: 0.25em 0 0.25em 0.5em;
+  padding: 0.25em 0.25em 0.25em 0.5em;
   cursor: pointer;
+  letter-spacing: 0.1em;
 }
 
 dt {
