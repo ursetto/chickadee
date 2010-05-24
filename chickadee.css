@@ -32,10 +32,9 @@ tt {
 
 #contents {
   float: right; width: 20%;
-  margin: 0 10px 1em 1em;
+  margin: 0.5em 10px 1em 1em;
   overflow: hidden;
   border: 1px solid #000;
-  border-top: none;
   -moz-border-radius-bottomleft: 6px;
   -webkit-border-bottom-left-radius: 6px;
   border-bottom-left-radius: 6px;
