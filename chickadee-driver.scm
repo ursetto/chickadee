@@ -12,7 +12,7 @@
 
 ;; An even number of connections is desirable as user agents
 ;; usually open two (keep-alive) connections per hostname.
-(max-connections 4)
+(max-connections 8)
 
 (ajax-log "/tmp/ajax.log")
 (cdoc-uri (uri "/cdoc"))

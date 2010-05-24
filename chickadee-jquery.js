@@ -8,9 +8,11 @@
 */
 
 jQuery(document).ready(function($) {
-  $('input.incsearch')
-    .incsearch()
-    .focus();
+  $('input.incsearch').incsearch();
+  $('#searchbox').focus();   // but only focus if primary searchbox
+  $('#contents h2').click(function() {
+    $(this).next().toggle();
+  });
 });
 
 /* incsearch plugin */
@@ -33,7 +35,8 @@ jQuery(document).ready(function($) {
       var $sb = $(this);
       if ($.metadata) { $.extend(opts, $sb.metadata()); }
 
-      var $is = $('<div/>', { id: opts.isclass + (index==0?'':'0'),   // id wrong
+      var $is = $('<div/>', { id: this.id ? this.id + "-" + opts.isclass
+                              : opts.isclass + (index==0?'':index),   // id wrong
                               'class': opts.isclass
                             })
         .appendTo('body');
@@ -84,7 +87,7 @@ jQuery(document).ready(function($) {
         var submit = opts.submit;
         if (submit) {
           if (submit === true) {
-            $('input:submit', this.form).first().click();
+            $(':submit', $sb[0].form).first().click();
           } else {
             $(submit).click();
           }

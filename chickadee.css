@@ -9,11 +9,10 @@ body {
 pre {
   font-family: "Courier", "Courier New", monospace;
   font-size: 14px;
-  padding-left: 1em;
-  margin: 0;
-  margin-top: 1em;
-  margin-bottom: 1em;
+  padding: 0.2em 1em;
+  margin: 1em 1em 1em 0.3em;
   border-left: 3px double black;
+/*  background-color: #f4f4f4; */
 }
 tt {
   font-family: "Courier", "Courier New", monospace;
@@ -27,11 +26,37 @@ tt {
   padding-right: 1em;
   margin-top: 1em;
 }
+#main ul {
+  list-style-type: circle;
+}
+
 #contents {
   float: right; width: 20%;
-  border-left: 1px solid black;
-  margin-left: 1em;
+  margin: 0.5em 10px 1em 1em;
   overflow: hidden;
+  border: 1px solid #000;
+  -moz-border-radius-bottomleft: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+/*  -moz-box-shadow: -5px 3px 5px #ddd; */   /* mozilla hack to prevent right overflow */
+  -moz-box-shadow: 0px 1px 10px #aaa; 
+  -webkit-box-shadow: 0px 1px 10px #aaa;
+  box-shadow: 0px 1px 10px #aaa;
+  background-color: white;
+}
+#contents h2 {
+  text-transform: lowercase;
+  background-color: #444;
+  color: #fff;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: normal;
+  margin: 0;
+  border: none;
+  line-height: 1em;
+  padding: 0.25em 0.25em 0.25em 0.5em;
+  cursor: pointer;
+  letter-spacing: 0.1em;
 }
 
 dt {
@@ -45,14 +70,20 @@ dl.defsig {
   border-color: black;
   margin-left: 1em;
 /*  margin-right: 1em; */
+  -moz-border-radius-bottomright: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  -webkit-box-shadow: #bbb 0px 2px 5px;
+  -moz-box-shadow: #bbb 0px 2px 5px;
+  box-shadow: #bbb 0px 2px 5px;
 }
 
 dt.defsig {
   padding: 0.2em 1.0em;
-  background-color: #e8e8e8;
-  color: #000000;
+  background-color: #444;
+  color: #fff;
   border-bottom: 1px solid black;
-  font-weight: bold;
+  font-weight: normal;
   margin: 0;
 }
 
@@ -66,14 +97,22 @@ dt.defsig {
 
 dt.defsig span.type {
   float: right;
-  color: #404040;
-  font-weight: bold;
+  color: #eee;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: normal;
 /*  border-left: 3px double black; */
 }
 dt.defsig span.sig {
 /* monospace already set via tt */
   float: left;
 }
+
+/* dt.defsig span.sig tt {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+} */
 
 .operator {
   color: #800000;
@@ -135,24 +174,43 @@ dt {
 }
 
 a {
-  color: black;
   text-decoration: none;
-  border-bottom: 1px solid black;
-  font-weight: bold;
+  color: #000;
 }
 
 a:hover {
-  color: white;
-  background-color: black;
+  color: #fff;
+  background-color: #000;
 }
 
-h1 {
+#main a {
+  color: #224;
+  border-bottom: 1px solid #889;
+  font-style: italic;
+}
+#main a:hover {
+  color: #fff;
+  background-color: #002;
+}
+
+#hdr h1 {
   font-size: medium;
   padding-left: 0.3em;
-  border-bottom: 3px double black;
   background-color: #ffffff;
   margin-bottom: 0;
   margin-top: 0;
+  float: left;
+}
+#hdr h5 {
+  display: none;
+}
+#hdr {
+  /* BFC set elsewhere */
+  border-bottom: 3px double black;
+  /* box-shadow: #bbb 0px 1px 5px;  // desired box shadow, but right overflow issues */
+  -webkit-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
+  -moz-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
+  box-shadow: #bbb -5px 1px 5px;
 }
 
 h1 a {
@@ -192,16 +250,25 @@ ul.contents-list {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  font-size: 90%;
+  font-size: 14px;
 }
 ul.contents-list li {
   padding: 0;
-  border-bottom: 1px solid black;
+  border-top: 1px solid #ddd;
   margin: 0;
+  line-height: 1em;
 }
+/* ul.contents-list li:first-child { */
+/*   border-top: none; */
+/* } */
 ul.contents-list li a {
   display: block;
-  padding: 0 0.5em;
+  padding: 0.25em 0.5em;
+  color: #000;
+}
+ul.contents-list li a:hover {
+  color: #fff;
+  background-color: #222;
 }
 
 /* Introduce a new "Block formatting context" (9.4.1) 
@@ -211,7 +278,8 @@ ul.contents-list li a {
    elts, such as table cells, get a BFC automatically. */
 #main dl, #main ul, #main ol,
 #main h1, #main h2, #main h3,
-#main h4, #main h5, #main h6 {
+#main h4, #main h5, #main h6,
+#hdr {
   overflow: hidden;
   /* Also set hasLayout in IE6 and IE7 */
   zoom: 1;
@@ -227,7 +295,7 @@ ul li {
   margin-bottom: 3px;  /* > 0 helps avoid cutoff of bottom link border */
 }
 
-form.lookup input.text, #incsearch {
+form.lookup input.text, div.incsearch {
   width: 40%;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
@@ -245,46 +313,86 @@ form.lookup input.button:focus {
   outline: none;
   background-color: #f4f4f4;
 }
-form.lookup input.button {
-  margin-left: 1em;
+input.button {
   font-family: "Georgia", "Times New Roman", serif;
+  cursor: pointer;
+}
+form.lookup input.button {
   font-size: 16px;
   border: 1px solid #888888;
   background-color: #fcfcfc;
-  cursor: pointer;
+  margin-left: 1em;
+}
+
+#hdr-lookup {
+    float: right;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    margin-right: 10px;
+}
+#hdr-searchbox {
+    padding: 0 0.2em;
+    margin: 0;
+    border: 0;      /* not none -- fixes border in IE6 */
+    font-size: 13px;
+    font-family: "Georgia", "Times New Roman", serif;
+    width: 18em;
+    outline: none;
+}
+#hdr-searchbox-incsearch {
+    font-size: 13px;
+}
+#hdr-submit {
+/*    float: right; */
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    background-image: url('mag.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+    margin-left: 2px;
+    margin-right: 3px;
+/*    margin-right: 0.5em; */   /* matches left indent */
+    width: 12px;
+    height: 13px;
+    outline: none;
+/*    border: none;
+    border-left: 1px solid #888888; */
+}
+#hdr-submit:focus {
+    outline: 1px dotted #888888;
 }
 
 #navskip {
   display: none;
 }
-#contents h2{
-  display: none;
-}
 
-#incsearch {
+div.incsearch {
   border: 1px solid #000000;
   overflow: hidden;
   zoom: 1;
   min-height: 0;
   padding: 0;
   position: absolute;
-  /* Absolute position must be written on window resize (specifically,
-     when input elt changes position or size */
-  left: 18px; top: 110px;
   display: none;
   background-color: #ffffff;
   cursor: default;
+  -webkit-box-shadow: 0px 1px 5px #bbb;
+  -moz-box-shadow: 0px 1px 5px #bbb;
+  box-shadow: 0px 1px 5px #bbb;
 }
-#incsearch ul {
+
+div.incsearch ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
-#incsearch ul li {
+div.incsearch ul li {
   margin: 0;
   padding: 0 0.5em;
 }
-#incsearch li.hover {
+div.incsearch li.hover {
   /* IE6 doesn't support :hover on non-A. */
   background-color: #bbbbbb;
 }
