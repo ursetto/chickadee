@@ -10,6 +10,9 @@
 jQuery(document).ready(function($) {
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
+  $('#contents h2').click(function() {
+    $(this).next().toggle();
+  });
 });
 
 /* incsearch plugin */
