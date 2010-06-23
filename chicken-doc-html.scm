@@ -196,6 +196,10 @@
                                    (@ . ,drop-tag)))
                         "</table>\n")))
           
+          (highlight . ,(lambda (t b s)
+                       (match b ((lang . body)
+                                 (list "<pre>" (walk body s) "</pre>")))))
+          ;; script -- old name for highlight
           (script . ,(lambda (t b s)
                        (match b ((lang . body)
                                  (list "<pre>" (walk body s) "</pre>")))))
