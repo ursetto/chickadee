@@ -12,7 +12,7 @@
 (cdoc-uri (uri "/cdoc"))
 (chickadee-uri (uri "/chickadee"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
-(chickadee-css-files (list (uri "/cdoc/chickadee.css?3")))
+(chickadee-css-files (list (uri "/cdoc/chickadee.css?4")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
                           (uri "/cdoc/chickadee-jquery.js?2")))
