@@ -396,3 +396,29 @@ div.incsearch li.hover {
   /* IE6 doesn't support :hover on non-A. */
   background-color: #bbbbbb;
 }
+
+/* -- Highlighting */
+pre.highlight i {
+  font-style: normal;
+}
+pre.highlight .symbol {
+/*  font-weight: bold; */
+  font-style: italic;
+  color: #555;
+}
+pre.highlight .special {
+  font-style: italic;
+}
+pre.highlight .comment {
+  color: #44a;
+  font-style: italic;
+}
+pre.highlight .string, .character {
+  color: #264;
+}
+pre.highlight .default {
+  color: #000;
+}
+pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
+  color: #777;
+}

@@ -9,6 +9,7 @@
 (use (only data-structures conc ->string string-intersperse))
 (use (only ports with-output-to-string))
 (use (only chicken-doc-admin man-filename->path))
+(use colorize) ;yeah!
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -198,7 +199,11 @@
           
           (highlight . ,(lambda (t b s)
                        (match b ((lang . body)
-                                 (list "<pre>" (walk body s) "</pre>")))))
+                                 (list "<pre class=\"highlight\">"
+                                       (html-colorize lang
+                                                      ;; html-colorize quotes HTML; don't walk
+                                                      (tree->string body))
+                                       "</pre>")))))
           ;; script -- old name for highlight
           (script . ,(lambda (t b s)
                        (match b ((lang . body)
