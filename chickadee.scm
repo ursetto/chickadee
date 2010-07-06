@@ -305,8 +305,12 @@
               (<div> id: "main"
                      body)))
    headers: (string-concatenate         ;; Note: cacheable
-             (map (lambda (x) (<script> type: "text/javascript" src: x))
-                  (map uri->string (chickadee-js-files))))
+             (append
+              (list
+               (<meta> name: "viewport" content: "initial-scale=1"))
+              (map
+               (lambda (x) (<script> type: "text/javascript" src: x))
+               (map uri->string (chickadee-js-files)))))
    css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
    doctype: xhtml-1.0-strict

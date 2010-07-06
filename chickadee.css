@@ -430,3 +430,17 @@ pre.highlight .default {
 pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
   color: #777;
 }
+
+@media only screen and (max-device-width: 480px) {
+    html { -webkit-text-size-adjust: none; }
+}
+
+@media screen and (max-width: 600px) {
+    #contents { width: auto; float: none; }
+    ul.contents-list { display: none; }
+    ul.contents-list li { 
+	float: left; 
+	border-right: 1px solid #ddd;
+	/*width: 6em;*/
+    }
+}
