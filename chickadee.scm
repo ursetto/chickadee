@@ -125,7 +125,7 @@
     (if (null? ids)
         ""
         (tree->string
-         `("<h2 class=\"contents-list\">Contents</h2>\n"
+         `("<h2 class=\"contents-list\">Contents &raquo;</h2>\n"
            "<ul class=\"contents-list\">"
            ,(map
              (lambda (id)

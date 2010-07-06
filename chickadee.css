@@ -436,11 +436,26 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 }
 
 @media screen and (max-width: 600px) {
-    #contents { width: auto; float: none; }
-    ul.contents-list { display: none; }
+    #contents { 
+	width: auto; 
+	float: none;
+        margin-left: 0.5em; 
+    }
+    ul.contents-list { 
+	display: none;  /* reset toggle */
+	float: left;
+    }
     ul.contents-list li { 
-	float: left; 
-	border-right: 1px solid #ddd;
-	/*width: 6em;*/
+	float: left;
+	border: none;
+	width: 33.3333333333%;
     }
 }
+
+@media screen and (max-width: 400px) {
+    ul.contents-list li { 
+	width: 50%;
+    }
+}
+/* Viewport seems wide enough at 768px (iPad portrai) to support
+   sidebar.  Alternatively use four-column contents (width 25%). */
