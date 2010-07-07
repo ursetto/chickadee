@@ -51,8 +51,11 @@
                    autocomplete: "off"  ;; apparently readonly in DOM
                    autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
                    )
-          (<input> class: "button" type: "submit" id: "query-name" name: "query-name" value: "Lookup")
-          (<input> class: "button" type: "submit" id: "query-regex" name: "query-regex" value: "Regex")))
+          (<div> class: "buttons"
+           (<input> class: "button" type: "submit"
+                    id: "query-name" name: "query-name" value: "Lookup")
+           (<input> class: "button" type: "submit"
+                    id: "query-regex" name: "query-regex" value: "Regex"))))
 
 (define (format-id x)
   (match (match-nodes x)

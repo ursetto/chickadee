@@ -304,7 +304,7 @@ ul li {
 }
 
 form.lookup input.text, div.incsearch {
-  width: 40%;
+  width: 50%;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 16px;
   border: 1px solid #888888;
@@ -314,6 +314,15 @@ form.lookup input.text, div.incsearch {
 form.lookup input.text:focus {
   outline: none;
   border: 1px solid black;
+}
+#searchbox {
+  width: 60%;
+  margin-bottom: 1em;
+}
+div.buttons {
+  float: right;
+  margin-left: 0.5em;
+  width: 4em;
 }
 form.lookup input.button:focus {
 /*  outline: 1px solid #888888; */
@@ -326,10 +335,12 @@ input.button {
   cursor: pointer;
 }
 form.lookup input.button {
-  font-size: 16px;
+  font-size: 0.875em;
+/*  font-size: 16px;*/
   border: 1px solid #888888;
   background-color: #fcfcfc;
-  margin-left: 1em;
+  margin-left: 0.2em;
+  width: 100%; /* inside div */
 }
 
 #hdr-lookup {
@@ -346,6 +357,7 @@ form.lookup input.button {
     font-family: "Georgia", "Times New Roman", serif;
     width: 18em;
     outline: none;
+    -webkit-appearance: none;
 }
 #hdr-searchbox-incsearch {
     font-size: 13px;
@@ -450,12 +462,34 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 	border: none;
 	width: 33.3333333333%;
     }
+    #hdr-lookup {
+	border-top: 1px solid black;   /* stupid hack */
+    }
+    #searchbox {
+	width: 75%;
+    }
+    div.buttons { width: 6em; font-size: 0.875em; }
+    dl.defsig span.sig tt { font-size: 0.875em; }
+    dl.defsig span.type { font-size: 0.875em; }
 }
 
 @media screen and (max-width: 400px) {
     ul.contents-list li { 
 	width: 50%;
     }
+    #searchbox, div.incsearch {
+	font-size: 0.875em;
+    }
+    form.lookup input.button {
+	min-height: 2em;
+    }
+    h3 { font-size: 1em; }   /* useful, but what about h4-h6? */
+    #hdr h1 { font-size: 0.875em; }
+    div.buttons { width: 5em; font-size: 0.750em; }
+    dl.defsig span.sig tt { font-size: 0.750em; }
+    dl.defsig span.type { font-size: 0.750em; }
+    /* FIXME: also move closer to left margin */
 }
+
 /* Viewport seems wide enough at 768px (iPad portrai) to support
    sidebar.  Alternatively use four-column contents (width 25%). */
