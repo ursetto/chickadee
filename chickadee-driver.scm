@@ -21,7 +21,10 @@
 (chickadee-css-files (list (uri "/cdoc/chickadee.css")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js")))
+                          (uri "/cdoc/chickadee-jquery.js")
+;                          (uri "http://ie7-js.googlecode.com/svn/version/2.1%20(beta4)/IE9.js")
+;                          (uri "http://ie7-js.googlecode.com/svn/version/2.1%20(beta4)/ie7-squish.js")
+                          ))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)

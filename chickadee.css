@@ -319,11 +319,15 @@ form.lookup input.text:focus {
 #searchbox {
   width: 60%;
   margin-bottom: 1em;
+  float: left;
 }
+/* Avoid next elt coming between searchbox and buttons.  Fails on IE6 */
+form.lookup + * { clear: left; }
+
 div.buttons {
   float: right;
   margin-left: 0.5em;
-  width: 4em;
+  width: 5em;
 }
 form.lookup input.button:focus {
 /*  outline: 1px solid #888888; */
@@ -342,6 +346,7 @@ form.lookup input.button {
   background-color: #fcfcfc;
   margin-left: 0.2em;
   width: 100%; /* inside div */
+  margin-bottom: 0.2em;
 }
 
 #hdr-lookup {
@@ -503,3 +508,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 
 /* Viewport seems wide enough at 768px (iPad portrai) to support
    sidebar.  Alternatively use four-column contents (width 25%). */
+
+
+/* IE6 fixes */
+/* #body { _zoom: 1 } */   /* fixes missing contents bar, but screws up body */
