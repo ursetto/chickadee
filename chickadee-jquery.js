@@ -7,6 +7,26 @@
                   function() { $('dt.defsig').next('dd').show(); });
 */
 
+patchMobileSafariOffset(); // http://dev.jquery.com/ticket/6446
+// http://gist.github.com/434145
+// as of jquery 1.4.2 mobile safari reports wrong values on offset()
+// bug occurs: on iPhone OS since 3.2 version (iPad)
+//             on iOS since 4.0 version
+function patchMobileSafariOffset() {
+  if (/webkit.*mobile/i.test(navigator.userAgent)
+      && "getBoundingClientRect" in document.documentElement) {
+    (function ($) {
+      $.fn.offsetOld = $.fn.offset;
+      $.fn.offset = function () {
+        var result = this.offsetOld();
+        result.top -= window.scrollY;
+        result.left -= window.scrollX;
+        return result;
+      };
+    })(jQuery);
+  }
+}
+
 jQuery(document).ready(function($) {
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
@@ -288,3 +308,4 @@ function QueuedAjax(options) {
     
   };
 }
+
