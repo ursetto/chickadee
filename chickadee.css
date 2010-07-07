@@ -9,8 +9,8 @@ body {
 pre {
   font-family: "Courier", "Courier New", monospace;
   font-size: 14px;
-  padding: 0.2em 1em;
-  margin: 1em 1em 1em 0.3em;
+  padding: 0.2em 0 0.2em 1em;
+  margin: 1em 0 1em 0.3em;
   border-left: 3px double black;
 /*  background-color: #f4f4f4; */
 }
