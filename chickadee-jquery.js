@@ -183,6 +183,7 @@ jQuery(document).ready(function($) {
       /* FIXME Should probably not reposition incsearch until it
        * becomes visible. */
       $(window).resize(reposition);
+      // $(window).bind('orientationchange', reposition); // iPhone/iPad -- but does not work
       reposition();
 
       // Cancel mousedown; don't fire blur nor allow text selection.
