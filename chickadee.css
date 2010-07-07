@@ -16,7 +16,7 @@ pre {
 }
 tt {
   font-family: "Courier", "Courier New", monospace;
-  font-size: 16px;
+  font-size: 0.875em;
 }
 
 #body {
@@ -85,6 +85,7 @@ dt.defsig {
   border-bottom: 1px solid black;
   font-weight: normal;
   margin: 0;
+  font-size: 1em;
 }
 
 dt.defsig {
@@ -98,7 +99,7 @@ dt.defsig {
 dt.defsig span.type {
   float: right;
   color: #eee;
-  font-size: 15px;
+  font-size: 0.9375em;
   font-style: italic;
   font-weight: normal;
 /*  border-left: 3px double black; */
@@ -469,8 +470,15 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 	width: 75%;
     }
     div.buttons { width: 6em; font-size: 0.875em; }
-    dl.defsig span.sig tt { font-size: 0.875em; }
-    dl.defsig span.type { font-size: 0.875em; }
+    dt.defsig { font-size: 0.875em; }
+    dl.defsig span.sig tt { font-size: inherit; }
+    dl.defsig { margin-left: 0; }
+    pre { margin-right: 0; 
+	  margin-left: -0.75em;
+	  padding: 0.2em 0em 0.2em 0.5em;
+	  border-left-color: #666;  /* claustrophobia */
+	  -webkit-box-sizing: border-box;
+ }
 }
 
 @media screen and (max-width: 400px) {
@@ -486,9 +494,11 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     h3 { font-size: 1em; }   /* useful, but what about h4-h6? */
     #hdr h1 { font-size: 0.875em; }
     div.buttons { width: 5em; font-size: 0.750em; }
-    dl.defsig span.sig tt { font-size: 0.750em; }
-    dl.defsig span.type { font-size: 0.750em; }
-    /* FIXME: also move closer to left margin */
+    dt.defsig { font-size: 0.825em; padding: 0.2em 0.5em; }
+    dd.defsig { padding: 0 0.5em; }
+    #main { padding: 0 0.5em; }
+    /* Left margin is narrower, so modify pre extending into margin */
+    pre { margin-left: -0.3em; border-left-width: 1px; padding-left: 0.25em; }
 }
 
 /* Viewport seems wide enough at 768px (iPad portrai) to support
