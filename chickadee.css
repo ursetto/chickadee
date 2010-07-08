@@ -483,7 +483,9 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 	  padding: 0.2em 0em 0.2em 0.5em;
 	  border-left-color: #666;  /* claustrophobia */
 	  -webkit-box-sizing: border-box;
- }
+	  letter-spacing: -1px;     /* Important for <=480px, but may be too squished for 600px */
+    }
+    table { margin-left: 0; margin-right: 0; }
 }
 
 @media screen and (max-width: 400px) {
@@ -503,7 +505,12 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     dd.defsig { padding: 0 0.5em; }
     #main { padding: 0 0.5em; }
     /* Left margin is narrower, so modify pre extending into margin */
-    pre { margin-left: -0.3em; border-left-width: 1px; padding-left: 0.25em; }
+    pre { margin-left: -0.3em; 
+	  border-left-width: 1px; 
+	  padding-left: 0.25em;
+	  letter-spacing: -1px;
+	  font-size: 0.75em;
+   }
 }
 
 /* Viewport seems wide enough at 768px (iPad portrai) to support
