@@ -95,6 +95,10 @@ dt.defsig {
   zoom: 1;
   min-height: 0;
 }
+dt.defsig a, dt.defsig a:hover {
+  font-style: inherit !important;
+  color: inherit !important;
+}
 
 dt.defsig span.type {
   float: right;
