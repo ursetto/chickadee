@@ -6,10 +6,12 @@
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
 (use (only uri-generic uri-encode-string)) ; grr
 (use matchable)
-(use (only data-structures conc ->string string-intersperse))
+(use (only data-structures conc ->string string-intersperse string-translate))
 (use (only ports with-output-to-string))
 (use (only chicken-doc-admin man-filename->path))
 (use colorize) ;yeah!
+(use regex) (import irregex)
+(use (only extras sprintf))
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -40,6 +42,25 @@
 
 (define (quote-html s)
   (string->goodHTML s))
+
+;;; URI fragment (id=) handling for sections and definitions
+(define +rx:%fragment-escape+ (irregex "[^-_:A-Za-z0-9]"))
+(define +rx:%fragment-unescape+ (irregex "\\.([0-9a-fA-F][0-9a-fA-F])"))
+(define (identifier->fragment x)
+  (irregex-replace/all
+   +rx:%fragment-escape+ x
+   (lambda (m) (sprintf ".~x"
+                   (char->integer
+                    (string-ref (irregex-match-substring m 0) 0))))))
+(define (fragment->identifier x)
+  (irregex-replace/all +rx:%fragment-unescape+ x
+                       (lambda (m) (string
+                               (integer->char
+                                (string->number (irregex-match-substring m 1)
+                                                16))))))
+(define (section->identifier x)
+  (string-append "sec:"
+                 (string-translate x #\space #\_)))
 
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
@@ -169,12 +190,19 @@
           (toc . ,drop-tag)
           (section . ,(lambda (t b s)
                         (match b ((level title . body)
-                                  (let ((H (string-append "h"
-                                                          (number->string level)
-                                                          ">")))
-                                    (list "<" H
+                                  (let ((H (list
+                                            "h" (number->string level)
+                                            ;; FIXME title markup must be stripped!
+                                            ))
+                                        (id (cond ((section->identifier title)
+                                                   => (lambda (x)
+                                                        `(" id=" #\"
+                                                          ,(identifier->fragment x)
+                                                          #\")))
+                                                  (else '()))))
+                                    (list "<" H id ">"
                                           (walk title inline-ss)
-                                          "</" H
+                                          "</" H ">"
                                           (walk body s)))))))
 
           (table . ,(lambda (t b table-ss)
