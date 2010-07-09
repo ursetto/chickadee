@@ -51,20 +51,31 @@
                     (*text* . ,(lambda (t b s) b))))))
 
 ;;; URI fragment (id=) handling for sections and definitions
-(define +rx:%fragment-escape+ (irregex "[^-_:A-Za-z0-9]"))
-(define +rx:%fragment-unescape+ (irregex "\\.([0-9a-fA-F][0-9a-fA-F])"))
-(define (identifier->fragment x)
+;; Permitted characters in ID attributes in HTML < 5 are only A-Z a-z 0-9 : - _
+;; even though URI fragments are much more liberal.  For compatibility, we
+;; "period-encode" all other chars.
+(define +rx:%idfragment-escape+ (irregex "[^-_:A-Za-z0-9]"))
+(define +rx:%idfragment-unescape+ (irregex "\\.([0-9a-fA-F][0-9a-fA-F])"))
+;; Encode raw identifier text string so it is usable as an HTML 4 ID attribute
+;; (and consequently, as a URI fragment).
+(define (quote-identifier x)  ; Not a good name; should prob. be encode-identifier
   (irregex-replace/all
-   +rx:%fragment-escape+ x
+   +rx:%idfragment-escape+ x
    (lambda (m) (sprintf ".~x"
                    (char->integer
                     (string-ref (irregex-match-substring m 0) 0))))))
-(define (fragment->identifier x)
-  (irregex-replace/all +rx:%fragment-unescape+ x
+;; Decode period-encoded URI fragment (or ID attribute value).
+;; Note that spaces were period-encoded, not converted to underscore,
+;; so the transformation is reversible.
+(define (unquote-identifier x)
+  (irregex-replace/all +rx:%idfragment-unescape+ x
                        (lambda (m) (string
                                (integer->char
                                 (string->number (irregex-match-substring m 1)
                                                 16))))))
+;; WARNING: Currently being used to both generate new ids for headers and
+;; to figure out the id for an internal-link target.  However the former may
+;; distinuish duplicate IDs while the latter should ignore duplicates.
 (define (section->identifier x)
   (string-append "sec:"
                  (string-translate x #\space #\_)))
@@ -121,7 +132,13 @@
                                                         => path->href)
                                                        ((char=? (string-ref href 0)
                                                                 #\#)
-                                                        href)
+                                                        ;; Assume #fragments target
+                                                        ;; section names in this doc.
+                                                        (string-append
+                                                         "#"
+                                                         (quote-identifier
+                                                          (section->identifier
+                                                           (substring href 1)))))
                                                        ((char=? (string-ref href 0)
                                                                 #\/)
                                                         (string-append ; ???
@@ -205,7 +222,7 @@
                                                     (text-content title))
                                                    => (lambda (x)
                                                         `(" id=" #\"
-                                                          ,(identifier->fragment x)
+                                                          ,(quote-identifier x)
                                                           #\")))
                                                   (else '()))))
                                     (list "<" H id ">"
