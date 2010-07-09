@@ -79,6 +79,38 @@
 (define (section->identifier x)
   (string-append "sec:"
                  (string-translate x #\space #\_)))
+(define (definition->identifier x)
+  (string-append "def:"
+                 (string-translate x #\space #\_)))
+
+;;; XXX Copy this directly from chicken-doc-parser temporarily while
+;;     I work on a permanent solution.
+;; Convert signature (usually a list or bare identifier) into an identifier
+;; At the moment, this just means taking the car of a list if it's a list,
+;; or otherwise returning the read item.  If it cannot be read as a
+;; scheme expression, fail.
+(define +rx:ivanism+
+  (irregex '(: ":" eos)))
+(use (only ports with-input-from-string))
+(define (signature->identifier sig type)
+  (condition-case
+   (let ((L (with-input-from-string sig read)))
+     (cond ((pair? L) (car L))
+           ((symbol? L)
+            ;; SPECIAL HANDLING: handle e.g. MPI:init:: -> MPI:init.
+            ;; Remove this once these signatures are normalized.
+            ;; (Warning: usually read as keywords, if so symbol->string
+            ;;  will strip one : itself)
+            (let ((str (irregex-replace +rx:ivanism+
+                                        (symbol->string L)
+                                        "")))
+              (if str (string->symbol str) L)))
+           (else sig)))
+   ((exn)
+    (warning "Could not parse signature" sig)
+    #f)))
+
+;;; HTML renderer
 
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
@@ -168,7 +200,17 @@
                                (lambda (s)
                                  (match s
                                         ((type sig)
-                                         `("<dt class=\"defsig\">"
+                                         `("<dt class=\"defsig\""
+                                           ,(cond ((signature->identifier sig type)
+                                                   => (lambda (def)
+                                                        (list " id=\""
+                                                              (quote-identifier
+                                                               (definition->identifier
+                                                                (symbol->string def)))
+                                                              ;symbol->string wasteful
+                                                              #\")))
+                                                  (else '()))
+                                           ">"
                                            "<span class=\"sig\"><tt>"
                                            ,(string->goodHTML sig) "</tt></span>"
                                            " "
