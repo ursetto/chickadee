@@ -200,24 +200,33 @@
                                (lambda (s)
                                  (match s
                                         ((type sig)
-                                         `("<dt class=\"defsig\""
-                                           ,(cond ((signature->identifier sig type)
-                                                   => (lambda (def)
-                                                        (list " id=\""
-                                                              (quote-identifier
-                                                               (definition->identifier
-                                                                (symbol->string def)))
-                                                              ;symbol->string wasteful
-                                                              #\")))
-                                                  (else '()))
-                                           ">"
-                                           "<span class=\"sig\"><tt>"
-                                           ,(string->goodHTML sig) "</tt></span>"
-                                           " "
-                                           "<span class=\"type\">"
-                                           ,(string->goodHTML (->string type))
-                                           "</span>"
-                                           "</dt>\n"))))
+                                         (let ((defid (symbol->string ;; wasteful
+                                                       (signature->identifier
+                                                        sig type))))
+                                           `("<dt class=\"defsig\""
+                                             ,(if defid
+                                                  (list " id=\""
+                                                        (quote-identifier
+                                                         (definition->identifier defid))
+                                                        #\")
+                                                  '())
+                                             ">"
+                                             ;; Link to underlying node.  Technically
+                                             ;; we should use path->href, but a relative
+                                             ;; link is easy.
+                                             ,(if defid
+                                                  (list "<a href=" #\"
+                                                        (uri-encode-string defid)
+                                                        #\" #\>)
+                                                  '())
+                                             "<span class=\"sig\"><tt>"
+                                             ,(string->goodHTML sig) "</tt></span>"
+                                             ,(if defid "</a>" '())
+                                             " "
+                                             "<span class=\"type\">"
+                                             ,(string->goodHTML (->string type))
+                                             "</span>"
+                                             "</dt>\n")))))
                                sigs)
                              "<dd class=\"defsig\">"
                              ,(walk body def-ss)
