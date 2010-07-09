@@ -123,20 +123,20 @@
                  "</table>"))))))))))
 
 (define (contents-list n)
-  (let ((p (map ->string (node-path n)))
-        (ids (node-child-ids n)))
+  (let ((ids (node-child-ids n)))
     (if (null? ids)
         ""
         (tree->string
          `("<h2 class=\"contents-list\">Contents &raquo;</h2>\n"
            "<ul class=\"contents-list\">"
            ,(map
-             (lambda (id)
-               `("<li>"
-                 "<a href=\"" ,(path->href (append p (list id)))
-                 "\">" ,(quote-html id)
-                 "</a>"
-                 "</li>"))
+             (let ((child->href (make-child->href n)))
+               (lambda (id)
+                 `("<li>"
+                   "<a href=\"" ,(child->href id)
+                   "\">" ,(quote-html id)
+                   "</a>"
+                   "</li>")))
              (map ->string ids))
            "</ul>\n"
            )))))
@@ -161,7 +161,8 @@
                   (node-page (title-path n)
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
-                                                     path->href)))))))
+                                                     path->href
+                                                     (make-child->href n))))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -171,6 +172,14 @@
    (string-intersperse (map (lambda (x)
                               (uri-encode-string (->string x)))
                             p) "/")))
+;; Given a node N, return a procedure that will produce
+;; an href for any child node ID of N.  Although simple now,
+;; this could be extended to use relative paths when the current
+;; URI permits it, saving some bandwidth.
+(define (make-child->href n)
+  (let ((path (node-path n)))
+    (lambda (id)
+      (path->href (append path (list id))))))
 
 (define (title-path n)
   (let loop ((p (node-path n))

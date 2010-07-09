@@ -114,6 +114,7 @@
 
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
+                                child->href ; link to child node
                                 )
   (tree->string
    (let ((walk sxml-walk)
@@ -211,12 +212,10 @@
                                                         #\")
                                                   '())
                                              ">"
-                                             ;; Link to underlying node.  Technically
-                                             ;; we should use path->href, but a relative
-                                             ;; link is easy.
+                                             ;; Link to underlying node.
                                              ,(if defid
                                                   (list "<a href=" #\"
-                                                        (uri-encode-string defid)
+                                                        (child->href defid)
                                                         #\" #\>)
                                                   '())
                                              "<span class=\"sig\"><tt>"
