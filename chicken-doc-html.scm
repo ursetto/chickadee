@@ -43,6 +43,13 @@
 (define (quote-html s)
   (string->goodHTML s))
 
+;; Like sxpath // *text*.  Beware, if your tags have arguments that
+;; shouldn't be considered text, they will still be extracted.
+(define (text-content doc)
+  (tree->string
+   (sxml-walk doc `((*default* . ,(lambda (t b s) (sxml-walk b s)))
+                    (*text* . ,(lambda (t b s) b))))))
+
 ;;; URI fragment (id=) handling for sections and definitions
 (define +rx:%fragment-escape+ (irregex "[^-_:A-Za-z0-9]"))
 (define +rx:%fragment-unescape+ (irregex "\\.([0-9a-fA-F][0-9a-fA-F])"))
@@ -194,7 +201,8 @@
                                             "h" (number->string level)
                                             ;; FIXME title markup must be stripped!
                                             ))
-                                        (id (cond ((section->identifier title)
+                                        (id (cond ((section->identifier
+                                                    (text-content title))
                                                    => (lambda (x)
                                                         `(" id=" #\"
                                                           ,(identifier->fragment x)
