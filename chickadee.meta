@@ -4,10 +4,10 @@
  (category doc-tools)
  (license "BSD")
  (doc-from-wiki)
- (needs matchable  uri-common intarweb doctype        ; chickadee
+ (needs matchable uri-common intarweb doctype        ; chickadee
         spiffy spiffy-request-vars              
         html-tags html-utils 
-        (chicken-doc 0.3.6)
+        (chicken-doc 0.3.6) sxpath
         sxml-transforms uri-generic (chicken-doc-admin 0.3.4) colorize ; chicken-doc-html
  )
  (files "chickadee.scm" "chickadee-driver.scm"

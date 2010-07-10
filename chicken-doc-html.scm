@@ -1,7 +1,7 @@
 (module chicken-doc-html
 (chicken-doc-sxml->html
  tree->string quote-html
- quote-identifier unquote-identifier definition->identifier)
+ quote-identifier unquote-identifier definition->identifier signature->identifier)
 
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp

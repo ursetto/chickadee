@@ -123,7 +123,7 @@
                  "</table>"))))))))))
 
 (define (contents-list n)
-  (let ((ids (node-child-ids n)))
+  (let ((ids (node-child-ids n)))  ; Assumption: node-child-ids include all definitions.
     (if (null? ids)
         ""
         (tree->string
@@ -140,6 +140,15 @@
              (map ->string ids))
            "</ul>\n"
            )))))
+
+(use sxpath) ; temp?  extract-definitions is in chicken-doc-parser
+(use srfi-69)
+(define extract-definition-identifiers
+  (let ((sx (sxpath '(// def sig *))))
+    (lambda (doc)
+      (map (lambda (x) (symbol->string
+                   (signature->identifier (cadr x) (car x))))
+           (sx doc)))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -176,23 +185,19 @@
 ;; an href for any child node ID of N.  Although simple now,
 ;; this could be extended to use relative paths when the current
 ;; URI permits it, saving some bandwidth.
-;; FIXME: May even want to alter this based on node signature,
-;; so that non-container nodes link to parent fragments in their defsig.
 (define (make-child->href n)
-  (let ((path (node-path n)))
-    (if #t
-        ;; (let ((href (path->href path)))
-        ;;   (lambda (id)
-        ;;     (string-append href "#"
-        ;;                    (quote-identifier (definition->identifier id)))))
-        ;; LOOKHERE: Assume that fragments are always available in the current
-        ;; page, which should be a valid assumption.
-        (lambda (id)
-          (string-append "#" (quote-identifier (definition->identifier id))))
-        ;; Temporarily omitted -- testing #def:
-        (lambda (id)
+  (let ((path (node-path n))
+        (defids (extract-definition-identifiers (node-sxml n)))
+        (deftable (make-hash-table string=?)))  ; Probably better: merge sort, preferring defs list
+    (for-each (lambda (x) (hash-table-set! deftable x #t)) defids)
+    (lambda (id)
+      (if (hash-table-exists? deftable (->string id))
+          ;; Assume that fragments are always available in the current page.
+          (string-append "#" (quote-identifier (definition->identifier id)))
           (path->href (append path (list id)))))))
 
+;; FIXME: May even want to alter this based on node signature,
+;; so that non-container nodes link to parent fragments in their defsig.
 ;;(define (make-def->href n) ...) ?
 ;; make-parent->href? make-fragment->href?
 ;; chg identifier to html-id (or maybe, fragment to html-id)
