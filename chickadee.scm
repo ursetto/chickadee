@@ -198,6 +198,10 @@
 
 ;; FIXME??? chg "identifier" to html-id (or maybe, fragment to html-id)
 
+;; Given a node N, return a procedure that will produce a definition href
+;; for ID suitable for placement in a defsig in N.  That is, it will refer
+;; to the actual child node when N is an egg (etc.) and it will refer to
+;; an anchor id in the parent when N is itself a defsig. 
 (define (make-def->href n)
   (let ((doc (node-sxml n))
         (path (node-path n)))

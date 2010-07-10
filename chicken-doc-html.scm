@@ -77,6 +77,8 @@
 ;; WARNING: Currently being used to both generate new ids for headers and
 ;; to figure out the id for an internal-link target.  However the former may
 ;; distinuish duplicate IDs while the latter should ignore duplicates.
+;; FIXME: Duplicate IDs will be generated for duplicate section or
+;; definition names.  A unique suffix is needed.
 (define (section->identifier x)
   (string-append "sec:"
                  (string-translate x #\space #\_)))
