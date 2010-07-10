@@ -176,10 +176,26 @@
 ;; an href for any child node ID of N.  Although simple now,
 ;; this could be extended to use relative paths when the current
 ;; URI permits it, saving some bandwidth.
+;; FIXME: May even want to alter this based on node signature,
+;; so that non-container nodes link to parent fragments in their defsig.
 (define (make-child->href n)
   (let ((path (node-path n)))
-    (lambda (id)
-      (path->href (append path (list id))))))
+    (if #t
+        ;; (let ((href (path->href path)))
+        ;;   (lambda (id)
+        ;;     (string-append href "#"
+        ;;                    (quote-identifier (definition->identifier id)))))
+        ;; LOOKHERE: Assume that fragments are always available in the current
+        ;; page, which should be a valid assumption.
+        (lambda (id)
+          (string-append "#" (quote-identifier (definition->identifier id))))
+        ;; Temporarily omitted -- testing #def:
+        (lambda (id)
+          (path->href (append path (list id)))))))
+
+;;(define (make-def->href n) ...) ?
+;; make-parent->href? make-fragment->href?
+;; chg identifier to html-id (or maybe, fragment to html-id)
 
 (define (title-path n)
   (let loop ((p (node-path n))

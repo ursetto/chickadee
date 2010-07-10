@@ -1,6 +1,7 @@
 (module chicken-doc-html
 (chicken-doc-sxml->html
- tree->string quote-html)
+ tree->string quote-html
+ quote-identifier unquote-identifier definition->identifier)
 
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
@@ -80,8 +81,7 @@
   (string-append "sec:"
                  (string-translate x #\space #\_)))
 (define (definition->identifier x)
-  (string-append "def:"
-                 (string-translate x #\space #\_)))
+  (string-append "def:" x))
 
 ;;; XXX Copy this directly from chicken-doc-parser temporarily while
 ;;     I work on a permanent solution.
@@ -114,7 +114,7 @@
 
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
-                                child->href ; link to child node
+                                def->href ; link to definition node
                                 )
   (tree->string
    (let ((walk sxml-walk)
@@ -215,7 +215,7 @@
                                              ;; Link to underlying node.
                                              ,(if defid
                                                   (list "<a href=" #\"
-                                                        (child->href defid)
+                                                        (def->href defid)
                                                         #\" #\>)
                                                   '())
                                              "<span class=\"sig\"><tt>"
