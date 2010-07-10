@@ -171,7 +171,7 @@
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
                                                      path->href
-                                                     (make-child->href n))))))))
+                                                     (make-def->href n))))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -196,11 +196,18 @@
           (string-append "#" (quote-identifier (definition->identifier id)))
           (path->href (append path (list id)))))))
 
-;; FIXME: May even want to alter this based on node signature,
-;; so that non-container nodes link to parent fragments in their defsig.
-;;(define (make-def->href n) ...) ?
-;; make-parent->href? make-fragment->href?
-;; chg identifier to html-id (or maybe, fragment to html-id)
+;; FIXME??? chg "identifier" to html-id (or maybe, fragment to html-id)
+
+(define (make-def->href n)
+  (let ((doc (node-sxml n))
+        (path (node-path n)))
+    (if (eq? (car doc) 'def)
+        (let* ((path (butlast path))
+               (href (path->href path)))
+          (lambda (id)
+            (string-append href "#" (quote-identifier (definition->identifier id)))))
+        (lambda (id)
+          (path->href (append path (list id)))))))
 
 (define (title-path n)
   (let loop ((p (node-path n))
