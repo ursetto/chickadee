@@ -147,6 +147,17 @@ h3 {
   border-bottom: 1px solid #808080;
 }
 
+/* section links */
+#main h1>a, #main h2>a, #main h3>a, #main h4>a, #main h5>a, #main h6>a {
+    font-style: inherit;
+    color: inherit;
+}
+#main h1>a:hover, h2>a:hover, h3>a:hover, h4>a:hover, h5>a:hover, h6>a:hover {
+    background-color: #000;
+    color: #fff;
+}
+/* end section links */
+
 hr {
   border: 1px solid black;
 }

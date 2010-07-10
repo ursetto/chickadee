@@ -84,6 +84,9 @@
                  (string-translate x #\space #\_)))
 (define (definition->identifier x)
   (string-append "def:" x))
+(define (section->href x)   ;; Convert section name to internal fragment href.
+  (string-append "#" (quote-identifier
+                      (section->identifier x))))
 
 ;;; XXX Copy this directly from chicken-doc-parser temporarily while
 ;;     I work on a permanent solution.
@@ -169,11 +172,7 @@
                                                                 #\#)
                                                         ;; Assume #fragments target
                                                         ;; section names in this doc.
-                                                        (string-append
-                                                         "#"
-                                                         (quote-identifier
-                                                          (section->identifier
-                                                           (substring href 1)))))
+                                                        (section->href (substring href 1)))
                                                        ((char=? (string-ref href 0)
                                                                 #\/)
                                                         (string-append ; ???
@@ -267,18 +266,17 @@
           (section . ,(lambda (t b s)
                         (match b ((level title . body)
                                   (let ((H (list
-                                            "h" (number->string level)
-                                            ;; FIXME title markup must be stripped!
-                                            ))
+                                            "h" (number->string level)))
                                         (id (cond ((section->identifier
                                                     (text-content title))
-                                                   => (lambda (x)
-                                                        `(" id=" #\"
-                                                          ,(quote-identifier x)
-                                                          #\")))
-                                                  (else '()))))
-                                    (list "<" H id ">"
+                                                   => quote-identifier)
+                                                  (else #f))))
+                                    (list "<" H
+                                          (if id `(" id=\"" ,id "\"") '())
+                                          ">"
+                                          "<a href=\"#" id "\">"
                                           (walk title inline-ss)
+                                          "</a>"
                                           "</" H ">"
                                           (walk body s)))))))
 
