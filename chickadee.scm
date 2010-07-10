@@ -357,7 +357,7 @@
                (map uri->string (chickadee-js-files)))))
    css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
-   doctype: xhtml-1.0-strict
+   doctype: doctype-html
    ;; no good way to get a nice title yet
    title: "chickadee | chicken-doc server"))
 
