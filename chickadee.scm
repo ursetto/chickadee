@@ -65,7 +65,8 @@
           ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
-                     (<p> "No node found matching identifier " (<tt> (htmlize x)))))
+                     (<p> "No node found matching identifier " (<tt> (htmlize x)))
+                     page-title: "node not found"))
          (nodes
           (match-page nodes x))))
 
@@ -120,7 +121,8 @@
                                                       (node-signature n)))))
                                  "</tr>")
                                 acc)))))
-                 "</table>"))))))))))
+                 "</table>")))
+           page-title: "query results")))))))
 
 (define (contents-list n)
   (let ((ids (node-child-ids n)))  ; Assumption: node-child-ids include all definitions.
@@ -171,7 +173,8 @@
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
                                                      path->href
-                                                     (make-def->href n))))))))
+                                                     (make-def->href n))
+                             page-title: (last (node-path n))))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -293,11 +296,16 @@
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  )))
+                  )
+      (<h4> "About")
+      (<p> (<a> href: (path->href '(chickadee)) "chickadee")
+           " is the web interface to the " (<a> href: (path->href '(chicken-doc)) "chicken-doc")
+           " documentation system for the " (<a> href: "http://call-cc.org" "Chicken") " language.  It is running on the " (<a> href: (path->href '(spiffy)) "spiffy") " webserver on Chicken " (chicken-version) ".")
+      ))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
-(define (%node-page-body title contents body)
+(define (%node-page-body title contents body #!key (page-title #f))
   (html-page
    (++ (<p> id: 'navskip
             (<a> href: "#body" "Skip navigation."))
@@ -359,11 +367,14 @@
    charset: "UTF-8"
    doctype: doctype-html
    ;; no good way to get a nice title yet
-   title: "chickadee | chicken-doc server"))
+   title: (htmlize (if page-title
+                       (string-append page-title " | chickadee")
+                       "chickadee server"))))
 
-(define (node-page title contents body)
+(define (node-page title contents body #!key (page-title #f))
   (send-response
-   body: (%node-page-body title contents body)
+   body: (%node-page-body title contents body
+                          page-title: page-title)
    headers: `((content-type #(text/html ((charset . "utf-8"))))
               )))
 
@@ -373,7 +384,8 @@
   (send-response code: 404 reason: "Not found"
                  body:
                  (%node-page-body (htmlize title)  ; quoting critical
-                                  "" body)))
+                                  "" body
+                                  page-title: "node not found")))
 
 (define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
 (define cdoc-uri
