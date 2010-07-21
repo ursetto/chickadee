@@ -202,9 +202,10 @@
                                (lambda (s)
                                  (match s
                                         ((type sig)
-                                         (let ((defid (symbol->string ;; wasteful
-                                                       (signature->identifier
-                                                        sig type))))
+                                         (let ((defid (->string ;; wasteful
+                                                       (or (signature->identifier
+                                                            sig type)
+                                                           sig))))
                                            `("<dt class=\"defsig\""
                                              ,(if defid
                                                   (list " id=\""

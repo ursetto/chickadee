@@ -148,8 +148,9 @@
 (define extract-definition-identifiers
   (let ((sx (sxpath '(// def sig *))))
     (lambda (doc)
-      (map (lambda (x) (symbol->string
-                   (signature->identifier (cadr x) (car x))))
+      (map (lambda (x)
+             (->string (or (signature->identifier (cadr x) (car x))
+                           (cadr x))))
            (sx doc)))))
 
 (define (format-path p)
