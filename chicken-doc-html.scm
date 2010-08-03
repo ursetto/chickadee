@@ -13,6 +13,7 @@
 (use colorize) ;yeah!
 (use regex) (import irregex)
 (use (only extras sprintf))
+(use (only srfi-13 string-downcase))
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -302,16 +303,25 @@
                         "</table>\n")))
           
           (highlight . ,(lambda (t b s)
-                       (match b ((lang . body)
-                                 (list "<pre class=\"highlight\">"
-                                       (html-colorize lang
-                                                      ;; html-colorize quotes HTML; don't walk
-                                                      (tree->string body))
-                                       "</pre>")))))
-          ;; script -- old name for highlight
-          (script . ,(lambda (t b s)
-                       (match b ((lang . body)
-                                 (list "<pre>" (walk body s) "</pre>")))))
+                          (define (coloring-type? t)
+                            (assq t (coloring-type-names)))
+                          (match b ((lang . body)
+                                    (let ((lang (and lang (string->symbol
+                                                           (string-downcase
+                                                            (->string lang))))))
+                                      (if (and lang     ;; lang #f not currently possible; reserved for future
+                                               (coloring-type? lang))
+                                          (list "<pre class=\"highlight\">"
+                                                (html-colorize lang
+                                                               ;; html-colorize quotes HTML; don't walk
+                                                               (tree->string body))
+                                                "</pre>")
+                                          (list (if lang
+                                                    (list "<!-- Unknown coloring type "
+                                                          (quote-html (->string lang)) " -->\n")
+                                                    '())
+                                                "<pre class=\"highlight\">"
+                                                (walk body s))))))))
 
           ;; convert example contents to `(pre ...) and re-walk it
           
