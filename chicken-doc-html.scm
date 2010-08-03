@@ -1,15 +1,18 @@
 (module chicken-doc-html
 (chicken-doc-sxml->html
- tree->string quote-html)
+ tree->string quote-html
+ quote-identifier unquote-identifier definition->identifier signature->identifier)
 
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
 (use (only uri-generic uri-encode-string)) ; grr
 (use matchable)
-(use (only data-structures conc ->string string-intersperse))
+(use (only data-structures conc ->string string-intersperse string-translate))
 (use (only ports with-output-to-string))
 (use (only chicken-doc-admin man-filename->path))
 (use colorize) ;yeah!
+(use regex) (import irregex)
+(use (only extras sprintf))
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -41,8 +44,82 @@
 (define (quote-html s)
   (string->goodHTML s))
 
+;; Like sxpath // *text*.  Beware, if your tags have arguments that
+;; shouldn't be considered text, they will still be extracted.
+(define (text-content doc)
+  (tree->string
+   (sxml-walk doc `((*default* . ,(lambda (t b s) (sxml-walk b s)))
+                    (*text* . ,(lambda (t b s) b))))))
+
+;;; URI fragment (id=) handling for sections and definitions
+;; Permitted characters in ID attributes in HTML < 5 are only A-Z a-z 0-9 : - _
+;; even though URI fragments are much more liberal.  For compatibility, we
+;; "period-encode" all other chars.
+(define +rx:%idfragment-escape+ (irregex "[^-_:A-Za-z0-9]"))
+(define +rx:%idfragment-unescape+ (irregex "\\.([0-9a-fA-F][0-9a-fA-F])"))
+;; Encode raw identifier text string so it is usable as an HTML 4 ID attribute
+;; (and consequently, as a URI fragment).
+(define (quote-identifier x)  ; Not a good name; should prob. be encode-identifier
+  (irregex-replace/all
+   +rx:%idfragment-escape+ x
+   (lambda (m) (sprintf ".~x"
+                   (char->integer
+                    (string-ref (irregex-match-substring m 0) 0))))))
+;; Decode period-encoded URI fragment (or ID attribute value).
+;; Note that spaces were period-encoded, not converted to underscore,
+;; so the transformation is reversible.
+(define (unquote-identifier x)
+  (irregex-replace/all +rx:%idfragment-unescape+ x
+                       (lambda (m) (string
+                               (integer->char
+                                (string->number (irregex-match-substring m 1)
+                                                16))))))
+;; WARNING: Currently being used to both generate new ids for headers and
+;; to figure out the id for an internal-link target.  However the former may
+;; distinuish duplicate IDs while the latter should ignore duplicates.
+;; FIXME: Duplicate IDs will be generated for duplicate section or
+;; definition names.  A unique suffix is needed.
+(define (section->identifier x)
+  (string-append "sec:"
+                 (string-translate x #\space #\_)))
+(define (definition->identifier x)
+  (string-append "def:" x))
+(define (section->href x)   ;; Convert section name to internal fragment href.
+  (string-append "#" (quote-identifier
+                      (section->identifier x))))
+
+;;; XXX Copy this directly from chicken-doc-parser temporarily while
+;;     I work on a permanent solution.
+;; Convert signature (usually a list or bare identifier) into an identifier
+;; At the moment, this just means taking the car of a list if it's a list,
+;; or otherwise returning the read item.  If it cannot be read as a
+;; scheme expression, fail.
+(define +rx:ivanism+
+  (irregex '(: ":" eos)))
+(use (only ports with-input-from-string))
+(define (signature->identifier sig type)
+  (condition-case
+   (let ((L (with-input-from-string sig read)))
+     (cond ((pair? L) (car L))
+           ((symbol? L)
+            ;; SPECIAL HANDLING: handle e.g. MPI:init:: -> MPI:init.
+            ;; Remove this once these signatures are normalized.
+            ;; (Warning: usually read as keywords, if so symbol->string
+            ;;  will strip one : itself)
+            (let ((str (irregex-replace +rx:ivanism+
+                                        (symbol->string L)
+                                        "")))
+              (if str (string->symbol str) L)))
+           (else sig)))
+   ((exn)
+    (warning "Could not parse signature" sig)
+    #f)))
+
+;;; HTML renderer
+
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
+                                def->href ; link to definition node
                                 )
   (tree->string
    (let ((walk sxml-walk)
@@ -93,7 +170,9 @@
                                                         => path->href)
                                                        ((char=? (string-ref href 0)
                                                                 #\#)
-                                                        href)
+                                                        ;; Assume #fragments target
+                                                        ;; section names in this doc.
+                                                        (section->href (substring href 1)))
                                                        ((char=? (string-ref href 0)
                                                                 #\/)
                                                         (string-append ; ???
@@ -123,14 +202,32 @@
                                (lambda (s)
                                  (match s
                                         ((type sig)
-                                         `("<dt class=\"defsig\">"
-                                           "<span class=\"sig\"><tt>"
-                                           ,(string->goodHTML sig) "</tt></span>"
-                                           " "
-                                           "<span class=\"type\">"
-                                           ,(string->goodHTML (->string type))
-                                           "</span>"
-                                           "</dt>\n"))))
+                                         (let ((defid (->string ;; wasteful
+                                                       (or (signature->identifier
+                                                            sig type)
+                                                           sig))))
+                                           `("<dt class=\"defsig\""
+                                             ,(if defid
+                                                  (list " id=\""
+                                                        (quote-identifier
+                                                         (definition->identifier defid))
+                                                        #\")
+                                                  '())
+                                             ">"
+                                             ;; Link to underlying node.
+                                             ,(if defid
+                                                  (list "<a href=" #\"
+                                                        (def->href defid)
+                                                        #\" #\>)
+                                                  '())
+                                             "<span class=\"sig\"><tt>"
+                                             ,(string->goodHTML sig) "</tt></span>"
+                                             ,(if defid "</a>" '())
+                                             " "
+                                             "<span class=\"type\">"
+                                             ,(string->goodHTML (->string type))
+                                             "</span>"
+                                             "</dt>\n")))))
                                sigs)
                              "<dd class=\"defsig\">"
                              ,(walk body def-ss)
@@ -169,12 +266,19 @@
           (toc . ,drop-tag)
           (section . ,(lambda (t b s)
                         (match b ((level title . body)
-                                  (let ((H (string-append "h"
-                                                          (number->string level)
-                                                          ">")))
+                                  (let ((H (list
+                                            "h" (number->string level)))
+                                        (id (cond ((section->identifier
+                                                    (text-content title))
+                                                   => quote-identifier)
+                                                  (else #f))))
                                     (list "<" H
+                                          (if id `(" id=\"" ,id "\"") '())
+                                          ">"
+                                          "<a href=\"#" id "\">"
                                           (walk title inline-ss)
-                                          "</" H
+                                          "</a>"
+                                          "</" H ">"
                                           (walk body s)))))))
 
           (table . ,(lambda (t b table-ss)

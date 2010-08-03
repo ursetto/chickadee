@@ -65,7 +65,8 @@
           ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
-                     (<p> "No node found matching identifier " (<tt> (htmlize x)))))
+                     (<p> "No node found matching identifier " (<tt> (htmlize x)))
+                     page-title: "node not found"))
          (nodes
           (match-page nodes x))))
 
@@ -120,26 +121,37 @@
                                                       (node-signature n)))))
                                  "</tr>")
                                 acc)))))
-                 "</table>"))))))))))
+                 "</table>")))
+           page-title: "query results")))))))
 
 (define (contents-list n)
-  (let ((p (map ->string (node-path n)))
-        (ids (node-child-ids n)))
+  (let ((ids (node-child-ids n)))  ; Assumption: node-child-ids include all definitions.
     (if (null? ids)
         ""
         (tree->string
          `("<h2 class=\"contents-list\">Contents &raquo;</h2>\n"
            "<ul class=\"contents-list\">"
            ,(map
-             (lambda (id)
-               `("<li>"
-                 "<a href=\"" ,(path->href (append p (list id)))
-                 "\">" ,(quote-html id)
-                 "</a>"
-                 "</li>"))
+             (let ((child->href (make-child->href n)))
+               (lambda (id)
+                 `("<li>"
+                   "<a href=\"" ,(child->href id)
+                   "\">" ,(quote-html id)
+                   "</a>"
+                   "</li>")))
              (map ->string ids))
            "</ul>\n"
            )))))
+
+(use sxpath) ; temp?  extract-definitions is in chicken-doc-parser
+(use srfi-69)
+(define extract-definition-identifiers
+  (let ((sx (sxpath '(// def sig *))))
+    (lambda (doc)
+      (map (lambda (x)
+             (->string (or (signature->identifier (cadr x) (car x))
+                           (cadr x))))
+           (sx doc)))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -161,7 +173,9 @@
                   (node-page (title-path n)
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
-                                                     path->href)))))))
+                                                     path->href
+                                                     (make-def->href n))
+                             page-title: (last (node-path n))))))))
         (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
@@ -171,6 +185,37 @@
    (string-intersperse (map (lambda (x)
                               (uri-encode-string (->string x)))
                             p) "/")))
+;; Given a node N, return a procedure that will produce
+;; an href for any child node ID of N.  Although simple now,
+;; this could be extended to use relative paths when the current
+;; URI permits it, saving some bandwidth.
+(define (make-child->href n)
+  (let ((path (node-path n))
+        (defids (extract-definition-identifiers (node-sxml n)))
+        (deftable (make-hash-table string=?)))  ; Probably better: merge sort, preferring defs list
+    (for-each (lambda (x) (hash-table-set! deftable x #t)) defids)
+    (lambda (id)
+      (if (hash-table-exists? deftable (->string id))
+          ;; Assume that fragments are always available in the current page.
+          (string-append "#" (quote-identifier (definition->identifier id)))
+          (path->href (append path (list id)))))))
+
+;; FIXME??? chg "identifier" to html-id (or maybe, fragment to html-id)
+
+;; Given a node N, return a procedure that will produce a definition href
+;; for ID suitable for placement in a defsig in N.  That is, it will refer
+;; to the actual child node when N is an egg (etc.) and it will refer to
+;; an anchor id in the parent when N is itself a defsig. 
+(define (make-def->href n)
+  (let ((doc (node-sxml n))
+        (path (node-path n)))
+    (if (eq? (car doc) 'def)
+        (let* ((path (butlast path))
+               (href (path->href path)))
+          (lambda (id)
+            (string-append href "#" (quote-identifier (definition->identifier id)))))
+        (lambda (id)
+          (path->href (append path (list id)))))))
 
 (define (title-path n)
   (let loop ((p (node-path n))
@@ -252,11 +297,16 @@
       (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
             (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
             (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  )))
+                  )
+      (<h4> "About")
+      (<p> (<a> href: (path->href '(chickadee)) "chickadee")
+           " is the web interface to the " (<a> href: (path->href '(chicken-doc)) "chicken-doc")
+           " documentation system for the " (<a> href: "http://call-cc.org" "Chicken") " language.  It is running on the " (<a> href: (path->href '(spiffy)) "spiffy") " webserver on Chicken " (chicken-version) ".")
+      ))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
-(define (%node-page-body title contents body)
+(define (%node-page-body title contents body #!key (page-title #f))
   (html-page
    (++ (<p> id: 'navskip
             (<a> href: "#body" "Skip navigation."))
@@ -316,13 +366,16 @@
                (map uri->string (chickadee-js-files)))))
    css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
-   doctype: xhtml-1.0-strict
+   doctype: doctype-html
    ;; no good way to get a nice title yet
-   title: "chickadee | chicken-doc server"))
+   title: (htmlize (if page-title
+                       (string-append page-title " | chickadee")
+                       "chickadee server"))))
 
-(define (node-page title contents body)
+(define (node-page title contents body #!key (page-title #f))
   (send-response
-   body: (%node-page-body title contents body)
+   body: (%node-page-body title contents body
+                          page-title: page-title)
    headers: `((content-type #(text/html ((charset . "utf-8"))))
               )))
 
@@ -332,7 +385,8 @@
   (send-response code: 404 reason: "Not found"
                  body:
                  (%node-page-body (htmlize title)  ; quoting critical
-                                  "" body)))
+                                  "" body
+                                  page-title: "node not found")))
 
 (define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
 (define cdoc-uri
