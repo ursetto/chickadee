@@ -126,11 +126,7 @@
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
          (drop-tag-noisily (lambda (t b s) (warning "dropped" (cons t b)) '()))
-         (quote-text `(*text* . ,(lambda (t b s) (quote-html b))))
-         (link (lambda (href desc)
-                 `("<a href=\"" ,href "\">"
-                   ,(quote-html desc)
-                   "</a>"))))
+         (quote-text `(*text* . ,(lambda (t b s) (quote-html b)))))
      (letrec ((block (lambda (tag)
                        (let ((open (conc "<" tag ">"))
                              (close (conc "</" tag ">")))
@@ -155,15 +151,17 @@
                            (big . ,(inline "big"))     ;; questionable
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
-                                      (match b
-                                             ((href desc)
-                                              (link href desc))
-                                             ((href)
-                                              (link href href)))))
+                                      (let ((link (lambda (href desc)  ;; Caller must quote DESC.
+                                                    `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>"))))
+                                        (match b
+                                               ((href desc)
+                                                (link href (walk desc inline-ss)))
+                                               ((href)
+                                                (link href (quote-html href)))))))
                            (int-link
                             . ,(lambda (t b s)
                                  (let ((ilink
-                                        (lambda (href desc)
+                                        (lambda (href desc)   ;; Caller must quote DESC.
                                           (let ((href
                                                  ;; barely tolerable.  perhaps we
                                                  ;; should use the id cache
@@ -182,12 +180,10 @@
                                                        (else
                                                         (path->href (list href)) ; !
                                                         ))))
-                                            `("<a href=\"" ,href "\">"
-                                              ,(quote-html desc)
-                                              "</a>")))))
+                                            `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
                                    (match b
-                                          ((href desc) (ilink href desc))
-                                          ((href) (ilink href href))))))))
+                                          ((href desc) (ilink href (walk desc inline-ss)))
+                                          ((href) (ilink href (quote-html href)))))))))
               )
        (walk
         doc
