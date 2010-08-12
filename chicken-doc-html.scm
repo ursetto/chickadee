@@ -204,22 +204,18 @@
                                                             sig type)
                                                            sig))))
                                            `("<dt class=\"defsig\""
-                                             ,(if defid
-                                                  (list " id=\""
-                                                        (quote-identifier
-                                                         (definition->identifier defid))
-                                                        #\")
-                                                  '())
+                                             ,(list " id=\""
+                                                    (quote-identifier
+                                                     (definition->identifier defid))
+                                                    #\")
                                              ">"
                                              ;; Link to underlying node.
-                                             ,(if defid
-                                                  (list "<a href=" #\"
-                                                        (def->href defid)
-                                                        #\" #\>)
-                                                  '())
+                                             ,(list "<a href=" #\"
+                                                    (def->href defid)
+                                                    #\" #\>)
                                              "<span class=\"sig\"><tt>"
                                              ,(quote-html sig) "</tt></span>"
-                                             ,(if defid "</a>" '())
+                                             "</a>"
                                              " "
                                              "<span class=\"type\">"
                                              ,(quote-html (->string type))
