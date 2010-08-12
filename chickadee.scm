@@ -31,7 +31,6 @@
 (use intarweb)
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
-(use doctype)
 (use regex) (import irregex)
 (use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
@@ -366,7 +365,7 @@
                (map uri->string (chickadee-js-files)))))
    css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
-   doctype: doctype-html
+   doctype: "<!doctype html>"
    ;; no good way to get a nice title yet
    title: (htmlize (if page-title
                        (string-append page-title " | chickadee")

@@ -4,7 +4,7 @@
  (category doc-tools)
  (license "BSD")
  (doc-from-wiki)
- (needs matchable uri-common intarweb (doctype 2.0)        ; chickadee
+ (needs matchable uri-common intarweb        ; chickadee
         ;; warning: requires sendfile >=1.6.3; require 4.8 spiffy when released
         spiffy spiffy-request-vars
         html-tags html-utils 
