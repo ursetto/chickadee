@@ -126,7 +126,7 @@
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
          (drop-tag-noisily (lambda (t b s) (warning "dropped" (cons t b)) '()))
-         (quote-text `(*text* . ,(lambda (t b s) (string->goodHTML b))))
+         (quote-text `(*text* . ,(lambda (t b s) (quote-html b))))
          (link (lambda (href desc)
                  `("<a href=\"" ,href "\">"
                    ,(quote-html desc)
@@ -222,11 +222,11 @@
                                                         #\" #\>)
                                                   '())
                                              "<span class=\"sig\"><tt>"
-                                             ,(string->goodHTML sig) "</tt></span>"
+                                             ,(quote-html sig) "</tt></span>"
                                              ,(if defid "</a>" '())
                                              " "
                                              "<span class=\"type\">"
-                                             ,(string->goodHTML (->string type))
+                                             ,(quote-html (->string type))
                                              "</span>"
                                              "</dt>\n")))))
                                sigs)
