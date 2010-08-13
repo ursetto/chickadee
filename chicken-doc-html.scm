@@ -118,6 +118,14 @@
 
 ;;; HTML renderer
 
+(define +rx:wiki-man-page+ (irregex '(: (? "http://wiki.call-cc.org")
+                                        (or "/man/4/"
+                                            "/manual/")
+                                        (submatch (+ any)))))
+(define +rx:wiki-egg-page+ (irregex '(: (? "http://wiki.call-cc.org")
+                                        (or "/eggref/4/"
+                                            "/egg/")
+                                        (submatch (+ any)))))
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
                                 def->href ; link to definition node
@@ -152,31 +160,59 @@
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
                                       (let ((link (lambda (href desc)  ;; Caller must quote DESC.
-                                                    `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>"))))
-                                        (match b
-                                               ((href desc)
-                                                (link href (walk desc inline-ss)))
-                                               ((href)
-                                                (link href (quote-html href)))))))
+                                                    (let ((href
+                                                           ;; svnwiki-sxml does not return int-link for
+                                                           ;; call-cc.org links, so we must check that here.
+                                                           (cond
+                                                            ;; Wiki man page, link to corresponding man page
+                                                            ((string-match +rx:wiki-man-page+ href)
+                                                             => (lambda (m)
+                                                                  (cond ((man-filename->path (cadr m))
+                                                                         => path->href)
+                                                                        (else href))))
+                                                            ;; Wiki egg page, link to node
+                                                            ((string-match +rx:wiki-egg-page+ href)
+                                                             => (lambda (m)
+                                                                  (path->href (list (cadr m)))))
+                                                            (else href))))
+                                                      `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
+                                          (match b
+                                                 ((href desc)
+                                                  (link href (walk desc inline-ss)))
+                                                 ((href)
+                                                  (link href (quote-html href)))))))
                            (int-link
                             . ,(lambda (t b s)
                                  (let ((ilink
                                         (lambda (href desc)   ;; Caller must quote DESC.
                                           (let ((href
-                                                 ;; barely tolerable.  perhaps we
-                                                 ;; should use the id cache
-                                                 (cond ((man-filename->path href)
-                                                        => path->href)
-                                                       ((char=? (string-ref href 0)
+                                                 ;; Usage of man-filename->path is barely tolerable.
+                                                 ;; Perhaps we should use the id cache.
+                                                 (cond ((char=? (string-ref href 0)
                                                                 #\#)
-                                                        ;; Assume #fragments target
-                                                        ;; section names in this doc.
+                                                        ;; Assume #fragments target section names in this doc.
                                                         (section->href (substring href 1)))
+                                                       ;; Wiki man page, link to corresponding man page
+                                                       ((string-match +rx:wiki-man-page+ href)
+                                                        => (lambda (m)
+                                                             (cond ((man-filename->path (cadr m))
+                                                                    => path->href)
+                                                                   (else href))))
+                                                       ;; Wiki egg page, link to node
+                                                       ((string-match +rx:wiki-egg-page+ href)
+                                                        => (lambda (m)
+                                                             (path->href (list (cadr m)))))
+                                                       ;; Unknown absolute path, link to wiki
                                                        ((char=? (string-ref href 0)
                                                                 #\/)
                                                         (string-append ; ???
-                                                         "http://chicken.wiki.br/"
+                                                         "http://wiki.call-cc.org"
                                                          href))
+                                                       ;; Relative path, try man page.  Wiki links to
+                                                       ;; current directory (/man) but we can't.
+                                                       ((man-filename->path href)
+                                                        => path->href)
+                                                       ;; Relative path, assume egg node.
                                                        (else
                                                         (path->href (list href)) ; !
                                                         ))))
