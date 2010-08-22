@@ -5,8 +5,7 @@
  (license "BSD")
  (doc-from-wiki)
  (needs matchable uri-common intarweb        ; chickadee
-        ;; warning: requires sendfile >=1.6.3; require 4.8 spiffy when released
-        spiffy spiffy-request-vars
+        (spiffy 4.8) spiffy-request-vars
         html-tags html-utils 
         (chicken-doc 0.3.9) sxpath
         sxml-transforms uri-generic (chicken-doc-admin 0.3.8) colorize ; chicken-doc-html

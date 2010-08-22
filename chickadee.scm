@@ -473,7 +473,8 @@
                  reason: reason
                  headers: `((location ,(uri-relative-to
                                         (uri-reference path)
-                                        (server-root-uri))))))
+                                        (request-uri (current-request)) ;; spiffy 4.8
+                                        )))))
 
 ;; Return 304 Not Modified.  If ACTUAL-MTIME is an integer, it is
 ;; returned to the client as the actual modification time of the resource.
