@@ -99,22 +99,24 @@
   (irregex '(: ":" eos)))
 (use (only ports with-input-from-string))
 (define (signature->identifier sig type)
-  (condition-case
-   (let ((L (with-input-from-string sig read)))
-     (cond ((pair? L) (car L))
-           ((symbol? L)
-            ;; SPECIAL HANDLING: handle e.g. MPI:init:: -> MPI:init.
-            ;; Remove this once these signatures are normalized.
-            ;; (Warning: usually read as keywords, if so symbol->string
-            ;;  will strip one : itself)
-            (let ((str (irregex-replace +rx:ivanism+
-                                        (symbol->string L)
-                                        "")))
-              (if str (string->symbol str) L)))
-           (else sig)))
-   ((exn)
-    (warning "Could not parse signature" sig)
-    #f)))
+  (if (eq? type 'read)
+      sig
+      (condition-case
+       (let ((L (with-input-from-string sig read)))
+         (cond ((pair? L) (car L))
+               ((symbol? L)
+                ;; SPECIAL HANDLING: handle e.g. MPI:init:: -> MPI:init.
+                ;; Remove this once these signatures are normalized.
+                ;; (Warning: usually read as keywords, if so symbol->string
+                ;;  will strip one : itself)
+                (let ((str (irregex-replace +rx:ivanism+
+                                            (symbol->string L)
+                                            "")))
+                  (if str (string->symbol str) L)))
+               (else sig)))
+       ((exn)
+        (warning "Could not parse signature" sig)
+        #f))))
 
 ;;; HTML renderer
 
