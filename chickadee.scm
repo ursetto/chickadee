@@ -192,11 +192,13 @@
   (let ((path (node-path n))
         (defids (extract-definition-identifiers (node-sxml n)))
         (deftable (make-hash-table string=?)))  ; Probably better: merge sort, preferring defs list
-    (for-each (lambda (x) (hash-table-set! deftable x #t)) defids)
+    (for-each (lambda (id) (hash-table-set! deftable id
+                                       (string-append
+                                        "#"
+                                        (quote-identifier (definition->identifier id)))))
+              defids)
     (lambda (id)
-      (if (hash-table-exists? deftable (->string id))
-          ;; Assume that fragments are always available in the current page.
-          (string-append "#" (quote-identifier (definition->identifier id)))
+      (or (hash-table-ref/default deftable (->string id) #f)  ;; definition anchor
           (path->href (append path (list id)))))))
 
 ;; FIXME??? chg "identifier" to html-id (or maybe, fragment to html-id)
