@@ -236,7 +236,7 @@
                            `(,(map
                                (lambda (s)
                                  (match s
-                                        ((type sig)
+                                        ((type sig . alist)
                                          (let ((defid (->string ;; wasteful
                                                        (or (signature->identifier
                                                             sig type)
