@@ -211,23 +211,26 @@
                                (lambda (s)
                                  (match s
                                         ((type sig . alist)
-                                         (let ((defid (->string ;; wasteful
-                                                       (or (signature->identifier
-                                                            sig type)
-                                                           sig))))
+                                         (let* ((defid (cond ((assq 'id alist) => cadr)
+                                                             (else (signature->identifier sig type))))
+                                                (defid (and defid (->string defid))))
                                            `("<dt class=\"defsig\""
-                                             ,(list " id=\""
-                                                    (quote-identifier
-                                                     (definition->identifier defid))
+                                             ,(if defid
+                                                  `(" id=\""
+                                                    ,(quote-identifier
+                                                      (definition->identifier defid))
                                                     #\")
-                                             ">"
+                                                  '())
+                                             #\>
                                              ;; Link to underlying node.
-                                             ,(list "<a href=" #\"
-                                                    (def->href defid)
+                                             ,(if defid
+                                                  `("<a href=" #\"
+                                                    ,(def->href defid)
                                                     #\" #\>)
+                                                  '())
                                              "<span class=\"sig\"><tt>"
                                              ,(quote-html sig) "</tt></span>"
-                                             "</a>"
+                                             ,(if defid "</a>" '())
                                              " "
                                              "<span class=\"type\">"
                                              ,(quote-html (->string type))
