@@ -147,10 +147,13 @@
 (define extract-definition-identifiers
   (let ((sx (sxpath '(// def sig *))))
     (lambda (doc)
-      (map (lambda (x)
-             (->string (or (signature->identifier (cadr x) (car x))
-                           (cadr x))))
-           (sx doc)))))
+      (filter-map
+       (lambda (x)
+         (let ((type (car x)) (sig (cadr x)) (alist (cddr x)))
+           (cond ((assq 'id alist) => cadr) ;; Check for pre-parsed ID.
+                 (else
+                  (signature->identifier sig type)))))
+       (sx doc)))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -192,10 +195,12 @@
   (let ((path (node-path n))
         (defids (extract-definition-identifiers (node-sxml n)))
         (deftable (make-hash-table string=?)))  ; Probably better: merge sort, preferring defs list
-    (for-each (lambda (id) (hash-table-set! deftable id
-                                       (string-append
-                                        "#"
-                                        (quote-identifier (definition->identifier id)))))
+    (for-each (lambda (id)
+                (let ((id (->string id)))
+                  (hash-table-set! deftable id
+                                   (string-append
+                                    "#"
+                                    (quote-identifier (definition->identifier id))))))
               defids)
     (lambda (id)
       (or (hash-table-ref/default deftable (->string id) #f)  ;; definition anchor
