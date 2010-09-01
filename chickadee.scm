@@ -142,18 +142,7 @@
            "</ul>\n"
            )))))
 
-(use sxpath) ; temp?  extract-definitions is in chicken-doc-parser
 (use srfi-69)
-(define extract-definition-identifiers
-  (let ((sx (sxpath '(// def sig *))))
-    (lambda (doc)
-      (filter-map
-       (lambda (x)
-         (let ((type (car x)) (sig (cadr x)) (alist (cddr x)))
-           (cond ((assq 'id alist) => cadr) ;; Check for pre-parsed ID.
-                 (else
-                  (signature->identifier sig type)))))
-       (sx doc)))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -192,18 +181,10 @@
 ;; this could be extended to use relative paths when the current
 ;; URI permits it, saving some bandwidth.
 (define (make-child->href n)
-  (let ((path (node-path n))
-        (defids (extract-definition-identifiers (node-sxml n)))
-        (deftable (make-hash-table string=?)))  ; Probably better: merge sort, preferring defs list
-    (for-each (lambda (id)
-                (let ((id (->string id)))
-                  (hash-table-set! deftable id
-                                   (string-append
-                                    "#"
-                                    (quote-identifier (definition->identifier id))))))
-              defids)
+  (let ((path (node-path n)))
     (lambda (id)
-      (or (hash-table-ref/default deftable (->string id) #f)  ;; definition anchor
+      (if (node-definition-id? n id)
+          (string-append "#" (quote-identifier (definition->identifier id)))
           (path->href (append path (list id)))))))
 
 ;; FIXME??? chg "identifier" to html-id (or maybe, fragment to html-id)
