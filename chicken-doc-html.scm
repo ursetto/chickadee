@@ -310,14 +310,12 @@
                         "</table>\n")))
           
           (highlight . ,(lambda (t b s)
-                          (define (coloring-type? t)
-                            (assq t (coloring-type-names)))
                           (match b ((lang . body)
                                     (let ((lang (and lang (string->symbol
                                                            (string-downcase
                                                             (->string lang))))))
                                       (if (and lang     ;; lang #f not currently possible; reserved for future
-                                               (coloring-type? lang))
+                                               (coloring-type-exists? lang))
                                           (list "<pre class=\"highlight\">"
                                                 (html-colorize lang
                                                                ;; html-colorize quotes HTML; don't walk
