@@ -160,42 +160,42 @@
                            (int-link
                             . ,(lambda (t b s)
                                  (let ((ilink
-                                        (lambda (href desc)   ;; Caller must quote DESC.
+                                        (lambda (link desc)   ;; Caller must quote DESC.
                                           (let ((href
                                                  ;; Usage of man-filename->path is barely tolerable.
                                                  ;; Perhaps we should use the id cache.
-                                                 (cond ((char=? (string-ref href 0)
+                                                 (cond ((char=? (string-ref link 0)
                                                                 #\#)
                                                         ;; Assume #fragments target section names in this doc.
-                                                        (section->href (substring href 1)))
+                                                        (section->href (substring link 1)))
                                                        ;; Wiki man page, link to corresponding man page
-                                                       ((string-match +rx:wiki-man-page+ href)
+                                                       ((string-match +rx:wiki-man-page+ link)
                                                         => (lambda (m)
                                                              (cond ((man-filename->path (cadr m))
                                                                     => path->href)
-                                                                   (else href))))
+                                                                   (else link))))
                                                        ;; Wiki egg page, link to node
-                                                       ((string-match +rx:wiki-egg-page+ href)
+                                                       ((string-match +rx:wiki-egg-page+ link)
                                                         => (lambda (m)
                                                              (path->href (list (cadr m)))))
                                                        ;; Unknown absolute path, link to wiki
-                                                       ((char=? (string-ref href 0)
+                                                       ((char=? (string-ref link 0)
                                                                 #\/)
                                                         (string-append ; ???
                                                          "http://wiki.call-cc.org"
-                                                         href))
+                                                         link))
                                                        ;; Relative path, try man page.  Wiki links to
                                                        ;; current directory (/man) but we can't.
-                                                       ((man-filename->path href)
+                                                       ((man-filename->path link)
                                                         => path->href)
                                                        ;; Relative path, assume egg node.
                                                        (else
-                                                        (path->href (list href)) ; !
+                                                        (path->href (list link)) ; !
                                                         ))))
                                             `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
                                    (match b
-                                          ((href desc) (ilink href (walk desc inline-ss)))
-                                          ((href) (ilink href (quote-html href)))))))))
+                                          ((link desc) (ilink link (walk desc inline-ss)))
+                                          ((link) (ilink link (quote-html link)))))))))
               )
        (walk
         doc
