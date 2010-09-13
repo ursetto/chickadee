@@ -90,6 +90,16 @@
       ""
       (string-append "#" (quote-identifier
                           (section->identifier x)))))
+(define (split-fragment link)    ;; Split at first #
+  (cond ((string-index link #\#)
+         => (lambda (i)
+              (cons (substring link 0 i)
+                    (substring link (+ i 1))))) ; don't include #
+        (else (cons link ""))))
+(define (join-fragment href fragment)  ;; Join with #
+  (if (string=? fragment "")
+      href
+      (string-append href "#" fragment)))
 
 (use (only svnwiki-sxml svnwiki-signature->identifier))
 (define signature->identifier svnwiki-signature->identifier)
@@ -108,6 +118,9 @@
                                 path->href ; for internal links; make parameter?
                                 def->href ; link to definition node
                                 )
+  (define (path+section->href p s)
+    (string-append (path->href p) (section->href s)))
+
   (tree->string
    (let ((walk sxml-walk)
          (drop-tag (lambda (t b s) '()))
@@ -137,42 +150,34 @@
                            (big . ,(inline "big"))     ;; questionable
                            (img . ,drop-tag)
                            (link . ,(lambda (t b s)
-                                      (let ((link (lambda (href desc)  ;; Caller must quote DESC.
-                                                    (let ((href
-                                                           ;; svnwiki-sxml does not return int-link for
-                                                           ;; call-cc.org links, so we must check that here.
-                                                           (cond
-                                                            ;; Wiki man page, link to corresponding man page
-                                                            ((string-match +rx:wiki-man-page+ href)
-                                                             => (lambda (m)
-                                                                  (cond ((man-filename->path (cadr m))
-                                                                         => path->href)
-                                                                        (else href))))
-                                                            ;; Wiki egg page, link to node
-                                                            ((string-match +rx:wiki-egg-page+ href)
-                                                             => (lambda (m)
-                                                                  (path->href (list (cadr m)))))
-                                                            (else href))))
-                                                      `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
-                                          (match b
-                                                 ((href desc)
-                                                  (link href (walk desc inline-ss)))
-                                                 ((href)
-                                                  (link href (quote-html href)))))))
+                                      ;; svnwiki-sxml does not return int-link for
+                                      ;; call-cc.org links, so we must check that here.
+                                      (define (process-resource R F)
+                                        (cond
+                                         ;; Wiki man page, link to corresponding man page
+                                         ((string-match +rx:wiki-man-page+ R)
+                                          => (lambda (m)
+                                               (cond ((man-filename->path (cadr m))
+                                                      => (lambda (p)
+                                                           (path+section->href p F)))
+                                                     (else ""))))
+                                         ;; Wiki egg page, link to node
+                                         ((string-match +rx:wiki-egg-page+ R)
+                                          => (lambda (m)
+                                               (path+section->href (list (cadr m)) F)))
+                                         (else (join-fragment R F))))
+                                      (let ((do-link
+                                             (lambda (link desc)  ;; Caller must quote DESC.
+                                               (let* ((S (split-fragment link))
+                                                      (href (process-resource (car S) (cdr S))))
+                                                 `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
+                                        (match b
+                                               ((link desc)
+                                                  (do-link link (walk desc inline-ss)))
+                                                 ((link)
+                                                  (do-link link (quote-html link)))))))
                            (int-link
                             . ,(lambda (t b s)
-                                 (define (split-fragment link)    ;; Split at first #
-                                   (cond ((string-index link #\#)
-                                          => (lambda (i)
-                                               (cons (substring link 0 i)
-                                                     (substring link (+ i 1))))) ; don't include #
-                                         (else (cons link ""))))
-                                 (define (join-fragment href fragment)  ;; Join with #
-                                   (if (string=? fragment "")
-                                       href
-                                       (string-append href "#" fragment)))
-                                 (define (path+section->href p s)
-                                   (string-append (path->href p) (section->href s)))
                                  (define (process-resource R F)  ;; Returns: href
                                    ;; Usage of man-filename->path is barely tolerable.
                                    ;; Perhaps we should use the id cache.
