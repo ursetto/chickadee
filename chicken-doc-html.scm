@@ -13,7 +13,7 @@
 (use colorize) ;yeah!
 (use regex) (import irregex)
 (use (only extras sprintf))
-(use (only srfi-13 string-downcase))
+(use (only srfi-13 string-downcase string-index))
 
 (define (sxml-walk doc ss)
   (let ((default-handler (cond ((assq '*default* ss) => cdr)
@@ -86,8 +86,10 @@
 (define (definition->identifier x)
   (string-append "def:" x))
 (define (section->href x)   ;; Convert section name to internal fragment href.
-  (string-append "#" (quote-identifier
-                      (section->identifier x))))
+  (if (string=? x "")
+      ""
+      (string-append "#" (quote-identifier
+                          (section->identifier x)))))
 
 (use (only svnwiki-sxml svnwiki-signature->identifier))
 (define signature->identifier svnwiki-signature->identifier)
@@ -159,44 +161,59 @@
                                                   (link href (quote-html href)))))))
                            (int-link
                             . ,(lambda (t b s)
+                                 (define (split-fragment link)    ;; Split at first #
+                                   (cond ((string-index link #\#)
+                                          => (lambda (i)
+                                               (cons (substring link 0 i)
+                                                     (substring link (+ i 1))))) ; don't include #
+                                         (else (cons link ""))))
+                                 (define (join-fragment href fragment)  ;; Join with #
+                                   (if (string=? fragment "")
+                                       href
+                                       (string-append href "#" fragment)))
+                                 (define (path+section->href p s)
+                                   (string-append (path->href p) (section->href s)))
+                                 (define (process-resource R F)  ;; Returns: href
+                                   ;; Usage of man-filename->path is barely tolerable.
+                                   ;; Perhaps we should use the id cache.
+                                   (cond ((string=? R "")
+                                          ;; #fragments target section names in this doc.
+                                          (section->href F))
+                                         ;; Wiki man page, link to corresponding man page,
+                                         ;; or to a dummy URL if man page lookup fails.
+                                         ((string-match +rx:wiki-man-page+ R)
+                                          => (lambda (m)
+                                               (cond ((man-filename->path (cadr m))
+                                                      => (lambda (p)
+                                                           (path+section->href p F)))
+                                                     (else ""))))
+                                         ;; Wiki egg page, link to node
+                                         ((string-match +rx:wiki-egg-page+ R)
+                                          => (lambda (m)
+                                               (path+section->href (list (cadr m))
+                                                                   F)))
+                                         ;; Unknown absolute path, link to wiki
+                                         ((char=? (string-ref R 0)
+                                                  #\/)
+                                          (join-fragment (string-append "http://wiki.call-cc.org" R)
+                                                         F))
+                                         ;; Relative path, try man page.  Wiki links to
+                                         ;; current directory (/man) but we can't.
+                                         ((man-filename->path R)
+                                          => (lambda (p)
+                                               (path+section->href p F)))
+                                         ;; Relative path, assume egg node.
+                                         (else
+                                          (path+section->href (list R) F))))
                                  (let ((ilink
                                         (lambda (link desc)   ;; Caller must quote DESC.
-                                          (let ((href
-                                                 ;; Usage of man-filename->path is barely tolerable.
-                                                 ;; Perhaps we should use the id cache.
-                                                 (cond ((char=? (string-ref link 0)
-                                                                #\#)
-                                                        ;; Assume #fragments target section names in this doc.
-                                                        (section->href (substring link 1)))
-                                                       ;; Wiki man page, link to corresponding man page
-                                                       ((string-match +rx:wiki-man-page+ link)
-                                                        => (lambda (m)
-                                                             (cond ((man-filename->path (cadr m))
-                                                                    => path->href)
-                                                                   (else link))))
-                                                       ;; Wiki egg page, link to node
-                                                       ((string-match +rx:wiki-egg-page+ link)
-                                                        => (lambda (m)
-                                                             (path->href (list (cadr m)))))
-                                                       ;; Unknown absolute path, link to wiki
-                                                       ((char=? (string-ref link 0)
-                                                                #\/)
-                                                        (string-append ; ???
-                                                         "http://wiki.call-cc.org"
-                                                         link))
-                                                       ;; Relative path, try man page.  Wiki links to
-                                                       ;; current directory (/man) but we can't.
-                                                       ((man-filename->path link)
-                                                        => path->href)
-                                                       ;; Relative path, assume egg node.
-                                                       (else
-                                                        (path->href (list link)) ; !
-                                                        ))))
+                                          (let* ((S (split-fragment link))
+                                                 (href (process-resource (car S) (cdr S))))
                                             `("<a href=\"" ,(quote-html href) "\">" ,desc "</a>")))))
                                    (match b
                                           ((link desc) (ilink link (walk desc inline-ss)))
-                                          ((link) (ilink link (quote-html link)))))))))
-              )
+                                          ((link) (ilink link (quote-html link)))))))
+                           )))
        (walk
         doc
         `(
