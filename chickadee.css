@@ -1,3 +1,5 @@
+/* Disabled box-shadow on #contents and dl.defsig due to
+   performance problems on mobile (and tackiness). */
 body {
   font-family: "Georgia", "Times New Roman", serif;
   background-color: #ffffff;
@@ -39,9 +41,9 @@ tt {
   -webkit-border-bottom-left-radius: 6px;
   border-bottom-left-radius: 6px;
 /*  -moz-box-shadow: -5px 3px 5px #ddd; */   /* mozilla hack to prevent right overflow */
-  -moz-box-shadow: 0px 1px 10px #aaa; 
+/*  -moz-box-shadow: 0px 1px 10px #aaa; 
   -webkit-box-shadow: 0px 1px 10px #aaa;
-  box-shadow: 0px 1px 10px #aaa;
+  box-shadow: 0px 1px 10px #aaa; */
   background-color: white;
 }
 #contents h2 {
@@ -73,9 +75,9 @@ dl.defsig {
   -moz-border-radius-bottomright: 5px;
   -webkit-border-bottom-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  -webkit-box-shadow: #bbb 0px 2px 5px;
+/*  -webkit-box-shadow: #bbb 0px 1px 1px;
   -moz-box-shadow: #bbb 0px 2px 5px;
-  box-shadow: #bbb 0px 2px 5px;
+  box-shadow: #bbb 0px 2px 5px; */
 }
 
 dt.defsig {
@@ -227,9 +229,9 @@ a:hover {
   /* BFC set elsewhere */
   border-bottom: 3px double black;
   /* box-shadow: #bbb 0px 1px 5px;  // desired box shadow, but right overflow issues */
-  -webkit-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
-  -moz-box-shadow: #bbb -5px 1px 5px;  /* moz hack to prevent right overflow */
-  box-shadow: #bbb -5px 1px 5px;
+  -webkit-box-shadow: #bbb -3px 1px 3px;  /* moz hack to prevent right overflow */
+  -moz-box-shadow: #bbb -3px 1px 3px;  /* moz hack to prevent right overflow */
+  box-shadow: #bbb -3px 1px 3px;
 }
 
 h1 a {
@@ -422,9 +424,9 @@ div.incsearch {
   display: none;
   background-color: #ffffff;
   cursor: default;
-  -webkit-box-shadow: 0px 1px 5px #bbb;
-  -moz-box-shadow: 0px 1px 5px #bbb;
-  box-shadow: 0px 1px 5px #bbb;
+  -webkit-box-shadow: 0px 1px 3px #bbb;
+  -moz-box-shadow: 0px 1px 3px #bbb;
+  box-shadow: 0px 1px 3px #bbb;
 }
 
 div.incsearch ul {
