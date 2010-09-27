@@ -147,7 +147,7 @@
     (if (null? ids)
         '()
         `((h2 (@ (class "contents-list"))
-              "Contents" (& "raquo"))
+              "Contents " (& "raquo"))
           (ul (@ (class "contents-list"))
               ,(map
                 (let ((child->href (make-child->href n)))
