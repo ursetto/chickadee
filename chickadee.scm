@@ -85,7 +85,8 @@
           ;; Should we return 404 here?  This is not a real resource
           (node-page #f
                      ""
-                     (<p> "No node found matching identifier " (<tt> (htmlize x)))
+                     (sxml->html `(p "No node found matching identifier "
+                                     (tt ,x)))
                      page-title: "node not found"))
          (nodes
           (match-page nodes x))))
