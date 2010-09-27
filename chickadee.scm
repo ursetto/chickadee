@@ -55,26 +55,27 @@
 ;;; Pages
 
 (define (input-form)
-  (sxml->html
-   `(form (@ (class "lookup")
-             (action ,(cdoc-page-path))
-             (method get))
-          (input (@ (id "searchbox")
-                    (class "text incsearch { "
-                      "url: \"" ,(uri->string (incremental-search-uri)) "\","
-                      "delay: " ,(incremental-search-delay)
-                      " }")
-                    (type "text")
-                    (name "q")
-                    (autocomplete "off") ;; apparently readonly in DOM
-                    (autocorrect "off")
-                    (autocapitalize "off")) ;; iphone/ipad
-                 )
-          (div (@ (class "buttons"))
-               (input (@ (class "button") (type "submit")
-                         (id "query-name") (name "query-name") (value "Lookup")))
-               (input (@ (class "button") (type "submit")
-                         (id "query-regex") (name "query-regex") (value "Regex")))))))
+  `(form (@ (class "lookup")
+            (action ,(cdoc-page-path))
+            (method get))
+         (input (@ (id "searchbox")
+                   (class "text incsearch { "
+                     "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                     "delay: " ,(incremental-search-delay)
+                     " }")
+                   (type "text")
+                   (name "q")
+                   (autocomplete "off") ;; apparently readonly in DOM
+                   (autocorrect "off")
+                   (autocapitalize "off")) ;; iphone/ipad
+                )
+         (div (@ (class "buttons"))
+              (input (@ (class "button") (type "submit")
+                        (id "query-name") (name "query-name")
+                        (value "Lookup")))
+              (input (@ (class "button") (type "submit")
+                        (id "query-regex") (name "query-regex")
+                        (value "Regex"))))))
 
 (define (format-id x)
   (match (match-nodes x)
@@ -180,7 +181,7 @@
               (if (null? (node-path n))
                   (node-page #f
                              (contents-list n)
-                             (root-page))
+                             (sxml->html (root-page)))
                   (node-page (title-path n)
                              (contents-list n)
                              (chicken-doc-sxml->html (node-sxml n)
@@ -286,30 +287,36 @@
           (parameterize ((access-log (ajax-log))) ; Logging is extremely slow
             (send-response body: body))))))))
 
-(define (root-page)
-  (++ (<h3> "Search Chicken documentation")
-      (input-form)
-      (<p> "Enter a documentation node name or path in the search box above."
-           (<ul> (<li> "A node name is an identifier, egg, module or unit name, such as "
-                       (<i> "open/rdonly") ", " (<i> "awful") ", "
-                       (<i> "scheme") " or " (<i> "eval") ".")
-                 (<li> "A node path is a sequence of node names, such as "
-                       (<i> "eval load") " or " (<i> "foreign types") ".")
-                 (<li> "Regular expression matching is usually done against node names, but if a space is present, the full node path will be considered.")
-                 ;; It might be more useful to match against each identifier level
-                 ;; with a separate regex.
-                 ))
+;; Re matching, it might be more useful to match against each identifier level
+;; with a separate regex.
 
-      (<h3> "Quick links")
-      (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
-            (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
-            (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  )
-      (<h4> "About")
-      (<p> (<a> href: (path->href '(chickadee)) "chickadee")
-           " is the web interface to the " (<a> href: (path->href '(chicken-doc)) "chicken-doc")
-           " documentation system for the " (<a> href: "http://call-cc.org" "Chicken") " language.  It is running on the " (<a> href: (path->href '(spiffy)) "spiffy") " webserver on Chicken " (chicken-version) ".")
-      ))
+(define (root-page)
+  `((h3 "Search Chicken documentation")
+    ,(input-form)
+    (p "Enter a documentation node name or path in the search box above.")
+    (ul (li "A node name is an identifier, egg, module or unit name, such as "
+            (i "open/rdonly") ", " (i "awful") ", "
+            (i "scheme") " or " (i "eval") ".")
+        (li "A node path is a sequence of node names, such as "
+            (i "eval load") " or " (i "foreign types") ".")
+        (li "Regular expression matching is usually done against node names,"
+            " but if a space is present, the full node path will be considered."))
+    (h3 "Quick links")
+    (ul (li (a (@ (href ,(path->href '(chicken))))
+               "Chicken manual"))
+        (li (a (@ (href ,(path->href '(chicken language))))
+               "Supported language"))
+        (li (a (@ (href ,(path->href '(foreign))))
+               "FFI")))
+    (h4 "About")
+    (p (a (@ (href ,(path->href '(chickadee)))) "chickadee")
+       " is the web interface to the "
+       (a (@ (href ,(path->href '(chicken-doc)))) "chicken-doc")
+       " documentation system for the "
+       (a (@ (href "http://call-cc.org")) "Chicken")
+       " language.  It is running on the "
+       (a (@ (href ,(path->href '(spiffy)))) "spiffy")
+       " webserver on Chicken " ,(chicken-version) ".")))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
