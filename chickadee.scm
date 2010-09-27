@@ -54,6 +54,9 @@
           (lambda ()
             (SRV:send-reply (pre-post-order* doc rules)))))))
 
+(define (maybe pred x)
+  (if pred x '()))
+
 ;;; Pages
 
 (define (input-form)
@@ -107,6 +110,7 @@
         (max (repository-modification-time (current-repository))
              (last-modified))
         (lambda ()
+;;; FIXME!!!!!! not sxml-ized
           (node-page
            (string-append "query " match-text " ("
                           (if (> result-length max-results)
@@ -316,55 +320,56 @@
 ;; Internal fxn for node-page / not-found
 (define (%node-page-body title contents body #!key (page-title #f))
   (html-page
-   (++ (<p> id: 'navskip
-            (<a> href: "#body" "Skip navigation."))
-       (<div> id: "hdr"
-              (<h1> (link (path->href '()) "chickadee")
-                    (if title
-                        (string-append " &raquo; " title)
-                        (string-append " | "
-                                       (link (path->href '(chicken-doc))
-                                             "chicken-doc")
-                                       " server")))
-              (<h5> (<label> for: "hdr-searchbox"
-                             "Identifier search"))
-              (<form> id: "hdr-lookup"
-                      class: "hdr-lookup"
-                      action: (cdoc-page-path)
-                      method: 'get
-                      (<input> id: "hdr-searchbox" name: "q"
-                               class: (string-append
-                                       "text incsearch { "
-                                       "url: \"" (uri->string (incremental-search-uri)) "\","
-                                       "delay: " (number->string (incremental-search-delay)) " }")
-                               type: "text"
-                               accesskey: "f"
-                               title: "chickadee search (Ctrl-F)"
-                               autocomplete: "off" autocorrect: "off"
-                               autocapitalize: "off"
-                               tabindex: "1")
-                      (<button> id: "hdr-submit" name: "query-name"
-                                title: "Search chicken-doc for this identifier"
-                                class: "button" type: "submit"
-                                "&nbsp;")
-                      ;; (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
-                      ;;          class: "button"
-                      ;;          type: "submit"
-                      ;;          tabindex: "2")
-                      ))
-       (if (string=? contents "")
-           ""
-           (<div> id: "contents"
-                  contents))
-       ;; We don't insert an empty contents div any more, because the bottom
-       ;; border shows up when it's empty.
-       ;; (<div> id: "contents"
-       ;;        (if (string=? contents "")
-       ;;            "<!-- ie sux -->"         ; collapse empty div for IE
-       ;;            contents))
-       (<div> id: "body"
-              (<div> id: "main"
-                     body)))
+   (sxml->html
+    `((p (@ (id "navskip"))
+         (a (@ (href "#body")) "Skip navigation."))
+      (div (@ (id "hdr"))
+           (h1 ,(link (path->href '()) "chickadee")
+               ,(if (null? title)
+                    `((" | " ,(link (path->href '(chicken-doc))
+                                    "chicken-doc")
+                       " server"))
+                    `((lit " &raquo; ") ,title)))
+           (h5 (label (@ (for "hdr-searchbox"))
+                      "Identifier search"))
+           (form (@ (id "hdr-lookup")
+                    (class "hdr-lookup")
+                    (action ,(cdoc-page-path))
+                    (method "get"))
+                 (input (@ (id "hdr-searchbox")
+                           (name "q")
+                           (class "text incsearch { "
+                             "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                             "delay: " ,(incremental-search-delay) " }")
+                           (type "text")
+                           (accesskey "f")
+                           (title "chickadee search (Ctrl-F)")
+                           (autocomplete "off")
+                           (autocorrect "off")
+                           (autocapitalize "off")
+                           (tabindex "1")))
+                 (button (@ (id "hdr-submit") (name "query-name")
+                            (title "Search chicken-doc for this identifier")
+                            (class "button") (type "submit"))
+                         (& "nbsp"))
+                 ;; (input id "hdr-submit" name "query-name" value "Lookup"
+                 ;;          class "button"
+                 ;;          type "submit"
+                 ;;          tabindex "2")
+                 ))
+      ,(maybe (not (null? contents))
+              `(div (@ (id "contents"))
+                    ,contents))
+      ;; We don't insert an empty contents div any more, because the bottom
+      ;; border shows up when it's empty.
+      ;; (div id "contents"
+      ;;        (if (string=? contents "")
+      ;;            "<!-- ie sux -->"         ; collapse empty div for IE
+      ;;            contents))
+      (div (@ (id "body"))
+           (div (@ (id "main"))
+                ,body))))
+   
    headers: (string-concatenate         ;; Note: cacheable
              (append
               (list
@@ -382,9 +387,9 @@
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
-   body: (%node-page-body (if (null? title) #f (sxml->html title)) ;meh
-                          (sxml->html contents)
-                          (sxml->html body)
+   body: (%node-page-body title
+                          contents
+                          body
                           page-title: page-title)
    headers: `((content-type #(text/html ((charset . "utf-8"))))
               )))
@@ -394,9 +399,9 @@
   ;; but right now I don't want to duplicate main page code
   (send-response code: 404 reason: "Not found"
                  body:
-                 (%node-page-body (htmlize title)  ; quoting critical
-                                  ""
-                                  (sxml->html body)
+                 (%node-page-body title
+                                  '()
+                                  body
                                   page-title: "node not found")))
 
 (define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
@@ -474,7 +479,7 @@
 
 (define ++ string-append)  ; legacy from awful
 (define (link href desc)
-  (<a> href: href desc))
+  `(a (@ (href ,href)) ,desc))
 (define ($ var #!optional converter/default)  ; from awful
     ((http-request-variables) var converter/default))
 (define http-request-variables (make-parameter #f))
