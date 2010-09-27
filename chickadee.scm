@@ -44,13 +44,15 @@
 
 (use (only ports with-output-to-port with-output-to-string))
 (define (sxml->html doc #!optional port)
-  (if port
-      (with-output-to-port port
-        (lambda ()
-          (SRV:send-reply (pre-post-order* doc universal-conversion-rules*))))
-      (with-output-to-string
-        (lambda ()
-          (SRV:send-reply (pre-post-order* doc universal-conversion-rules*))))))
+  (let ((rules `((lit *preorder* . ,(lambda (t b) b))
+                 . ,universal-conversion-rules*)))
+    (if port
+        (with-output-to-port port
+          (lambda ()
+            (SRV:send-reply (pre-post-order* doc rules))))
+        (with-output-to-string
+          (lambda ()
+            (SRV:send-reply (pre-post-order* doc rules)))))))
 
 ;;; Pages
 
@@ -83,10 +85,9 @@
           (redirect-to (path->href (node-path n1))))
          (()
           ;; Should we return 404 here?  This is not a real resource
-          (node-page #f
-                     ""
-                     (sxml->html `(p "No node found matching identifier "
-                                     (tt ,x)))
+          (node-page '()
+                     '()
+                     `(p "No node found matching identifier " (tt ,x))
                      page-title: "node not found"))
          (nodes
           (match-page nodes x))))
@@ -172,16 +173,17 @@
                  (last-modified))
             (lambda ()
               (if (null? (node-path n))
-                  (node-page #f
-                             (sxml->html (contents-list n))
-                             (sxml->html (root-page)))
-                  (node-page (sxml->html (title-path n))
-                             (sxml->html (contents-list n))
-                             (chicken-doc-sxml->html (node-sxml n)
-                                                     path->href
-                                                     (make-def->href n))
+                  (node-page '()
+                             (contents-list n)
+                             (root-page))
+                  (node-page (title-path n)
+                             (contents-list n)
+                             `(lit
+                               . ,(chicken-doc-sxml->html (node-sxml n)
+                                                          path->href
+                                                          (make-def->href n)))
                              page-title: (last (node-path n))))))))
-        (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
+        (node-not-found p `(p "No node found at path " (i ,p))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
@@ -380,7 +382,9 @@
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
-   body: (%node-page-body title contents body
+   body: (%node-page-body (if (null? title) #f (sxml->html title)) ;meh
+                          (sxml->html contents)
+                          (sxml->html body)
                           page-title: page-title)
    headers: `((content-type #(text/html ((charset . "utf-8"))))
               )))
@@ -391,7 +395,8 @@
   (send-response code: 404 reason: "Not found"
                  body:
                  (%node-page-body (htmlize title)  ; quoting critical
-                                  "" body
+                                  ""
+                                  (sxml->html body)
                                   page-title: "node not found")))
 
 (define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
