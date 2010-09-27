@@ -145,23 +145,18 @@
            page-title: "query results")))))))
 
 (define (contents-list n)
-  (let ((ids (node-child-ids n)))  ; Assumption: node-child-ids include all definitions.
+  (let ((ids (node-child-ids n)))
     (if (null? ids)
-        ""
-        (tree->string
-         `("<h2 class=\"contents-list\">Contents &raquo;</h2>\n"
-           "<ul class=\"contents-list\">"
-           ,(map
-             (let ((child->href (make-child->href n)))
-               (lambda (id)
-                 `("<li>"
-                   "<a href=\"" ,(child->href id)
-                   "\">" ,(quote-html id)
-                   "</a>"
-                   "</li>")))
-             (map ->string ids))
-           "</ul>\n"
-           )))))
+        '()
+        `((h2 (@ (class "contents-list"))
+              "Contents" (& "raquo"))
+          (ul (@ (class "contents-list"))
+              ,(map
+                (let ((child->href (make-child->href n)))
+                  (lambda (id)
+                    `(li
+                      (a (@ (href ,(child->href id))) ,id))))
+                (map ->string ids)))))))
 
 (use srfi-69)
 
@@ -180,10 +175,10 @@
             (lambda ()
               (if (null? (node-path n))
                   (node-page #f
-                             (contents-list n)
+                             (sxml->html (contents-list n))
                              (sxml->html (root-page)))
                   (node-page (title-path n)
-                             (contents-list n)
+                             (sxml->html (contents-list n))
                              (chicken-doc-sxml->html (node-sxml n)
                                                      path->href
                                                      (make-def->href n))
