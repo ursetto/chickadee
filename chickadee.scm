@@ -110,41 +110,36 @@
         (max (repository-modification-time (current-repository))
              (last-modified))
         (lambda ()
-;;; FIXME!!!!!! not sxml-ized
           (node-page
-           (string-append "query " match-text " ("
-                          (if (> result-length max-results)
-                              (string-append (number->string
-                                              max-results) " of ")
-                              "")
-                          (number->string result-length)
-                          " matches)")
-           ""                 ;contents
-           (sxml->html
-            (if (= result-length 0)
-                '()
-                `(table
-                  (@ (class "match-results"))
-                  (tr (th "path") (th "signature"))
-                  ,(let loop ((sigs (maximum-match-signatures))
-                              (results max-results)
-                              (nodes nodes) (acc '()))
-                     (if (or (null? nodes)
-                             (<= results 0))
-                         (reverse acc)
-                         (let ((n (car nodes)))
-                           (loop (- sigs 1) (- results 1)
-                                 (cdr nodes)
-                                 (cons
-                                  `(tr
-                                    (td (@ (class "match-path"))
-                                        ,(title-path n))
-                                    (td (@ (class "match-sig"))
-                                        (a (@ (href ,(path->href (node-path n))))
-                                           ,(if (<= sigs 0)
-                                                "-"
-                                                `(tt ,(node-signature n))))))
-                                  acc))))))))
+           `("query " ,match-text " ("
+             ,(maybe (> result-length max-results)
+                     `(,max-results " of "))
+             ,result-length " matches)")
+           '()                 ;contents
+           (if (= result-length 0)
+               '()
+               `(table
+                 (@ (class "match-results"))
+                 (tr (th "path") (th "signature"))
+                 ,(let loop ((sigs (maximum-match-signatures))
+                             (results max-results)
+                             (nodes nodes) (acc '()))
+                    (if (or (null? nodes)
+                            (<= results 0))
+                        (reverse acc)
+                        (let ((n (car nodes)))
+                          (loop (- sigs 1) (- results 1)
+                                (cdr nodes)
+                                (cons
+                                 `(tr
+                                   (td (@ (class "match-path"))
+                                       ,(title-path n))
+                                   (td (@ (class "match-sig"))
+                                       (a (@ (href ,(path->href (node-path n))))
+                                          ,(if (<= sigs 0)
+                                               "-"
+                                               `(tt ,(node-signature n))))))
+                                 acc)))))))
            page-title: "query results")))))))
 
 (define (contents-list n)
