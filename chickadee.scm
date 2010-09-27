@@ -25,7 +25,7 @@
 
 (import scheme chicken)
 (import tcp data-structures srfi-1)
-(use spiffy-request-vars html-tags html-utils chicken-doc)
+(use spiffy-request-vars html-utils chicken-doc)
 (use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
@@ -365,13 +365,13 @@
            (div (@ (id "main"))
                 ,body))))
    
-   headers: (string-concatenate         ;; Note: cacheable
-             (append
-              (list
-               (<meta> name: "viewport" content: "initial-scale=1"))
-              (map
-               (lambda (x) (<script> type: "text/javascript" src: x))
-               (map uri->string (chickadee-js-files)))))
+   headers: (sxml->html         ;; Note: cacheable
+             `((meta (@ (name "viewport")
+                        (content "initial-scale=1")))
+               ,(map (lambda (x)
+                       `(script (@ (type "text/javascript")
+                                   (src ,(uri->string x)))))
+                     (chickadee-js-files))))
    css: (map uri->string (chickadee-css-files))
    charset: "UTF-8"
    doctype: "<!doctype html>"
