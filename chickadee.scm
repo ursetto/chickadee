@@ -115,34 +115,31 @@
                           (number->string result-length)
                           " matches)")
            ""                 ;contents
-           (if (= result-length 0)
-               ""
-               (tree->string
-                (list
-                 "<table class=\"match-results\">"
-                 (<tr> (<th> "path") (<th> "signature"))
-                 (let loop ((sigs (maximum-match-signatures))
-                            (results max-results)
-                            (nodes nodes) (acc '()))
-                   (if (or (null? nodes)
-                           (<= results 0))
-                       (reverse acc)
-                       (let ((n (car nodes)))
-                         (loop (- sigs 1) (- results 1)
-                               (cdr nodes)
-                               (cons 
-                                (list
-                                 "<tr>"
-                                 (<td> class: "match-path" (title-path n))
-                                 (<td> class: "match-sig"
-                                       (<a> href: (path->href (node-path n))
-                                            (if (<= sigs 0)
+           (sxml->html
+            (if (= result-length 0)
+                '()
+                `(table
+                  (@ (class "match-results"))
+                  (tr (th "path") (th "signature"))
+                  ,(let loop ((sigs (maximum-match-signatures))
+                              (results max-results)
+                              (nodes nodes) (acc '()))
+                     (if (or (null? nodes)
+                             (<= results 0))
+                         (reverse acc)
+                         (let ((n (car nodes)))
+                           (loop (- sigs 1) (- results 1)
+                                 (cdr nodes)
+                                 (cons
+                                  `(tr
+                                    (td (@ (class "match-path"))
+                                        ,(title-path n))
+                                    (td (@ (class "match-sig"))
+                                        (a (@ (href ,(path->href (node-path n))))
+                                           ,(if (<= sigs 0)
                                                 "-"
-                                                (<tt> convert-to-entities?: #t
-                                                      (node-signature n)))))
-                                 "</tr>")
-                                acc)))))
-                 "</table>")))
+                                                `(tt ,(node-signature n))))))
+                                  acc))))))))
            page-title: "query results")))))))
 
 (define (contents-list n)
@@ -178,7 +175,7 @@
                   (node-page #f
                              (sxml->html (contents-list n))
                              (sxml->html (root-page)))
-                  (node-page (title-path n)
+                  (node-page (sxml->html (title-path n))
                              (sxml->html (contents-list n))
                              (chicken-doc-sxml->html (node-sxml n)
                                                      path->href
@@ -222,21 +219,20 @@
           (path->href (append path (list id)))))))
 
 (define (title-path n)
-  (let loop ((p (node-path n))
-             (f '())
-             (r '()))
-    (if (null? p)
-        (tree->string (reverse r))
-        (let* ((id (->string (car p)))
-               (f (append f (list id)))
-               (n (lookup-node f)))
-          (loop (cdr p) f (cons
-                           (list
-                            "<a href=\"" (path->href f)
-                            "\">" (quote-html id)
-                            "</a>"
-                            (if (null? (cdr p)) '() " &raquo; "))
-                           r))))))
+  (define (links n)
+    (let loop ((p (node-path n))
+               (f '())
+               (r '()))
+      (if (null? p)
+          (reverse r)
+          (let* ((id (->string (car p)))
+                 (f (append f (list id)))
+                 (n (lookup-node f)))
+            (let ((link `(a (@ (href ,(path->href f))) ,id)))
+              (loop (cdr p) f (cons link r)))))))
+  
+  (intersperse (links n)
+               '(" " (& "raquo") " "))) ;; literal " &raquo; " would be nicer
 
 (define (query p)
   (let ((q (string-split p)))
