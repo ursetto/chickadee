@@ -3,7 +3,9 @@
 ;; License: BSD.
 
 (module chickadee
- (chickadee-start-server
+*
+ #;
+(chickadee-start-server
   cdoc-uri
   chickadee-uri
   incremental-search-uri
@@ -35,26 +37,44 @@
 (use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
 (use srfi-18)
+(use (only sxml-transforms
+           pre-post-order* universal-conversion-rules* SRV:send-reply))
+
+;;; HTML
+
+(use (only ports with-output-to-port with-output-to-string))
+(define (sxml->html doc #!optional port)
+  (if port
+      (with-output-to-port port
+        (lambda ()
+          (SRV:send-reply (pre-post-order* doc universal-conversion-rules*))))
+      (with-output-to-string
+        (lambda ()
+          (SRV:send-reply (pre-post-order* doc universal-conversion-rules*))))))
 
 ;;; Pages
 
 (define (input-form)
-  (<form> class: "lookup"
-          action: (cdoc-page-path)
-          method: 'get
-          (<input> id: "searchbox" class: (string-append "text incsearch { "
-                                                         "url: \"" (uri->string (incremental-search-uri)) "\","
-                                                         "delay: " (number->string (incremental-search-delay))
-                                                         " }")
-                   type: "text" name: "q"
-                   autocomplete: "off"  ;; apparently readonly in DOM
-                   autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
-                   )
-          (<div> class: "buttons"
-           (<input> class: "button" type: "submit"
-                    id: "query-name" name: "query-name" value: "Lookup")
-           (<input> class: "button" type: "submit"
-                    id: "query-regex" name: "query-regex" value: "Regex"))))
+  (sxml->html
+   `(form (@ (class "lookup")
+             (action ,(cdoc-page-path))
+             (method get))
+          (input (@ (id "searchbox")
+                    (class "text incsearch { "
+                      "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                      "delay: " ,(incremental-search-delay)
+                      " }")
+                    (type "text")
+                    (name "q")
+                    (autocomplete "off") ;; apparently readonly in DOM
+                    (autocorrect "off")
+                    (autocapitalize "off")) ;; iphone/ipad
+                 )
+          (div (@ (class "buttons"))
+               (input (@ (class "button") (type "submit")
+                         (id "query-name") (name "query-name") (value "Lookup")))
+               (input (@ (class "button") (type "submit")
+                         (id "query-regex") (name "query-regex") (value "Regex")))))))
 
 (define (format-id x)
   (match (match-nodes x)
