@@ -80,17 +80,17 @@
                      "url: \"" ,(uri->string (incremental-search-uri)) "\","
                      "delay: " ,(incremental-search-delay)
                      " }")
-                   (type "text")
-                   (name "q")
-                   (autocomplete "off") ;; apparently readonly in DOM
-                   (autocorrect "off")
-                   (autocapitalize "off")) ;; iphone/ipad
+                   (type text)
+                   (name q)
+                   (autocomplete off) ;; apparently readonly in DOM
+                   (autocorrect off)
+                   (autocapitalize off)) ;; iphone/ipad
                 )
          (div (@ (class "buttons"))
-              (input (@ (class "button") (type "submit")
+              (input (@ (class "button") (type submit)
                         (id "query-name") (name "query-name")
                         (value "Lookup")))
-              (input (@ (class "button") (type "submit")
+              (input (@ (class "button") (type submit)
                         (id "query-regex") (name "query-regex")
                         (value "Regex"))))))
 
