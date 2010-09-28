@@ -147,10 +147,11 @@
                                    (td (@ (class "match-path"))
                                        ,(title-path n))
                                    (td (@ (class "match-sig"))
-                                       (a (@ (href ,(path->href (node-path n))))
-                                          ,(if (<= sigs 0)
-                                               "-"
-                                               `(tt ,(node-signature n))))))
+                                       ,(path-link
+                                         (node-path n)
+                                         (if (<= sigs 0)
+                                             "-"
+                                             `(tt ,(node-signature n))))))
                                  acc)))))))
            page-title: "query results")))))))
 
@@ -241,8 +242,7 @@
           (let* ((id (->string (car p)))
                  (f (append f (list id)))
                  (n (lookup-node f)))
-            (let ((link `(a (@ (href ,(path->href f))) ,id)))
-              (loop (cdr p) f (cons link r)))))))
+            (loop (cdr p) f (cons (path-link f id) r))))))
   
   (intersperse (links n)
                '(" " (& "raquo") " "))) ;; literal " &raquo; " would be nicer
@@ -307,20 +307,17 @@
         (li "Regular expression matching is usually done against node names,"
             " but if a space is present, the full node path will be considered."))
     (h3 "Quick links")
-    (ul (li (a (@ (href ,(path->href '(chicken))))
-               "Chicken manual"))
-        (li (a (@ (href ,(path->href '(chicken language))))
-               "Supported language"))
-        (li (a (@ (href ,(path->href '(foreign))))
-               "FFI")))
+    (ul (li ,(path-link '(chicken) "Chicken manual"))
+        (li ,(path-link '(chicken language) "Supported language"))
+        (li ,(path-link '(foreign) "FFI")))
     (h4 "About")
-    (p (a (@ (href ,(path->href '(chickadee)))) "chickadee")
+    (p ,(path-link '(chickadee))
        " is the web interface to the "
-       (a (@ (href ,(path->href '(chicken-doc)))) "chicken-doc")
+       ,(path-link '(chicken-doc))
        " documentation system for the "
        (a (@ (href "http://call-cc.org")) "Chicken")
        " language.  It is running on the "
-       (a (@ (href ,(path->href '(spiffy)))) "spiffy")
+       ,(path-link '(spiffy))
        " webserver on Chicken " ,(chicken-version) ".")))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
@@ -341,10 +338,9 @@
        (p (@ (id "navskip"))
           (a (@ (href "#body")) "Skip navigation."))
        (div (@ (id "hdr"))
-            (h1 ,(link (path->href '()) "chickadee")
+            (h1 ,(path-link '() "chickadee")
                 ,(if (null? title)
-                     `((" | " ,(link (path->href '(chicken-doc))
-                                     "chicken-doc")
+                     `((" | " ,(path-link '(chicken-doc))
                         " server"))
                      `((lit " &raquo; ") ,title)))
             (h5 (label (@ (for "hdr-searchbox"))
@@ -481,6 +477,9 @@
 
 (define (link href desc)
   `(a (@ (href ,href)) ,desc))
+(define (path-link path #!optional desc)
+  (link (path->href path)
+        (or desc (string-intersperse (map ->string path) " "))))
 
 (define ($ var #!optional converter/default)  ; from awful
     ((http-request-variables) var converter/default))
