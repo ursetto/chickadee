@@ -71,7 +71,7 @@
 
 ;;; Pages
 
-(define (input-form)
+(define (search-form)
   `(form (@ (class "lookup")
             (action ,(cdoc-page-path))
             (method get))
@@ -297,7 +297,7 @@
 
 (define (root-page)
   `((h3 "Search Chicken documentation")
-    ,(input-form)
+    ,(search-form)
     (p "Enter a documentation node name or path in the search box above.")
     (ul (li "A node name is an identifier, egg, module or unit name, such as "
             (i "open/rdonly") ", " (i "awful") ", "
