@@ -169,8 +169,6 @@
                       (a (@ (href ,(child->href id))) ,id))))
                 (map ->string ids)))))))
 
-(use srfi-69)
-
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
     (if n
