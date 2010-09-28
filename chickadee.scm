@@ -364,21 +364,10 @@
                   (button (@ (id "hdr-submit") (name "query-name")
                              (title "Search chicken-doc for this identifier")
                              (class "button") (type "submit"))
-                          (& "nbsp"))
-                  ;; (input id "hdr-submit" name "query-name" value "Lookup"
-                  ;;          class "button"
-                  ;;          type "submit"
-                  ;;          tabindex "2")
-                  ))
+                          (& "nbsp"))))
        ,(maybe (not (null? contents))
                `(div (@ (id "contents"))
                      ,contents))
-       ;; We don't insert an empty contents div any more, because the bottom
-       ;; border shows up when it's empty.
-       ;; (div id "contents"
-       ;;        (if (string=? contents "")
-       ;;            "<!-- ie sux -->"         ; collapse empty div for IE
-       ;;            contents))
        (div (@ (id "body"))
             (div (@ (id "main"))
                  ,body)))))))
