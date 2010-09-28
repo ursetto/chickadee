@@ -25,7 +25,7 @@
 
 (import scheme chicken)
 (import tcp data-structures srfi-1)
-(use spiffy-request-vars html-utils chicken-doc)
+(use spiffy-request-vars chicken-doc)
 (use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
@@ -56,6 +56,18 @@
 
 (define (maybe pred x)
   (if pred x '()))
+
+(define (charset c)
+  (maybe c
+         `(meta (@ (http-equiv "content-type")
+                   (content "text/html; charset=" ,c)))))
+(define (javascript u)
+  `(script (@ (type "text/javascript")
+              (src ,(uri->string u)))))
+(define (css-link u)
+  `(link (@ (rel stylesheet)
+            (href ,(uri->string u))
+            (type "text/css"))))
 
 ;;; Pages
 
@@ -314,71 +326,66 @@
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
 (define (%node-page-body title contents body #!key (page-title #f))
-  (html-page
-   (sxml->html
-    `((p (@ (id "navskip"))
-         (a (@ (href "#body")) "Skip navigation."))
-      (div (@ (id "hdr"))
-           (h1 ,(link (path->href '()) "chickadee")
-               ,(if (null? title)
-                    `((" | " ,(link (path->href '(chicken-doc))
-                                    "chicken-doc")
-                       " server"))
-                    `((lit " &raquo; ") ,title)))
-           (h5 (label (@ (for "hdr-searchbox"))
-                      "Identifier search"))
-           (form (@ (id "hdr-lookup")
-                    (class "hdr-lookup")
-                    (action ,(cdoc-page-path))
-                    (method "get"))
-                 (input (@ (id "hdr-searchbox")
-                           (name "q")
-                           (class "text incsearch { "
-                             "url: \"" ,(uri->string (incremental-search-uri)) "\","
-                             "delay: " ,(incremental-search-delay) " }")
-                           (type "text")
-                           (accesskey "f")
-                           (title "chickadee search (Ctrl-F)")
-                           (autocomplete "off")
-                           (autocorrect "off")
-                           (autocapitalize "off")
-                           (tabindex "1")))
-                 (button (@ (id "hdr-submit") (name "query-name")
-                            (title "Search chicken-doc for this identifier")
-                            (class "button") (type "submit"))
-                         (& "nbsp"))
-                 ;; (input id "hdr-submit" name "query-name" value "Lookup"
-                 ;;          class "button"
-                 ;;          type "submit"
-                 ;;          tabindex "2")
-                 ))
-      ,(maybe (not (null? contents))
-              `(div (@ (id "contents"))
-                    ,contents))
-      ;; We don't insert an empty contents div any more, because the bottom
-      ;; border shows up when it's empty.
-      ;; (div id "contents"
-      ;;        (if (string=? contents "")
-      ;;            "<!-- ie sux -->"         ; collapse empty div for IE
-      ;;            contents))
-      (div (@ (id "body"))
-           (div (@ (id "main"))
-                ,body))))
-   
-   headers: (sxml->html         ;; Note: cacheable
-             `((meta (@ (name "viewport")
-                        (content "initial-scale=1")))
-               ,(map (lambda (x)
-                       `(script (@ (type "text/javascript")
-                                   (src ,(uri->string x)))))
-                     (chickadee-js-files))))
-   css: (map uri->string (chickadee-css-files))
-   charset: "UTF-8"
-   doctype: "<!doctype html>"
-   ;; no good way to get a nice title yet
-   title: (htmlize (if page-title
-                       (string-append page-title " | chickadee")
-                       "chickadee server"))))
+  (sxml->html
+   `((lit "<!doctype html>")
+     (html
+      (head ,(charset "utf-8")
+            ,(map javascript (chickadee-js-files))
+            ,(map css-link (chickadee-css-files))
+            (title ,(if page-title
+                        `(,page-title " | chickadee")
+                        "chickadee server"))
+            (meta (@ (name "viewport")
+                     (content "initial-scale=1"))))
+      (body
+       (p (@ (id "navskip"))
+          (a (@ (href "#body")) "Skip navigation."))
+       (div (@ (id "hdr"))
+            (h1 ,(link (path->href '()) "chickadee")
+                ,(if (null? title)
+                     `((" | " ,(link (path->href '(chicken-doc))
+                                     "chicken-doc")
+                        " server"))
+                     `((lit " &raquo; ") ,title)))
+            (h5 (label (@ (for "hdr-searchbox"))
+                       "Identifier search"))
+            (form (@ (id "hdr-lookup")
+                     (class "hdr-lookup")
+                     (action ,(cdoc-page-path))
+                     (method "get"))
+                  (input (@ (id "hdr-searchbox")
+                            (name "q")
+                            (class "text incsearch { "
+                              "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                              "delay: " ,(incremental-search-delay) " }")
+                            (type "text")
+                            (accesskey "f")
+                            (title "chickadee search (Ctrl-F)")
+                            (autocomplete "off")
+                            (autocorrect "off")
+                            (autocapitalize "off")
+                            (tabindex "1")))
+                  (button (@ (id "hdr-submit") (name "query-name")
+                             (title "Search chicken-doc for this identifier")
+                             (class "button") (type "submit"))
+                          (& "nbsp"))
+                  ;; (input id "hdr-submit" name "query-name" value "Lookup"
+                  ;;          class "button"
+                  ;;          type "submit"
+                  ;;          tabindex "2")
+                  ))
+       ,(maybe (not (null? contents))
+               `(div (@ (id "contents"))
+                     ,contents))
+       ;; We don't insert an empty contents div any more, because the bottom
+       ;; border shows up when it's empty.
+       ;; (div id "contents"
+       ;;        (if (string=? contents "")
+       ;;            "<!-- ie sux -->"         ; collapse empty div for IE
+       ;;            contents))
+       (div (@ (id "body"))
+            (div (@ (id "main"))
+                 ,body)))))))
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
