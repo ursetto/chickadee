@@ -479,9 +479,9 @@
     (restart-request
      (update-request-uri r (rewriter u)))))
 
-(define ++ string-append)  ; legacy from awful
 (define (link href desc)
   `(a (@ (href ,href)) ,desc))
+
 (define ($ var #!optional converter/default)  ; from awful
     ((http-request-variables) var converter/default))
 (define http-request-variables (make-parameter #f))
