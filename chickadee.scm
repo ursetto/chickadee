@@ -285,8 +285,6 @@
        (cache-privately-for  ; `private` has no effect on nginx proxy cache
         (cache-nodes-for)
         (lambda ()
-          ;; (send-response
-          ;;   body: body)              
           (parameterize ((access-log (ajax-log))) ; Logging is extremely slow
             (send-response body: body))))))))
 
