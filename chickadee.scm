@@ -3,7 +3,9 @@
 ;; License: BSD.
 
 (module chickadee
- (chickadee-start-server
+*
+ #;
+(chickadee-start-server
   cdoc-uri
   chickadee-uri
   incremental-search-uri
@@ -23,7 +25,7 @@
 
 (import scheme chicken)
 (import tcp data-structures srfi-1)
-(use spiffy-request-vars html-tags html-utils chicken-doc)
+(use spiffy-request-vars chicken-doc)
 (use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
@@ -35,26 +37,62 @@
 (use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
 (use srfi-18)
+(use (only sxml-transforms
+           pre-post-order* universal-conversion-rules* SRV:send-reply))
+
+;;; HTML
+
+(use (only ports with-output-to-port with-output-to-string))
+(define (sxml->html doc #!optional port)
+  (let ((rules `((lit *preorder* . ,(lambda (t b) b))
+                 . ,universal-conversion-rules*)))
+    (if port
+        (with-output-to-port port
+          (lambda ()
+            (SRV:send-reply (pre-post-order* doc rules))))
+        (with-output-to-string
+          (lambda ()
+            (SRV:send-reply (pre-post-order* doc rules)))))))
+
+(define (maybe pred x)
+  (if pred x '()))
+
+(define (charset c)
+  (maybe c
+         `(meta (@ (http-equiv "content-type")
+                   (content "text/html; charset=" ,c)))))
+(define (javascript u)
+  `(script (@ (type "text/javascript")
+              (src ,(uri->string u)))))
+(define (css-link u)
+  `(link (@ (rel stylesheet)
+            (href ,(uri->string u))
+            (type "text/css"))))
 
 ;;; Pages
 
-(define (input-form)
-  (<form> class: "lookup"
-          action: (cdoc-page-path)
-          method: 'get
-          (<input> id: "searchbox" class: (string-append "text incsearch { "
-                                                         "url: \"" (uri->string (incremental-search-uri)) "\","
-                                                         "delay: " (number->string (incremental-search-delay))
-                                                         " }")
-                   type: "text" name: "q"
-                   autocomplete: "off"  ;; apparently readonly in DOM
-                   autocorrect: "off" autocapitalize: "off" ;; iphone/ipad
-                   )
-          (<div> class: "buttons"
-           (<input> class: "button" type: "submit"
-                    id: "query-name" name: "query-name" value: "Lookup")
-           (<input> class: "button" type: "submit"
-                    id: "query-regex" name: "query-regex" value: "Regex"))))
+(define (search-form)
+  `(form (@ (class "lookup")
+            (action ,(cdoc-page-path))
+            (method get))
+         (input (@ (id "searchbox")
+                   (class "text incsearch { "
+                     "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                     "delay: " ,(incremental-search-delay)
+                     " }")
+                   (type text)
+                   (name q)
+                   (autocomplete off) ;; apparently readonly in DOM
+                   (autocorrect off)
+                   (autocapitalize off)) ;; iphone/ipad
+                )
+         (div (@ (class "buttons"))
+              (input (@ (class "button") (type submit)
+                        (id "query-name") (name "query-name")
+                        (value "Lookup")))
+              (input (@ (class "button") (type submit)
+                        (id "query-regex") (name "query-regex")
+                        (value "Regex"))))))
 
 (define (format-id x)
   (match (match-nodes x)
@@ -62,9 +100,9 @@
           (redirect-to (path->href (node-path n1))))
          (()
           ;; Should we return 404 here?  This is not a real resource
-          (node-page #f
-                     ""
-                     (<p> "No node found matching identifier " (<tt> (htmlize x)))
+          (node-page '()
+                     '()
+                     `(p "No node found matching identifier " (tt ,x))
                      page-title: "node not found"))
          (nodes
           (match-page nodes x))))
@@ -85,64 +123,51 @@
              (last-modified))
         (lambda ()
           (node-page
-           (string-append "query " match-text " ("
-                          (if (> result-length max-results)
-                              (string-append (number->string
-                                              max-results) " of ")
-                              "")
-                          (number->string result-length)
-                          " matches)")
-           ""                 ;contents
+           `("query " ,match-text " ("
+             ,(maybe (> result-length max-results)
+                     `(,max-results " of "))
+             ,result-length " matches)")
+           '()                 ;contents
            (if (= result-length 0)
-               ""
-               (tree->string
-                (list
-                 "<table class=\"match-results\">"
-                 (<tr> (<th> "path") (<th> "signature"))
-                 (let loop ((sigs (maximum-match-signatures))
-                            (results max-results)
-                            (nodes nodes) (acc '()))
-                   (if (or (null? nodes)
-                           (<= results 0))
-                       (reverse acc)
-                       (let ((n (car nodes)))
-                         (loop (- sigs 1) (- results 1)
-                               (cdr nodes)
-                               (cons 
-                                (list
-                                 "<tr>"
-                                 (<td> class: "match-path" (title-path n))
-                                 (<td> class: "match-sig"
-                                       (<a> href: (path->href (node-path n))
-                                            (if (<= sigs 0)
-                                                "-"
-                                                (<tt> convert-to-entities?: #t
-                                                      (node-signature n)))))
-                                 "</tr>")
-                                acc)))))
-                 "</table>")))
+               '()
+               `(table
+                 (@ (class "match-results"))
+                 (tr (th "path") (th "signature"))
+                 ,(let loop ((sigs (maximum-match-signatures))
+                             (results max-results)
+                             (nodes nodes) (acc '()))
+                    (if (or (null? nodes)
+                            (<= results 0))
+                        (reverse acc)
+                        (let ((n (car nodes)))
+                          (loop (- sigs 1) (- results 1)
+                                (cdr nodes)
+                                (cons
+                                 `(tr
+                                   (td (@ (class "match-path"))
+                                       ,(title-path n))
+                                   (td (@ (class "match-sig"))
+                                       ,(path-link
+                                         (node-path n)
+                                         (if (<= sigs 0)
+                                             "-"
+                                             `(tt ,(node-signature n))))))
+                                 acc)))))))
            page-title: "query results")))))))
 
 (define (contents-list n)
-  (let ((ids (node-child-ids n)))  ; Assumption: node-child-ids include all definitions.
+  (let ((ids (node-child-ids n)))
     (if (null? ids)
-        ""
-        (tree->string
-         `("<h2 class=\"contents-list\">Contents &raquo;</h2>\n"
-           "<ul class=\"contents-list\">"
-           ,(map
-             (let ((child->href (make-child->href n)))
-               (lambda (id)
-                 `("<li>"
-                   "<a href=\"" ,(child->href id)
-                   "\">" ,(quote-html id)
-                   "</a>"
-                   "</li>")))
-             (map ->string ids))
-           "</ul>\n"
-           )))))
-
-(use srfi-69)
+        '()
+        `((h2 (@ (class "contents-list"))
+              "Contents " (& "raquo"))
+          (ul (@ (class "contents-list"))
+              ,(map
+                (let ((child->href (make-child->href n)))
+                  (lambda (id)
+                    `(li
+                      (a (@ (href ,(child->href id))) ,id))))
+                (map ->string ids)))))))
 
 (define (format-path p)
   (let ((n (handle-exceptions e #f (lookup-node (string-split p)))))
@@ -158,16 +183,17 @@
                  (last-modified))
             (lambda ()
               (if (null? (node-path n))
-                  (node-page #f
+                  (node-page '()
                              (contents-list n)
                              (root-page))
                   (node-page (title-path n)
                              (contents-list n)
-                             (chicken-doc-sxml->html (node-sxml n)
-                                                     path->href
-                                                     (make-def->href n))
+                             `(lit
+                               . ,(chicken-doc-sxml->html (node-sxml n)
+                                                          path->href
+                                                          (make-def->href n)))
                              page-title: (last (node-path n))))))))
-        (node-not-found p (<p> "No node found at path " (<i> (htmlize p)))))))
+        (node-not-found p `(p "No node found at path " (i ,p))))))
 
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
   (string-append
@@ -205,21 +231,19 @@
           (path->href (append path (list id)))))))
 
 (define (title-path n)
-  (let loop ((p (node-path n))
-             (f '())
-             (r '()))
-    (if (null? p)
-        (tree->string (reverse r))
-        (let* ((id (->string (car p)))
-               (f (append f (list id)))
-               (n (lookup-node f)))
-          (loop (cdr p) f (cons
-                           (list
-                            "<a href=\"" (path->href f)
-                            "\">" (quote-html id)
-                            "</a>"
-                            (if (null? (cdr p)) '() " &raquo; "))
-                           r))))))
+  (define (links n)
+    (let loop ((p (node-path n))
+               (f '())
+               (r '()))
+      (if (null? p)
+          (reverse r)
+          (let* ((id (->string (car p)))
+                 (f (append f (list id)))
+                 (n (lookup-node f)))
+            (loop (cdr p) f (cons (path-link f id) r))))))
+  
+  (intersperse (links n)
+               '(" " (& "raquo") " "))) ;; literal " &raquo; " would be nicer
 
 (define (query p)
   (let ((q (string-split p)))
@@ -261,107 +285,94 @@
        (cache-privately-for  ; `private` has no effect on nginx proxy cache
         (cache-nodes-for)
         (lambda ()
-          ;; (send-response
-          ;;   body: body)              
           (parameterize ((access-log (ajax-log))) ; Logging is extremely slow
             (send-response body: body))))))))
 
-(define (root-page)
-  (++ (<h3> "Search Chicken documentation")
-      (input-form)
-      (<p> "Enter a documentation node name or path in the search box above."
-           (<ul> (<li> "A node name is an identifier, egg, module or unit name, such as "
-                       (<i> "open/rdonly") ", " (<i> "awful") ", "
-                       (<i> "scheme") " or " (<i> "eval") ".")
-                 (<li> "A node path is a sequence of node names, such as "
-                       (<i> "eval load") " or " (<i> "foreign types") ".")
-                 (<li> "Regular expression matching is usually done against node names, but if a space is present, the full node path will be considered.")
-                 ;; It might be more useful to match against each identifier level
-                 ;; with a separate regex.
-                 ))
+;; Re matching, it might be more useful to match against each identifier level
+;; with a separate regex.
 
-      (<h3> "Quick links")
-      (<ul> (<li> (<a> href: (path->href '(chicken)) "Chicken manual"))
-            (<li> (<a> href: (path->href '(chicken language)) "Supported language"))
-            (<li> (<a> href: (path->href '(foreign)) "FFI"))
-                  )
-      (<h4> "About")
-      (<p> (<a> href: (path->href '(chickadee)) "chickadee")
-           " is the web interface to the " (<a> href: (path->href '(chicken-doc)) "chicken-doc")
-           " documentation system for the " (<a> href: "http://call-cc.org" "Chicken") " language.  It is running on the " (<a> href: (path->href '(spiffy)) "spiffy") " webserver on Chicken " (chicken-version) ".")
-      ))
+(define (root-page)
+  `((h3 "Search Chicken documentation")
+    ,(search-form)
+    (p "Enter a documentation node name or path in the search box above.")
+    (ul (li "A node name is an identifier, egg, module or unit name, such as "
+            (i "open/rdonly") ", " (i "awful") ", "
+            (i "scheme") " or " (i "eval") ".")
+        (li "A node path is a sequence of node names, such as "
+            (i "eval load") " or " (i "foreign types") ".")
+        (li "Regular expression matching is usually done against node names,"
+            " but if a space is present, the full node path will be considered."))
+    (h3 "Quick links")
+    (ul (li ,(path-link '(chicken) "Chicken manual"))
+        (li ,(path-link '(chicken language) "Supported language"))
+        (li ,(path-link '(foreign) "FFI")))
+    (h4 "About")
+    (p ,(path-link '(chickadee))
+       " is the web interface to the "
+       ,(path-link '(chicken-doc))
+       " documentation system for the "
+       (a (@ (href "http://call-cc.org")) "Chicken")
+       " language.  It is running on the "
+       ,(path-link '(spiffy))
+       " webserver on Chicken " ,(chicken-version) ".")))
 
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
 (define (%node-page-body title contents body #!key (page-title #f))
-  (html-page
-   (++ (<p> id: 'navskip
-            (<a> href: "#body" "Skip navigation."))
-       (<div> id: "hdr"
-              (<h1> (link (path->href '()) "chickadee")
-                    (if title
-                        (string-append " &raquo; " title)
-                        (string-append " | "
-                                       (link (path->href '(chicken-doc))
-                                             "chicken-doc")
-                                       " server")))
-              (<h5> (<label> for: "hdr-searchbox"
-                             "Identifier search"))
-              (<form> id: "hdr-lookup"
-                      class: "hdr-lookup"
-                      action: (cdoc-page-path)
-                      method: 'get
-                      (<input> id: "hdr-searchbox" name: "q"
-                               class: (string-append
-                                       "text incsearch { "
-                                       "url: \"" (uri->string (incremental-search-uri)) "\","
-                                       "delay: " (number->string (incremental-search-delay)) " }")
-                               type: "text"
-                               accesskey: "f"
-                               title: "chickadee search (Ctrl-F)"
-                               autocomplete: "off" autocorrect: "off"
-                               autocapitalize: "off"
-                               tabindex: "1")
-                      (<button> id: "hdr-submit" name: "query-name"
-                                title: "Search chicken-doc for this identifier"
-                                class: "button" type: "submit"
-                                "&nbsp;")
-                      ;; (<input> id: "hdr-submit" name: "query-name" value: "Lookup"
-                      ;;          class: "button"
-                      ;;          type: "submit"
-                      ;;          tabindex: "2")
-                      ))
-       (if (string=? contents "")
-           ""
-           (<div> id: "contents"
-                  contents))
-       ;; We don't insert an empty contents div any more, because the bottom
-       ;; border shows up when it's empty.
-       ;; (<div> id: "contents"
-       ;;        (if (string=? contents "")
-       ;;            "<!-- ie sux -->"         ; collapse empty div for IE
-       ;;            contents))
-       (<div> id: "body"
-              (<div> id: "main"
-                     body)))
-   headers: (string-concatenate         ;; Note: cacheable
-             (append
-              (list
-               (<meta> name: "viewport" content: "initial-scale=1"))
-              (map
-               (lambda (x) (<script> type: "text/javascript" src: x))
-               (map uri->string (chickadee-js-files)))))
-   css: (map uri->string (chickadee-css-files))
-   charset: "UTF-8"
-   doctype: "<!doctype html>"
-   ;; no good way to get a nice title yet
-   title: (htmlize (if page-title
-                       (string-append page-title " | chickadee")
-                       "chickadee server"))))
+  (sxml->html
+   `((lit "<!doctype html>")
+     (html
+      (head ,(charset "utf-8")
+            ,(map javascript (chickadee-js-files))
+            ,(map css-link (chickadee-css-files))
+            (title ,(if page-title
+                        `(,page-title " | chickadee")
+                        "chickadee server"))
+            (meta (@ (name "viewport")
+                     (content "initial-scale=1"))))
+      (body
+       (p (@ (id "navskip"))
+          (a (@ (href "#body")) "Skip navigation."))
+       (div (@ (id "hdr"))
+            (h1 ,(path-link '() "chickadee")
+                ,(if (null? title)
+                     `((" | " ,(path-link '(chicken-doc))
+                        " server"))
+                     `((lit " &raquo; ") ,title)))
+            (h5 (label (@ (for "hdr-searchbox"))
+                       "Identifier search"))
+            (form (@ (id "hdr-lookup")
+                     (class "hdr-lookup")
+                     (action ,(cdoc-page-path))
+                     (method "get"))
+                  (input (@ (id "hdr-searchbox")
+                            (name "q")
+                            (class "text incsearch { "
+                              "url: \"" ,(uri->string (incremental-search-uri)) "\","
+                              "delay: " ,(incremental-search-delay) " }")
+                            (type "text")
+                            (accesskey "f")
+                            (title "chickadee search (Ctrl-F)")
+                            (autocomplete "off")
+                            (autocorrect "off")
+                            (autocapitalize "off")
+                            (tabindex "1")))
+                  (button (@ (id "hdr-submit") (name "query-name")
+                             (title "Search chicken-doc for this identifier")
+                             (class "button") (type "submit"))
+                          (& "nbsp"))))
+       ,(maybe (not (null? contents))
+               `(div (@ (id "contents"))
+                     ,contents))
+       (div (@ (id "body"))
+            (div (@ (id "main"))
+                 ,body)))))))
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
-   body: (%node-page-body title contents body
+   body: (%node-page-body title
+                          contents
+                          body
                           page-title: page-title)
    headers: `((content-type #(text/html ((charset . "utf-8"))))
               )))
@@ -371,8 +382,9 @@
   ;; but right now I don't want to duplicate main page code
   (send-response code: 404 reason: "Not found"
                  body:
-                 (%node-page-body (htmlize title)  ; quoting critical
-                                  "" body
+                 (%node-page-body title
+                                  '()
+                                  body
                                   page-title: "node not found")))
 
 (define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
@@ -448,9 +460,12 @@
     (restart-request
      (update-request-uri r (rewriter u)))))
 
-(define ++ string-append)  ; legacy from awful
 (define (link href desc)
-  (<a> href: href desc))
+  `(a (@ (href ,href)) ,desc))
+(define (path-link path #!optional desc)
+  (link (path->href path)
+        (or desc (string-intersperse (map ->string path) " "))))
+
 (define ($ var #!optional converter/default)  ; from awful
     ((http-request-variables) var converter/default))
 (define http-request-variables (make-parameter #f))
