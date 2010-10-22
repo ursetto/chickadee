@@ -37,7 +37,8 @@
            +conf-file+))
   (define (usage-help)
     (fprintf (current-error-port)
-             "
+             "chickadee, the chicken-doc server
+
  usage: ~A command args...
 
  commands:
