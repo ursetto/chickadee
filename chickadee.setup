@@ -28,9 +28,14 @@
 (create-directory +basedir+)
 (create-directory +root+)
 (create-directory +cdoc+)
+(create-directory (make-pathname +basedir+ "logs"))
 (copy-file "chickadee-jquery.js" +cdoc+)
 (copy-file "chickadee.css" +cdoc+)
 (copy-file "jquery.metadata.min.js"
            (make-pathname +cdoc+
                           "jquery.metadata.2.1.min.js"))
 (copy-file "mag.png" +cdoc+)
+(copy-file "chickadee-config.scm"
+           (make-pathname +basedir+
+                          "config.scm"))
+
