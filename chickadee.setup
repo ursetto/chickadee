@@ -1,3 +1,5 @@
+;; -*- scheme -*-
+
 (compile -s -O2 -d1 -S chicken-doc-html.scm -j chicken-doc-html)
 (compile -s -O2 -d0 chicken-doc-html.import.scm)
 
@@ -8,4 +10,20 @@
   'chickadee
   '("chickadee.so" "chicken-doc-html.so" "chickadee.import.so"
     "chicken-doc-html.import.so")
-  `((version "0.9.7")))
+  `((version "0.9.8")))
+
+;; Tree installation
+
+(define +basedir+ (make-pathname (chicken-home) "chickadee"))
+(define +root+ (make-pathname +basedir+ "root"))
+(define +cdoc+ (make-pathname +root+ "cdoc"))
+
+(create-directory +basedir+)
+(create-directory +root+)
+(create-directory +cdoc+)
+(copy-file "chickadee-jquery.js" +cdoc+)
+(copy-file "chickadee.css" +cdoc+)
+(copy-file "jquery.metadata.min.js"
+           (make-pathname +cdoc+
+                          "jquery.metadata.2.1.min.js"))
+(copy-file "mag.png" +cdoc+)
