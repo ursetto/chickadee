@@ -10,30 +10,63 @@
 (define +conf-file+
   (make-pathname +basedir+ "config.scm"))
 
-(define (usage)
-  (fprintf (current-error-port)
-           "
-usage: ~A serve [options] [conf-file]
-
-Start a chicken-doc web server using the configuration file
-[conf-file] or the default configuration file,
-~A.
-If provided, [options] override settings in [conf-file].
-
-options:
-
+(define (usage type)
+  (define (usage-serve)
+    (fprintf (current-error-port)
+             "
+ usage: ~A serve [options] [conf-file]
+ 
+ Start a chicken-doc web server using the configuration file
+ [conf-file] or the default configuration file,
+ ~A.
+ If provided, [options] override settings in [conf-file].
+ 
+ options:
+ 
   -p --port NUM         Port number
-
+  
   -A --access-log FILE  Access log file
   -E --error-log FILE   Error log file     
   -D --debug-log FILE   Debug log file
   -J --ajax-log FILE    AJAX access log
     FILE is a filename relative to the directory holding [conf-file].
     It may be \"-\" to log to the console or \"\" to suppress logging.
-
-"
+ 
+ "
            (program-name)
            +conf-file+))
+  (define (usage-help)
+    (fprintf (current-error-port)
+             "
+ usage: ~A command args...
+
+ commands:
+
+   serve               Start a chicken-doc webserver
+   location            Show location of datafiles
+   help                Get help on command
+
+ "
+             (program-name)))
+  (define (usage-location)
+    (fprintf (current-error-port)
+             "
+ usage: ~A location
+
+ Prints information about the location of important chickadee
+ data files, such as the base directory and config file.
+ 
+ "
+             (program-name)))
+  (cond ((equal? type "serve")
+         (usage-serve))
+        ((equal? type "help")
+         (usage-help))
+        ((equal? type "location")
+         (usage-location))
+        (else (usage "help")))
+  ;(exit 1)
+  )
 
 (match args
        (("serve" . args)
@@ -66,7 +99,7 @@ options:
                          (else
                           (if (null? (cdr args))
                               (collect alog elog dlog jlog port a (cdr args))
-                              (usage))))))
+                              (usage "serve"))))))
                 (else
                  (cond ((pathname-directory file)
                         => change-directory))
@@ -100,7 +133,9 @@ options:
        (("location")  ;; accept conf file?
         (print "conf: " +conf-file+)
         (print "base: " +basedir+))
-       (else (usage)))
+       (("help" cmd)
+        (usage cmd))
+       (else (usage "help")))
 
 
 
