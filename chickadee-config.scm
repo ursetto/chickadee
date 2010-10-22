@@ -10,6 +10,10 @@
 
 (root-path "root")
 (server-port 8080)
+
+;; Logging.  If commented out, the defaults will be used:
+;; access, debug and AJAX logs are disabled, and error logs go to stderr.
+
 ;(access-log "logs/access.log")
 ;(error-log "logs/error.log")
 ;(debug-log (current-error-port))
