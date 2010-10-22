@@ -595,6 +595,9 @@
                          ((and (incremental-search-uri)
                                (equal? (uri-path (incremental-search-uri)) p))
                           => incremental-search-handler)
+                         ;; Last resort redirect of root path to main page.
+                         ((equal? p '(/ ""))
+                          (redirect-to (path->href '())))
                          (else
                           (continue)))))))))
 
