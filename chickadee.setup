@@ -1,16 +1,23 @@
 ;; -*- scheme -*-
 
+(define +version+ "0.9.8")
+
 (compile -s -O2 -d1 -S chicken-doc-html.scm -j chicken-doc-html)
 (compile -s -O2 -d0 chicken-doc-html.import.scm)
 
 (compile -s -O2 -d1 -S chickadee.scm -j chickadee)
 (compile -s -O2 -d0 chickadee.import.scm)
+(compile    -O2 -d0 -S -o chickadee chickadee-cmd.scm)
 
 (install-extension
   'chickadee
   '("chickadee.so" "chicken-doc-html.so" "chickadee.import.so"
     "chicken-doc-html.import.so")
-  `((version "0.9.8")))
+  `((version ,+version+)))
+(install-program
+ 'chickadee-cmd
+ '("chickadee")
+ `((version ,+version+)))
 
 ;; Tree installation
 
