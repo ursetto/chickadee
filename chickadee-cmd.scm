@@ -5,10 +5,10 @@
 (use matchable)
 
 (define args (command-line-arguments))
+(define +basedir+
+  (make-pathname (chicken-home) "chickadee"))
 (define +conf-file+
-  (make-pathname (chicken-home)
-                 (make-pathname "chickadee"
-                                "config.scm")))
+  (make-pathname +basedir+ "config.scm"))
 
 (define (usage)
   (fprintf (current-error-port)
@@ -97,6 +97,9 @@ options:
                  (chickadee-start-server)))
 
          ))
+       (("location")  ;; accept conf file?
+        (print "conf: " +conf-file+)
+        (print "base: " +basedir+))
        (else (usage)))
 
 

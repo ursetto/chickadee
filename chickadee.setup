@@ -21,6 +21,9 @@
 
 ;; Tree installation
 
+(if (not (setup-install-mode))
+  (exit))
+
 (define +basedir+ (make-pathname (chicken-home) "chickadee"))
 (define +root+ (make-pathname +basedir+ "root"))
 (define +cdoc+ (make-pathname +root+ "cdoc"))
