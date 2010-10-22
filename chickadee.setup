@@ -41,4 +41,7 @@
 (copy-file "chickadee-config.scm"
            (make-pathname +basedir+
                           "config.scm"))
+(copy-file "chickadee-config-nginx.scm"
+           (make-pathname +basedir+
+                          "config-nginx.scm"))
 
