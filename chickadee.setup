@@ -1,6 +1,6 @@
 ;; -*- scheme -*-
 
-(define +version+ "0.9.8")
+(define +version+ "0.9.8.1")
 
 (compile -s -O2 -d1 -S chicken-doc-html.scm -j chicken-doc-html)
 (compile -s -O2 -d0 chicken-doc-html.import.scm)
@@ -28,10 +28,12 @@
 (define +root+ (make-pathname +basedir+ "root"))
 (define +cdoc+ (make-pathname +root+ "cdoc"))
 
-(create-directory +basedir+)
-(create-directory +root+)
-(create-directory +cdoc+)
-(create-directory (make-pathname +basedir+ "logs"))
+;; create-directory/parents required to respect sudo; I don't
+;; actually want it to create a tree.
+(create-directory/parents +basedir+)
+(create-directory/parents +root+)
+(create-directory/parents +cdoc+)
+(create-directory/parents (make-pathname +basedir+ "logs"))
 (copy-file "chickadee-jquery.js" +cdoc+)
 (copy-file "chickadee.css" +cdoc+)
 (copy-file "jquery.metadata.min.js"
