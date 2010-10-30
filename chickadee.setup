@@ -1,6 +1,6 @@
 ;; -*- scheme -*-
 
-(define +version+ "0.9.8.1")
+(define +version+ "0.9.8.2")
 
 (compile -s -O2 -d1 -S chicken-doc-html.scm -j chicken-doc-html)
 (compile -s -O2 -d0 chicken-doc-html.import.scm)
