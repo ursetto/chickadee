@@ -3,9 +3,7 @@
 ;; License: BSD.
 
 (module chickadee
-*
- #;
-(chickadee-start-server
+ (chickadee-start-server
   cdoc-uri
   chickadee-uri
   incremental-search-uri
