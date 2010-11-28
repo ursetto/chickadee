@@ -33,6 +33,7 @@
 (use intarweb)
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
+(use (only chicken-doc-admin man-filename->path))
 (use regex) (import irregex)
 (use (only srfi-13 string-index string-concatenate))
 (use (only posix seconds->string seconds->utc-time utc-time->seconds))
@@ -191,7 +192,8 @@
                              `(lit
                                . ,(chicken-doc-sxml->html (node-sxml n)
                                                           path->href
-                                                          (make-def->href n)))
+                                                          (make-def->href n)
+                                                          man-filename->path))
                              page-title: (last (node-path n))))))))
         (node-not-found p `(p "No node found at path " (i ,p))))))
 

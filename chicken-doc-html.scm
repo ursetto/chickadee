@@ -5,11 +5,9 @@
 
 (import scheme chicken)
 (use (only sxml-transforms string->goodHTML SRV:send-reply))                 ; temp
-(use (only uri-generic uri-encode-string)) ; grr
 (use matchable)
 (use (only data-structures conc ->string string-intersperse string-translate))
 (use (only ports with-output-to-string))
-(use (only chicken-doc-admin man-filename->path))
 (use colorize) ;yeah!
 (use regex) (import irregex)
 (use (only extras sprintf))
@@ -117,6 +115,7 @@
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
                                 def->href ; link to definition node, or #f for no link
+                                man-filename->path
                                 )
   (define (path+section->href p s)
     (string-append (path->href p) (section->href s)))
