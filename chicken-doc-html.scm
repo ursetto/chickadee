@@ -116,7 +116,7 @@
                                         (submatch (+ any)))))
 (define (chicken-doc-sxml->html doc
                                 path->href ; for internal links; make parameter?
-                                def->href ; link to definition node
+                                def->href ; link to definition node, or #f for no link
                                 )
   (define (path+section->href p s)
     (string-append (path->href p) (section->href s)))
@@ -245,14 +245,14 @@
                                                   '())
                                              #\>
                                              ;; Link to underlying node.
-                                             ,(if defid
-                                                  `("<a href=" #\"
-                                                    ,(def->href defid)
-                                                    #\" #\>)
-                                                  '())
-                                             "<span class=\"sig\"><tt>"
-                                             ,(quote-html sig) "</tt></span>"
-                                             ,(if defid "</a>" '())
+                                             ,(let ((def-href (and defid
+                                                                   (def->href defid))))
+                                                `(,(if def-href
+                                                       `("<a href=\"" ,def-href "\">")
+                                                       '())
+                                                  "<span class=\"sig\"><tt>"
+                                                  ,(quote-html sig) "</tt></span>"
+                                                  ,(if def-href "</a>" '())))
                                              " "
                                              "<span class=\"type\">"
                                              ,(quote-html (->string type))
