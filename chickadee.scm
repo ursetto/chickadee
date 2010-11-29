@@ -43,15 +43,12 @@
 
 (use (only ports with-output-to-port with-output-to-string))
 (define (sxml->html doc #!optional port)
-  (let ((rules `((lit *preorder* . ,(lambda (t b) b))
-                 . ,universal-conversion-rules*)))
+  (let* ((rules `((lit *preorder* . ,(lambda (t b) b))
+                  . ,universal-conversion-rules*))
+         (reply (lambda () (SRV:send-reply (pre-post-order* doc rules)))))
     (if port
-        (with-output-to-port port
-          (lambda ()
-            (SRV:send-reply (pre-post-order* doc rules))))
-        (with-output-to-string
-          (lambda ()
-            (SRV:send-reply (pre-post-order* doc rules)))))))
+        (with-output-to-port port reply)
+        (with-output-to-string reply))))
 
 (define (maybe pred x)
   (if pred x '()))
