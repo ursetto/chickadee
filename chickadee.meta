@@ -6,12 +6,11 @@
  (category doc-tools)
  (license "BSD")
  (doc-from-wiki)
- (needs matchable uri-common intarweb        ; chickadee
+ (needs matchable uri-common intarweb
         (spiffy 4.8) spiffy-request-vars
         (chicken-doc 0.4.0)
         sxml-transforms uri-generic (chicken-doc-admin 0.4.0) 
-	chicken-doc-html
- )
+        chicken-doc-html)
  (files "chickadee.scm" "chickadee-driver.scm"
         "chickadee.css" "chicken-doc-html.scm"
         "chickadee.setup"))
