@@ -1,3 +1,5 @@
+;;; -*- scheme -*-
+
 ((egg "chickadee.egg")
  (synopsis "chicken-doc web server")
  (author "Jim Ursetto")
