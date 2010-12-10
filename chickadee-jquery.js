@@ -34,6 +34,10 @@ jQuery(document).ready(function($) {
   $('#contents h2').click(function() {
     $(this).next().toggle();
   });
+  $('#toc h2').click(function() {
+    $(this).next().toggle();
+  });
+  $('#toc h2').next().hide();
 });
 
 /* incsearch plugin */
