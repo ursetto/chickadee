@@ -62,6 +62,7 @@ tt {
 }
 #toc {
   overflow: hidden;
+  zoom: 1;
   border: 1px solid #000;
   border-left: 2px solid #000;
   -moz-border-radius-bottomright: 5px;
@@ -139,9 +140,12 @@ dt.defsig {
   zoom: 1;
   min-height: 0;
 }
-dt.defsig a, dt.defsig a:hover {
-  font-style: inherit !important;
-  color: inherit !important;
+#main dt.defsig a, #main dt.defsig a:hover {
+  /* avoid inherit & use #main to placate IE6/7 */
+  /* font-style: inherit !important; */
+  /* color: inherit !important; */
+  font-style: normal;  
+  color: #fff;
 }
 dt.defsig a:hover tt {
   border-bottom: 1px solid #fff !important;
@@ -192,11 +196,11 @@ h3 {
 }
 
 /* section links */
-#main h1>a, #main h2>a, #main h3>a, #main h4>a, #main h5>a, #main h6>a {
-    font-style: inherit;
-    color: inherit;
+#main h1 a, #main h2 a, #main h3 a, #main h4 a, #main h5 a, #main h6 a {
+    font-style: normal;     /* avoid inherit to placate IE6/7 */
+    color: #000;
 }
-#main h1>a:hover, h2>a:hover, h3>a:hover, h4>a:hover, h5>a:hover, h6>a:hover {
+#main h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover {
     background-color: #000;
     color: #fff;
 }
