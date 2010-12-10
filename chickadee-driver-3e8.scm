@@ -12,10 +12,10 @@
 (cdoc-uri (uri "/cdoc"))
 (chickadee-uri (uri "/chickadee"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
-(chickadee-css-files (list (uri "/cdoc/chickadee.css?12")))
+(chickadee-css-files (list (uri "/cdoc/chickadee.css?13")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js?3")))
+                          (uri "/cdoc/chickadee-jquery.js?4")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
