@@ -11,6 +11,4 @@
         (chicken-doc 0.4.0)
         sxml-transforms uri-generic (chicken-doc-admin 0.4.0) 
         chicken-doc-html)
- (files "chickadee.scm" "chickadee-driver.scm"
-        "chickadee.css" "chicken-doc-html.scm"
-        "chickadee.setup"))
+ (files "chickadee-cmd.scm" "chickadee-config.scm" "chickadee-driver-3e8.scm" "chickadee.setup" "chickadee.release-info" "jquery.metadata.min.js" "chickadee.meta" "mag.png" "chickadee.js" "chickadee.scm" "chickadee-config-nginx.scm" "install.sh" "chickadee-jquery.js" "chickadee.css" "chickadee-driver.scm"))
