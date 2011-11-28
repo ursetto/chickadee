@@ -320,8 +320,8 @@
    `((lit "<!doctype html>")
      (html
       (head ,(charset "utf-8")
-            ,(map javascript (chickadee-js-files))
             ,(map css-link (chickadee-css-files))
+            ,(map javascript (chickadee-js-files))
             (title ,(if page-title
                         `(,page-title " | chickadee")
                         "chickadee server"))
