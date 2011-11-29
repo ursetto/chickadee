@@ -93,11 +93,8 @@ tt {
   padding-left: 1.5em;
   text-transform: lowercase;
 }
-#toc ul.toc {    /* want #toc > ul but not compat w/IE6 */
+.js #toc ul.toc {    /* want #toc > ul but not compat w/IE6 */
   display: none;
-}
-.no-js #toc ul.toc {
-  display: block;
 }
 #toc ul.toc {
   padding-left: 0.5em;
