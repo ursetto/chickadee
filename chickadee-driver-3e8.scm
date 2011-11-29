@@ -5,17 +5,17 @@
 (debug-log (current-error-port))
 (access-log "access.log")
 (error-log "error.log")
-(server-port 8383)
+(server-port 8388)
 (max-connections 8)
 
 (ajax-log #f)   ;; Slow; not recommended for production.
 (cdoc-uri (uri "/cdoc"))
-(chickadee-uri (uri "/chickadee"))
+(chickadee-uri (uri "/doc"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
-(chickadee-css-files (list (uri "/cdoc/chickadee.css?13")))
+(chickadee-css-files (list (uri "/cdoc/chickadee.css?14")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js?4")))
+                          (uri "/cdoc/chickadee-jquery.js?5")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
