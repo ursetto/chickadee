@@ -321,9 +321,9 @@
      (html (@ class "no-js")
       (head ,(charset "utf-8")
             ,(map css-link (chickadee-css-files))
-            ;; Remove "no-js" class from <HTML> when JS enabled, a la Modernizr.
+            ;; Remove "no-js" class and add "js" class to <HTML> when JS enabled, a la Modernizr.
             (script "this.document.documentElement.className = "
-                    "this.document.documentElement.className.replace(/\\bno-js\\b/, '')")
+                    "this.document.documentElement.className.replace(/\\bno-js\\b/, '') + ' js '")
             (title ,(if page-title
                         `(,page-title " | chickadee")
                         "chickadee server"))
