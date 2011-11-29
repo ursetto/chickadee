@@ -15,7 +15,7 @@
 (chickadee-css-files (list (uri "/cdoc/chickadee.css?16")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js?5")))
+                          (uri "/cdoc/chickadee-jquery.js?6")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
