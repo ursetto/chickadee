@@ -29,6 +29,7 @@ function patchMobileSafariOffset() {
 }
 
 jQuery(document).ready(function($) {
+  $("#contents").insertBefore($("#body"));
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
   $('#contents h2').click(function() {
@@ -37,6 +38,7 @@ jQuery(document).ready(function($) {
   $('#toc h2').click(function() {
     $(this).next().toggle();
   });
+  $('#toc h2').next().hide();
 });
 
 /* incsearch plugin */

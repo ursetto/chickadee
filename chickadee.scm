@@ -360,13 +360,13 @@
                              (title "Search chicken-doc for this identifier")
                              (class "button") (type "submit"))
                           (& "nbsp"))))
+       (div (@ (id "body"))
+            (div (@ (id "main"))
+                 ,body))
        ,(maybe (not (null? contents))
                `(div (@ (id "contents"))
                      ,contents))
-       (div (@ (id "body"))
-            (div (@ (id "main"))
-                 ,body)))
-      ,(map javascript (chickadee-js-files))))))
+       ,(map javascript (chickadee-js-files)))))))
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
