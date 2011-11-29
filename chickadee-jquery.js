@@ -28,8 +28,21 @@ function patchMobileSafariOffset() {
   }
 }
 
+function isScrolledIntoView(elem)
+{
+  var docViewTop = $(window).scrollTop();
+  var docViewBottom = docViewTop + $(window).height();
+
+  var elemTop = $(elem).offset().top;
+  var elemBottom = elemTop + $(elem).height();
+
+  return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
+}
+
 jQuery(document).ready(function($) {
-  $("#contents").insertBefore($("#body"));
+  if (!isScrolledIntoView($("#contents"))) {
+    $("#contents").insertBefore($("#body")).addClass('sidebar');
+  }
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
   $('#contents h2').click(function() {

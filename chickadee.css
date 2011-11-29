@@ -32,9 +32,18 @@ tt {
   list-style-type: circle;
 }
 
-#contents {
+#contents { 
+  float: none; width: auto; 
+  margin-left: 0.5em; 
+}
+
+#contents.sidebar {
   float: right; width: 20%;
-  margin: 0.5em 10px 1em 1em;
+  margin-left: 1.0em;
+}
+
+#contents {
+  margin: 0.5em 10px 1em 0.5em;
   overflow: hidden;
   border: 1px solid #000;
   -moz-border-radius-bottomleft: 6px;
@@ -316,6 +325,23 @@ td.match-sig tt {
 /*  font-size: 14px; */
 }
 
+#contents ul.contents-list {
+ float: left;
+}
+#contents ul.contents-list li { 
+ float: left;
+ border: none;
+ width: 33.3333333%;
+}
+#contents.sidebar ul.contents-list {
+ float: none;
+}
+#contents.sidebar ul.contents-list li {
+ float: none;
+ border-top: 1px solid #ddd;
+ width: auto;
+}
+
 ul.contents-list {
   list-style-type: none;
   padding: 0;
@@ -324,7 +350,6 @@ ul.contents-list {
 }
 ul.contents-list li {
   padding: 0;
-  border-top: 1px solid #ddd;
   margin: 0;
   line-height: 1em;
 }
@@ -522,21 +547,59 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     html { -webkit-text-size-adjust: none; }
 }
 
-@media screen and (max-width: 600px) {
-    #contents { 
-	width: auto; 
-	float: none;
-        margin-left: 0.5em; 
+@media screen and (min-width: 1901px) {
+    #contents ul.contents-list li {
+      width: 12.5%;
     }
-    ul.contents-list { 
+}
+
+@media screen and (max-width: 1900px) {
+    #contents ul.contents-list li {
+      width: 12.5%;
+    }
+}
+
+@media screen and (max-width: 1600px) {
+    #contents ul.contents-list li {
+      width: 14.28572857%;
+    }
+}
+
+@media screen and (max-width: 1280px) {
+    #contents ul.contents-list li {
+      width: 16.666666%;
+    }
+}
+
+
+@media screen and (max-width: 1024px) {
+    #contents ul.contents-list li {
+      width: 20%;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    #contents ul.contents-list li {
+      width: 25%;
+    }
+}
+
+
+@media screen and (max-width: 600px) {
+    #contents.sidebar ul.contents-list { 
 	display: none;  /* reset toggle */
-	float: left;
     }
     .no-js ul.contents-list {
         /* Don't collapse for non-JS.  Can be obtrusive, would probably look better at bottom. */
         display: block;
     }
-    ul.contents-list li { 
+    #contents, #contents.sidebar { 
+      float: none; width: auto; 
+      margin-left: 0.5em; 
+    }
+
+    #contents ul.contents-list li,
+    #contents.sidebar ul.contents-list li { 
 	float: left;
 	border: none;
 	width: 33.3333333333%;
@@ -562,7 +625,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 }
 
 @media screen and (max-width: 400px) {
-    ul.contents-list li { 
+    #contents ul.contents-list li { 
 	width: 50%;
     }
     #searchbox, div.incsearch {
