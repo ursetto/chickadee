@@ -93,7 +93,13 @@ tt {
   padding-left: 1.5em;
   text-transform: lowercase;
 }
-#toc > ul {
+#toc ul.toc {    /* want #toc > ul but not compat w/IE6 */
+  display: none;
+}
+.no-js #toc ul.toc {
+  display: block;
+}
+#toc ul.toc {
   padding-left: 0.5em;
 }
 #toc ul li {
@@ -528,6 +534,10 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     ul.contents-list { 
 	display: none;  /* reset toggle */
 	float: left;
+    }
+    .no-js ul.contents-list {
+        /* Don't collapse for non-JS.  Can be obtrusive, would probably look better at bottom. */
+        display: block;
     }
     ul.contents-list li { 
 	float: left;

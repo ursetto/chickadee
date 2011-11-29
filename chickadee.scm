@@ -318,10 +318,12 @@
 (define (%node-page-body title contents body #!key (page-title #f))
   (sxml->html
    `((lit "<!doctype html>")
-     (html
+     (html (@ class "no-js")
       (head ,(charset "utf-8")
             ,(map css-link (chickadee-css-files))
-            ,(map javascript (chickadee-js-files))
+            ;; Remove "no-js" class from <HTML> when JS enabled, a la Modernizr.
+            (script "this.document.documentElement.className = "
+                    "this.document.documentElement.className.replace(/\\bno-js\\b/, '')")
             (title ,(if page-title
                         `(,page-title " | chickadee")
                         "chickadee server"))
@@ -363,7 +365,8 @@
                      ,contents))
        (div (@ (id "body"))
             (div (@ (id "main"))
-                 ,body)))))))
+                 ,body)))
+      ,(map javascript (chickadee-js-files))))))
 
 (define (node-page title contents body #!key (page-title #f))
   (send-response
