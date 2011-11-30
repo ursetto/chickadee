@@ -434,7 +434,7 @@ form.lookup input.text:focus {
 form.lookup + * { clear: left; }
 
 div.buttons {
-  float: right;
+  float: left;
   margin-left: 0.5em;
   width: 5em;
 }
