@@ -1,5 +1,5 @@
 /* chickadee chicken-doc server */
-/* Copyright (c) 2010 Jim Ursetto.  All rights reserved.
+/* Copyright (c) 2010, 2011 Jim Ursetto.  All rights reserved.
    License: BSD. */
 
 /* thoughts for the future:
