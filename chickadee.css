@@ -657,7 +657,9 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     div.buttons { width: 5em; font-size: 0.750em; }
     dt.defsig { font-size: 0.825em; padding: 0.2em 0.5em; }
     dd.defsig { padding: 0 0.5em; }
-    #main { padding: 0 0.5em; }
+    #main { padding: 0 8px; }
+    #hdr-lookup { margin-right: 8px; }
+    #contents { margin-left: 8px; margin-right: 8px; }
     /* Left margin is narrower, so modify pre extending into margin */
     pre { margin-left: -0.3em; 
 	  border-left-width: 1px; 
