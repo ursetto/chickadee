@@ -28,24 +28,13 @@ function patchMobileSafariOffset() {
   }
 }
 
-// http://stackoverflow.com/questions/487073/jquery-check-if-element-is-visible-after-scroling/488073#488073
-function isScrolledIntoView(elem)
-{
-  var docViewTop = $(window).scrollTop();
-  var docViewBottom = docViewTop + $(window).height();
-
-  var elemTop = $(elem).offset().top;
-  var elemBottom = elemTop + $(elem).height();
-
-  return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
-}
-
 jQuery(document).ready(function($) {
-  $("#contents").insertBefore($("#body"));
-  if ($("#contents > ul li").length < 100) {
-     $("#contents").addClass('sidebar');
+  var contents = $('#contents');
+  contents.insertBefore($('#body'));
+  if (contents.find('li').length < 100) {
+     contents.addClass('sidebar'); /* permit display as sidebar if screen wide enough */
   }
-  $("#contents").show();
+  contents.show();
 
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
