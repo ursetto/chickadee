@@ -28,6 +28,7 @@ function patchMobileSafariOffset() {
   }
 }
 
+// http://stackoverflow.com/questions/487073/jquery-check-if-element-is-visible-after-scroling/488073#488073
 function isScrolledIntoView(elem)
 {
   var docViewTop = $(window).scrollTop();
@@ -43,6 +44,8 @@ jQuery(document).ready(function($) {
   if (!isScrolledIntoView($("#contents"))) {
     $("#contents").insertBefore($("#body")).addClass('sidebar');
   }
+  $("#contents").show();   /* problem: if hidden, we can't tell if scrolled into view */
+
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox
   $('#contents h2').click(function() {

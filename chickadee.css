@@ -325,6 +325,10 @@ td.match-sig tt {
 /*  font-size: 14px; */
 }
 
+.js #contents {
+ display: none;  /* unhide later */
+}
+
 #contents ul.contents-list {
  float: left;
 }
