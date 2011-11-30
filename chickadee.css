@@ -8,19 +8,19 @@ body {
   padding: 0;
   font-size: 16px;
 }
+
 ul, ol { margin: 1em 0; padding: 0 0 0 40px; } /* fix IE 6,7 bullets */
+pre, code, kbd, samp, tt { 
+ font-family: monospace, monospace; 
+ _font-family: 'courier new', monospace;
+ font-size: 0.875em;
+}
 
 pre {
-  font-family: "Courier", "Courier New", monospace;
-  font-size: 14px;
   padding: 0.2em 0 0.2em 1em;
   margin: 1em 0 1em 0.3em;
   border-left: 3px double black;
 /*  background-color: #f4f4f4; */
-}
-tt {
-  font-family: "Courier", "Courier New", monospace;
-  font-size: 0.875em;
 }
 input { background-color: #ffffff; }
 
