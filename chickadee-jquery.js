@@ -41,10 +41,11 @@ function isScrolledIntoView(elem)
 }
 
 jQuery(document).ready(function($) {
-  if (!isScrolledIntoView($("#contents"))) {
-    $("#contents").insertBefore($("#body")).addClass('sidebar');
+  $("#contents").insertBefore($("#body"));
+  if ($("#contents > ul li").length < 100) {
+     $("#contents").addClass('sidebar');
   }
-  $("#contents").show();   /* problem: if hidden, we can't tell if scrolled into view */
+  $("#contents").show();
 
   $('input.incsearch').incsearch();
   $('#searchbox').focus();   // but only focus if primary searchbox

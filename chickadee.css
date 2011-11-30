@@ -332,6 +332,9 @@ td.match-sig tt {
 #contents ul.contents-list {
  float: left;
 }
+.js #contents ul.contents-list {
+ display: none;
+}
 #contents ul.contents-list li { 
  float: left;
  border: none;
@@ -339,6 +342,9 @@ td.match-sig tt {
 }
 #contents.sidebar ul.contents-list {
  float: none;
+}
+.js #contents.sidebar ul.contents-list {
+ display: block;  /* move this to @media? */
 }
 #contents.sidebar ul.contents-list li {
  float: none;
@@ -590,7 +596,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 
 
 @media screen and (max-width: 600px) {
-    #contents.sidebar ul.contents-list { 
+    .js #contents.sidebar ul.contents-list { 
 	display: none;  /* reset toggle */
     }
     .no-js ul.contents-list {
