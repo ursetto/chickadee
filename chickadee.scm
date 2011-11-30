@@ -85,10 +85,10 @@
          (div (@ (class "buttons"))
               (input (@ (class "button") (type submit)
                         (id "query-name") (name "query-name")
-                        (value "Lookup")))
+                        (value "Look up")))
               (input (@ (class "button") (type submit)
                         (id "query-regex") (name "query-regex")
-                        (value "Regex"))))))
+                        (value "Regexp"))))))
 
 (define (format-id x)
   (match (match-nodes x)
@@ -290,13 +290,14 @@
 
 (define (root-page)
   `((h3 "Search Chicken documentation")
+    (p "Enter a node name or path in the search box below:")
     ,(search-form)
-    (p "Enter a documentation node name or path in the search box above.")
     (ul (li "A node name is an identifier, egg, module or unit name, such as "
             (i "open/rdonly") ", " (i "awful") ", "
             (i "scheme") " or " (i "eval") ".")
         (li "A node path is a sequence of node names, such as "
             (i "eval load") " or " (i "foreign types") ".")
+        (li (i "Look up") " finds an exact match, and " (i "Regexp") " matches a regular expression.")
         (li "Regular expression matching is usually done against node names,"
             " but if a space is present, the full node path will be considered."))
     (h3 "Quick links")
