@@ -21,8 +21,6 @@ tt {
   font-size: 0.875em;
 }
 
-#body {
-}
 #main {
   padding-left: 1em;
   padding-right: 1em;
@@ -33,7 +31,7 @@ tt {
 }
 
 #contents {
-  margin: 0.5em 10px 1em 0.5em;
+  margin: 2em 10px 1em 0.5em;
   overflow: hidden;
   border: 1px solid #000;
   background-color: white;
@@ -331,6 +329,7 @@ td.match-sig tt {
 
 .js #contents {
  display: none;  /* unhide later */
+ margin-top: 0.5em;
 }
 
 #contents ul.contents-list {
