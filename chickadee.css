@@ -431,12 +431,11 @@ form.lookup input.text:focus {
   border: 1px solid black;
 }
 #searchbox {
-  width: 60%;
+  width: 75%;
+  max-width: 45em;
   margin-bottom: 1em;
   float: left;
 }
-/* Avoid next elt coming between searchbox and buttons.  Fails on IE6 */
-/*form.lookup + * { clear: left; }*/
 form.lookup { overflow: hidden; zoom: 1; min-height: 0; }
 
 div.buttons {
@@ -637,7 +636,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     #searchbox {
 	width: 75%;
     }
-    div.buttons { width: 6em; font-size: 0.875em; }
+    div.buttons { width: 5em; font-size: 0.875em; }
     dt.defsig { font-size: 0.875em; }
     dl.defsig span.sig tt { font-size: inherit; }
     dl.defsig { margin-left: 0; }
