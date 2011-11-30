@@ -324,6 +324,7 @@ td.match-sig {
   padding-left: 1em;
   padding-right: 1em;
   font-weight: normal;
+  font-style: normal;
 }
 td.match-sig tt {
 /*  font-size: 14px; */
