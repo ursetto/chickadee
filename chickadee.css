@@ -337,6 +337,7 @@ td.match-sig tt {
 
 #contents ul.contents-list {
  float: left;
+ *width: 100%;        /* IE7: explicit width so float children can use % width */
 }
 .js #contents ul.contents-list {
  display: none;
@@ -344,6 +345,7 @@ td.match-sig tt {
 #contents ul.contents-list li { 
  float: left;
  width: 33.3333333%;
+ *width: 33.25%;      /* IE7: avoid width overage */
  border: none;
  border-top: 1px solid #e8e8e8;  /* longer lines need lighter value; also -bottom looks terrible */
 }
