@@ -7,6 +7,20 @@
                   function() { $('dt.defsig').next('dd').show(); });
 */
 
+/* Quick hack to make #toc and #contents visible if jQuery didn't load.
+   Remove once we have reliable fallback. */
+if(!window.jQuery) {
+  var c = document.getElementById('contents');
+  if (c) {
+   c.style.display = "block";
+   c.children[1].style.display = "block";
+  }
+  var t = document.getElementById('toc');
+  if (t) {
+   c.children[1].style.display = "block";
+  }
+}
+
 patchMobileSafariOffset(); // http://dev.jquery.com/ticket/6446
 // http://gist.github.com/434145
 // as of jquery 1.4.2 mobile safari reports wrong values on offset()
