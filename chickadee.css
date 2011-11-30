@@ -345,8 +345,8 @@ td.match-sig tt {
 }
 #contents ul.contents-list li { 
  float: left;
- width: 33.3333333%;
- *width: 33.25%;      /* IE7: avoid width overage */
+ width: 25%;          /* ok for 800x600 */
+ *width: 24.75%;      /* IE7: avoid width overage */
  border: none;
  border-top: 1px solid #e8e8e8;  /* longer lines need lighter value; also -bottom looks terrible */
 }
