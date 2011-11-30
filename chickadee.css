@@ -341,8 +341,9 @@ td.match-sig tt {
 }
 #contents ul.contents-list li { 
  float: left;
- border: none;
  width: 33.3333333%;
+ border: none;
+ border-top: 1px solid #e8e8e8;  /* longer lines need lighter value; also -bottom looks terrible */
 }
 #contents.sidebar ul.contents-list {
  float: none;
@@ -352,8 +353,9 @@ td.match-sig tt {
 }
 #contents.sidebar ul.contents-list li {
  float: none;
- border-top: 1px solid #ddd;
  width: auto;
+ border: none;
+ border-top: 1px solid #ddd;
 }
 
 ul.contents-list {
@@ -615,12 +617,14 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 	-moz-border-radius: 0 0 5px 0;
 	border-radius: 0 0 5px 0;
     }
-
-    #contents ul.contents-list li,
-    #contents.sidebar ul.contents-list li { 
+    #contents.sidebar ul.contents-list li {   /* dup #contents ul li */
 	float: left;
 	border: none;
-	width: 33.3333333333%;
+	border-top: 1px solid #e8e8e8;
+    }
+    #contents.sidebar ul.contents-list li,
+    #contents ul.contents-list li {
+	width: 33.3333333333%; /* override larger @media */
     }
     #hdr-lookup {
 	border-top: 1px solid black;   /* stupid hack */
