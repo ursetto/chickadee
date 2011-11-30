@@ -1,5 +1,6 @@
 /* Disabled box-shadow on #contents and dl.defsig due to
    performance problems on mobile (and tackiness). */
+html { font-size: 100%; }
 body {
   font-family: "Georgia", "Times New Roman", serif;
   background-color: #ffffff;
