@@ -8,6 +8,7 @@ body {
   padding: 0;
   font-size: 16px;
 }
+ul, ol { margin: 1em 0; padding: 0 0 0 40px; } /* fix IE 6,7 bullets */
 
 pre {
   font-family: "Courier", "Courier New", monospace;
