@@ -32,29 +32,33 @@ tt {
   list-style-type: circle;
 }
 
-#contents { 
-  float: none; width: auto; 
-  margin-left: 0.5em; 
-}
-
-#contents.sidebar {
-  float: right; width: 20%;
-  margin-left: 1.0em;
-}
-
 #contents {
   margin: 0.5em 10px 1em 0.5em;
   overflow: hidden;
   border: 1px solid #000;
-  -moz-border-radius-bottomleft: 6px;
-  -webkit-border-bottom-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+  background-color: white;
 /*  -moz-box-shadow: -5px 3px 5px #ddd; */   /* mozilla hack to prevent right overflow */
 /*  -moz-box-shadow: 0px 1px 10px #aaa; 
   -webkit-box-shadow: 0px 1px 10px #aaa;
   box-shadow: 0px 1px 10px #aaa; */
-  background-color: white;
 }
+#contents { 
+  float: none; width: auto; 
+  margin-left: 0.5em; 
+  border-left: 2px solid #000;
+  -webkit-border-radius: 0 0 5px 0;
+  -moz-border-radius: 0 0 5px 0;
+  border-radius: 0 0 5px 0;
+}
+#contents.sidebar {
+  float: right; width: 20%;
+  margin-left: 1.0em;
+  border-left: 1px solid #000;
+  -webkit-border-radius: 0 0 0 5px;
+  -moz-border-radius: 0 0 0 5px;
+  border-radius: 0 0 0 5px;
+}
+
 #contents h2 {
   text-transform: lowercase;
   background-color: #444;
@@ -603,9 +607,13 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
         /* Don't collapse for non-JS.  Can be obtrusive, would probably look better at bottom. */
         display: block;
     }
-    #contents, #contents.sidebar { 
-      float: none; width: auto; 
-      margin-left: 0.5em; 
+    #contents.sidebar {    /* dup #contents, moving sidebar to middle */
+	float: none; width: auto; 
+	margin-left: 0.5em; 
+	border-left: 2px solid #000;
+	-webkit-border-radius: 0 0 5px 0;
+	-moz-border-radius: 0 0 5px 0;
+	border-radius: 0 0 5px 0;
     }
 
     #contents ul.contents-list li,
