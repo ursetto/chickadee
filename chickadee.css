@@ -21,6 +21,7 @@ tt {
   font-family: "Courier", "Courier New", monospace;
   font-size: 0.875em;
 }
+input { background-color: #ffffff; }
 
 #main {
   padding-left: 1em;
