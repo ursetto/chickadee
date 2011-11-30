@@ -601,7 +601,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 }
 
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 640px) {
     .js #contents.sidebar ul.contents-list { 
 	display: none;  /* reset toggle */
     }
@@ -646,8 +646,9 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     table { margin-left: 0; margin-right: 0; }
 }
 
-@media screen and (max-width: 400px) {
-    #contents ul.contents-list li { 
+@media screen and (max-width: 440px) {
+    #contents ul.contents-list li,
+    #contents.sidebar ul.contents-list li { 
 	width: 50%;
     }
     #searchbox, div.incsearch {
