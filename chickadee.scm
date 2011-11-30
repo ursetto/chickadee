@@ -313,12 +313,26 @@
        ,(path-link '(spiffy))
        " webserver on Chicken " ,(chicken-version) ".")))
 
+;; Conditionally add Internet Explorer classes to <html> a la HTML5 Boilerplate.
+;; Also add 'no-js' (which we will change to 'js' if JS is enabled).
+;; NOTE: you must supposedly add <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+;; or send that header to avoid Compatibility View in IE -- can't reproduce and
+;; the <meta> solution is dubious, so not using this until can conduct more tests.
+(define (conditional-html x)
+  `((lit "
+<!--[if lt IE 7]> <html class=\"no-js ie6 lt-ie9 lt-ie8 lt-ie7\"> <![endif]-->
+<!--[if IE 7]>    <html class=\"no-js ie7 lt-ie9 lt-ie8\"> <![endif]-->
+<!--[if IE 8]>    <html class=\"no-js ie8 lt-ie9\"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en\"> <!--<![endif]-->
+"
+    ) ,x (lit "</html>")))
+
 ;; Warning: TITLE, CONTENTS and BODY are expected to be HTML-quoted.
 ;; Internal fxn for node-page / not-found
 (define (%node-page-body title contents body #!key (page-title #f))
   (sxml->html
    `((lit "<!doctype html>")
-     (html (@ class "no-js")
+     (html (@ (class "no-js"))
       (head ,(charset "utf-8")
             ,(map css-link (chickadee-css-files))
             ;; Remove "no-js" class and add "js" class to <HTML> when JS enabled, a la Modernizr.
