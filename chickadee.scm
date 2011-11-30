@@ -330,8 +330,11 @@
             (meta (@ (name "viewport")
                      (content "initial-scale=1"))))
       (body
-       (p (@ (id "navskip"))
-          (a (@ (href "#body")) "Skip navigation."))
+       ;; Removed navskip because #contents are now at bottom.  However, a TOC skip might be nice,
+       ;; although you can click the next section instead.  Also, maybe provide a link to skip
+       ;; to the #contents.
+       ;; (p (@ (id "navskip"))
+       ;;    (a (@ (href "#body")) "Skip navigation."))
        (div (@ (id "hdr"))
             (h1 ,(path-link '() "chickadee")
                 ,(if (null? title)
