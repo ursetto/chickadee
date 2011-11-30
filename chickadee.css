@@ -436,7 +436,8 @@ form.lookup input.text:focus {
   float: left;
 }
 /* Avoid next elt coming between searchbox and buttons.  Fails on IE6 */
-form.lookup + * { clear: left; }
+/*form.lookup + * { clear: left; }*/
+form.lookup { overflow: hidden; zoom: 1; min-height: 0; }
 
 div.buttons {
   float: left;
