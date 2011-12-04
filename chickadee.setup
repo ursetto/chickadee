@@ -35,6 +35,7 @@
 (copy-file "jquery.metadata.min.js"
            (make-pathname +cdoc+
                           "jquery.metadata.2.1.min.js"))
+(copy-file "modernizr.custom.93248.js" +cdoc+)
 (copy-file "mag.png" +cdoc+)
 (copy-file "chickadee-config.scm"
            (make-pathname +basedir+
