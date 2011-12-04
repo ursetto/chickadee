@@ -511,7 +511,7 @@ form.lookup input.button {
     padding: 0;
     border: 0;
     background-color: transparent;
-    background-image: url('mag.png');
+    background-image: url('mag.png?d25a9700'); /* manual cache bust */
     background-position: center center;
     background-repeat: no-repeat;
     margin-left: 2px;

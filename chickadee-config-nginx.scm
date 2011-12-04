@@ -1,5 +1,17 @@
-(use chickadee spiffy uri-common)
+(use chickadee spiffy uri-common simple-sha1)
+
+;; Helpers
 (define uri uri-reference)
+(define (fingerprint fn)
+  ;; alternative: (number->string (file-modification-time fn))
+  (substring (or (sha1sum fn) (error "file not found" fn))
+             0 8))
+(define cache-bust ;; Fingerprint FN (relative to cdoc) and return cache-busting URI.
+  (lambda (fn)
+    (let ((cdoc (uri->string (cdoc-uri))))
+      (uri (string-append cdoc "/" fn "?"
+                          (fingerprint (make-pathname (list (root-path) cdoc)
+                                                      fn)))))))
 
 (root-path "root")
 (server-port 8388)
@@ -13,17 +25,18 @@
 (cdoc-uri (uri "/cdoc"))
 (chickadee-uri (uri "/chickadee"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
-(chickadee-css-files (list (uri "/cdoc/chickadee.css")))
+
+(chickadee-css-files (list (cache-bust "chickadee.css")))
 (chickadee-early-js-files (list (uri "/cdoc/modernizr.custom.93248.js")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js")))
+                          (cache-bust "chickadee-jquery.js")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
 (incremental-search 15)
 (incremental-search-delay 50)
 (cache-nodes-for 600)
-(cache-static-content-for 1800)
+(cache-static-content-for #t)
 
 (last-modified (current-seconds))
