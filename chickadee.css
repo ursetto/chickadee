@@ -365,7 +365,7 @@ td.match-sig tt {
  width: 100%;
  display: inline-block;  /* fix webkit margin wrapping.  `-webkit-column-break-inside: avoid` also works */
  border: none;
- border-bottom: 1px solid #e8e8e8;
+ border-top: 1px solid #e8e8e8;
 }
 
 #contents.sidebar ul.contents-list {
