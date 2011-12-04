@@ -363,7 +363,8 @@ td.match-sig tt {
 .csscolumns #contents ul.contents-list li {
  float: none;
  width: 100%;
- display: inline-block;  /* fix webkit margin wrapping.  `-webkit-column-break-inside: avoid` also works */
+/* display: inline-block; */  /* fix webkit margin wrapping; slows down firefox */
+ -webkit-column-break-inside: avoid; /* alternate webkit fix */
  border: none;
  border-top: 1px solid #e8e8e8;
 }
