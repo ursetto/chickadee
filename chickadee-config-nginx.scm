@@ -23,7 +23,7 @@
 (ajax-log #f)   ;; Slow; not recommended for production.
 
 (cdoc-uri (uri "/cdoc"))
-(chickadee-uri (uri "/chickadee"))
+(chickadee-uri (uri "/doc"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 
 (chickadee-css-files (list (cache-bust "chickadee.css")))
