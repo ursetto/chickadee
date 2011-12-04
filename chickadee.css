@@ -350,6 +350,22 @@ td.match-sig tt {
  border: none;
  border-top: 1px solid #e8e8e8;  /* longer lines need lighter value; also -bottom looks terrible */
 }
+
+.css3columns #contents ul.contents-list {
+ float: none;
+ -webkit-column-width: 12em;
+ -webkit-column-rule: 1px solid black;
+ -webkit-column-gap: 1px; /* defeat disappearing rule */
+ -moz-column-width: 12em;
+ -moz-column-rule: 1px solid black;
+ -moz-column-gap: 1px;  /* defeat border overlapping rule */
+}
+.css3columns #contents ul.contents-list li {
+ float: none;
+ width: auto;
+/* border: none; */
+}
+
 #contents.sidebar ul.contents-list {
  float: none;
 }
