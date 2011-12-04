@@ -8,6 +8,7 @@
   chickadee-uri
   incremental-search-uri
   chickadee-css-files
+  chickadee-early-js-files
   chickadee-js-files
   maximum-match-results
   maximum-match-signatures
@@ -336,6 +337,7 @@
      (html (@ (class "no-js"))
       (head ,(charset "utf-8")
             ,(map css-link (chickadee-css-files))
+            ,(map javascript (chickadee-early-js-files))
             ;; Remove "no-js" class and add "js" class to <HTML> when JS enabled a la Modernizr,
             ;; assuming Modernizr isn't already loaded.
             (script "if(!window.Modernizr){"
@@ -432,6 +434,8 @@
   (make-parameter (list (uri-reference "/cdoc/chickadee.css"))))
 (define chickadee-js-files
   (make-parameter (list (uri-reference "/cdoc/chickadee.js"))))
+(define chickadee-early-js-files
+  (make-parameter '()))
 
 (define maximum-match-results (make-parameter 250))
 (define maximum-match-signatures (make-parameter 100))
