@@ -378,7 +378,11 @@ td.match-sig tt {
  float: none;
  width: auto;
  border: none;
- border-top: 1px solid #ddd;
+ border-top: 1px solid #e8e8e8;
+}
+.csscolumns #contents.sidebar ul.contents-list li {  /* not sure if safe when no-csscolumns */
+  width: 100%;
+  display: inline-block;
 }
 
 ul.contents-list {
