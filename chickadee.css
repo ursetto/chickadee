@@ -363,7 +363,7 @@ td.match-sig tt {
 .csscolumns #contents ul.contents-list li {
  float: none;
  width: auto;
-/* border: none; */
+ border: none;  /* No borders for now; webkit especially has rendering problems when border wraps */
 }
 
 #contents.sidebar ul.contents-list {
