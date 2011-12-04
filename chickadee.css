@@ -679,6 +679,11 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     #contents.sidebar ul.contents-list li { 
 	width: 50%;
     }
+    .csscolumns #contents ul.contents-list {
+	-webkit-columns: 10em;  /* std 12em yields only 1 col here */
+	-moz-columns: 10em;
+	columns: 10em;
+    }
     #searchbox, div.incsearch {
 	font-size: 0.875em;
     }
