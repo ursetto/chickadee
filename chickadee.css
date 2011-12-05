@@ -593,38 +593,38 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 
 @media screen and (min-width: 1901px) {
     #contents ul.contents-list li {
-      width: 12.5%;
+      width: 12.5%; *width: 12.47%;
     }
 }
 
 @media screen and (max-width: 1900px) {
     #contents ul.contents-list li {
-      width: 12.5%;
+      width: 12.5%; *width: 12.47%;
     }
 }
 
 @media screen and (max-width: 1600px) {
     #contents ul.contents-list li {
-      width: 14.28572857%;
+      width: 14.28572857%; *width: 14.25%;
     }
 }
 
 @media screen and (max-width: 1280px) {
     #contents ul.contents-list li {
-      width: 16.666666%;
+      width: 16.666666%; *width: 16.6%;
     }
 }
 
 
 @media screen and (max-width: 1024px) {
     #contents ul.contents-list li {
-      width: 20%;
+      width: 20%; *width: 19.9%;
     }
 }
 
 @media screen and (max-width: 800px) {
     #contents ul.contents-list li {
-      width: 25%;
+      width: 25%; *width: 24.9%;
     }
 }
 
@@ -653,6 +653,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
     #contents.sidebar ul.contents-list li,
     #contents ul.contents-list li {
 	width: 33.3333333333%; /* override larger @media */
+	*width: 33%;
     }
     #hdr-lookup {
 	border-top: 1px solid black;   /* stupid hack */
@@ -677,7 +678,7 @@ pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
 @media screen and (max-width: 440px) {
     #contents ul.contents-list li,
     #contents.sidebar ul.contents-list li { 
-	width: 50%;
+	width: 50%; *width: 49.9%;
     }
     .csscolumns #contents ul.contents-list {
 	-webkit-columns: 10em;  /* std 12em yields only 1 col here */
