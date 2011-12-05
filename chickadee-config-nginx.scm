@@ -27,7 +27,7 @@
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 
 (chickadee-css-files (list (cache-bust "chickadee.css")))
-(chickadee-early-js-files (list (uri "/cdoc/modernizr.custom.93248.js")))
+(chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
                           (cache-bust "chickadee-jquery.js")))
