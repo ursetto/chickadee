@@ -577,13 +577,15 @@ pre.highlight .comment {
   color: #44a;
   font-style: italic;
 }
-pre.highlight .string, .character {
+pre.highlight .string, pre.highlight .character {
   color: #264;
 }
 pre.highlight .default {
   color: #000;
 }
-pre.highlight .paren1, .paren2, .paren3, .paren4, .paren5, .paren6 {
+pre.highlight .paren1, pre.highlight .paren2,
+pre.highlight .paren3, pre.highlight .paren4,
+pre.highlight .paren5, pre.highlight .paren6 {
   color: #777;
 }
 
