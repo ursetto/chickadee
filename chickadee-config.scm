@@ -4,6 +4,7 @@
 ;; so all paths below are relative to that path.
 
 (use chickadee spiffy uri-common)   ;; REQUIRED.  Do not remove.
+(use (only chicken-doc-html syntax-highlighter colorize prettify-js))
 (define uri uri-reference)          ;; A convenient alias.
 
 ;;; Main config
@@ -29,7 +30,9 @@
 (chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (uri "/cdoc/chickadee-jquery.js")))
+                          (uri "/cdoc/chickadee-jquery.js")
+                          ;(uri "/cdoc/prettify-bundle.js")  ;; Uncomment if using prettify-js highlighter.
+                          ))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
@@ -37,6 +40,8 @@
 (incremental-search-delay 50)
 (cache-nodes-for 300)
 (cache-static-content-for 1800)
+
+;; (syntax-highlighter prettify-js)   ;; Uncomment to use prettify-js instead of colorize
 
 (last-modified (current-seconds))
 

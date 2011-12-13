@@ -1,4 +1,5 @@
 (use chickadee spiffy uri-common simple-sha1)
+(use (only chicken-doc-html syntax-highlighter colorize prettify-js))
 
 ;; Helpers
 (define uri uri-reference)
@@ -30,7 +31,8 @@
 (chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
-                          (cache-bust "chickadee-jquery.js")))
+                          (cache-bust "chickadee-jquery.js")
+                          (cache-bust "prettify-bundle.js")))
 
 (maximum-match-results 250)
 (maximum-match-signatures 100)
@@ -38,5 +40,7 @@
 (incremental-search-delay 50)
 (cache-nodes-for 600)
 (cache-static-content-for #t)
+
+(syntax-highlighter prettify-js)
 
 (last-modified (current-seconds))
