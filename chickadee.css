@@ -565,29 +565,36 @@ div.incsearch li.hover {
 pre.highlight i {
   font-style: normal;
 }
-pre.highlight .symbol {
-/*  font-weight: bold; */
-  font-style: italic;
-  color: #555;
+pre.highlight .symbol,
+.prettyprint .kwd, .prettyprint .tag {
+  font-weight: bold;
+  color: #666;
 }
-pre.highlight .special {
-  font-style: italic;
-}
-pre.highlight .comment {
-  color: #44a;
+pre.highlight .comment,
+.prettyprint .com {
+  color: #778;
   font-style: italic;
 }
-pre.highlight .string, pre.highlight .character {
-  color: #264;
+pre.highlight .string, pre.highlight .character,
+.prettyprint .str, .prettyprint .atv {
+  color: #666;
 }
-pre.highlight .default {
+pre.highlight .default,
+.prettyprint .pln, .prettyprint .fun {
   color: #000;
 }
 pre.highlight .paren1, pre.highlight .paren2,
 pre.highlight .paren3, pre.highlight .paren4,
-pre.highlight .paren5, pre.highlight .paren6 {
-  color: #777;
+pre.highlight .paren5, pre.highlight .paren6,
+.prettyprint .opn, .prettyprint .clo {
+  color: #99a;
 }
+.prettyprint .typ { color: #444; font-weight: bold }
+.highlight .special, .prettyprint .atn,
+.prettyprint .dec, .prettyprint .var { color: #444; }
+.prettyprint .lit { color: #357; }
+.prettyprint .pun { color: #383840; }
+
 
 @media only screen and (max-device-width: 480px) {
     html { -webkit-text-size-adjust: none; }
