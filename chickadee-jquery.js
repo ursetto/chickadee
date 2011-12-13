@@ -77,6 +77,94 @@ jQuery(document).ready(function($) {
 */
 /* deps: QueuedAjax */
 (function($) {
+
+  /* Alarm */
+  function Alarm() {}
+  Alarm.prototype = {
+    cancel: function() {
+      if (typeof this.timeoutID == "number") {
+        window.clearTimeout(this.timeoutID);
+        delete this.timeoutID;
+      }
+    },
+    schedule: function(callback, delay) {
+      var self = this;
+      this.cancel();
+      this.timeoutID = window.setTimeout(
+        function() {
+          delete self.timeoutID;
+          callback();
+        }, delay);
+    }
+  };
+
+  /* Only one outstanding prefix request is allowed at a time.
+     Incoming requests are sent after DELAY ms; if another request
+     comes in before that, the countdown is reset.  If a request
+     comes in during the send, it is queued for retransmission
+     for DELAY ms after the send completes successfully
+     (any existing queued request is cancelled).
+  */
+  function QueuedAjax(options) {
+    var sending = false;
+    var enqueued_data = null;
+    var alarm = new Alarm();
+    var defaults = {
+      url: "",
+      delay: 50,
+      timeout: 1500,
+      type: 'GET',
+      success: $.noop,
+      error: $.noop
+    };
+    var opts = $.extend({}, defaults, options);
+
+    return {
+      send: function(data) {
+        var self = this;
+        if (sending) {
+          /* Sending flag is not cleared on error,
+             so further requests will take place.  But due to jQuery
+             bug (?) in 1.4.2, no error occurs on network failure. */
+          enqueued_data = data;
+          return;
+        }
+
+        var ajax = function() {
+          sending = true;
+          /* TODO url, type and timeout can perhaps be omitted if not set
+             by caller, accepting $.ajax defaults. */
+          $.ajax({
+            url: opts.url,
+            type: opts.type,
+            data: typeof data === 'function' ? data() : data,
+            timeout: opts.timeout,   // FIXME: Don't want to set if undefined
+            success: function(data, status, xhr) {
+              opts.success(data, status, xhr);
+              /* If send was enqueued during XHR, reschedule it. */
+              var enq = enqueued_data;
+              if (enq) {
+                enqueued_data = null;
+                alarm.schedule(function() { self.send(enq); },
+                               opts.delay);
+              }
+              sending = false;
+            },
+            error: opts.error
+          });
+        };
+
+        if (opts.delay == 0) {
+          alarm.cancel();
+          ajax();
+        } else {
+          alarm.schedule(ajax, opts.delay);
+        }
+      }
+
+    };
+  }
+
   $.fn.incsearch = function(options) {
     var opts = $.extend({}, $.fn.incsearch.defaults, options);
     return this.each(function(index) {
@@ -95,7 +183,7 @@ jQuery(document).ready(function($) {
       var selected = null;         // which 0-based item index is selected, or null
       var saved_value;
       var item_count = 0;          // number of items in the incsearch box
-      
+
       var qajax = QueuedAjax({
         timeout: opts.timeout,
         delay: opts.delay,
@@ -148,18 +236,18 @@ jQuery(document).ready(function($) {
         if (e.which == 38 || e.which == 40 || e.which == 13) return true;
         var str = $sb.val();
         if (str != last_search) {
-	  last_search = str;
-	  if (str == "") {
-	    hide();
-	  } else {
+          last_search = str;
+          if (str == "") {
+            hide();
+          } else {
             if (typeof query === 'function') {
               qajax.send(query(str));
             } else {
               var args = {};
               args[query] = str;
-	      qajax.send(args);
+              qajax.send(args);
             }
-	  }
+          }
         }
       });
       $sb.keydown(function(e) {
@@ -250,91 +338,3 @@ jQuery(document).ready(function($) {
     submit: true
   };
 })(jQuery);
-
-/* Alarm */
-function Alarm() {}
-Alarm.prototype = {
-  cancel: function() {
-    if (typeof this.timeoutID == "number") {
-      window.clearTimeout(this.timeoutID);
-      delete this.timeoutID;
-    }
-  },
-  schedule: function(callback, delay) {
-    var self = this;
-    this.cancel();
-    this.timeoutID = window.setTimeout(
-      function() {
-	delete self.timeoutID;
-	callback();
-      }, delay);
-  }
-};
-
-/* Only one outstanding prefix request is allowed at a time.
-   Incoming requests are sent after DELAY ms; if another request
-   comes in before that, the countdown is reset.  If a request
-   comes in during the send, it is queued for retransmission
-   for DELAY ms after the send completes successfully
-   (any existing queued request is cancelled).
-*/
-function QueuedAjax(options) {
-  var sending = false;
-  var enqueued_data = null;
-  var alarm = new Alarm();
-  var defaults = {
-    url: "",
-    delay: 50,
-    timeout: 1500,
-    type: 'GET',
-    success: $.noop,
-    error: $.noop
-  };
-  var opts = $.extend({}, defaults, options);
-
-  return {
-    send: function(data) {
-      var self = this;
-      if (sending) {
-        /* Sending flag is not cleared on error,
-           so further requests will take place.  But due to jQuery
-           bug (?) in 1.4.2, no error occurs on network failure. */
-        enqueued_data = data;
-        return;
-      }
-
-      var ajax = function() {
-        sending = true;
-        /* TODO url, type and timeout can perhaps be omitted if not set
-           by caller, accepting $.ajax defaults. */
-        $.ajax({
-          url: opts.url,
-          type: opts.type,
-          data: typeof data === 'function' ? data() : data,
-          timeout: opts.timeout,   // FIXME: Don't want to set if undefined
-          success: function(data, status, xhr) {
-            opts.success(data, status, xhr);
-	    /* If send was enqueued during XHR, reschedule it. */
-            var enq = enqueued_data;
-	    if (enq) {
-              enqueued_data = null;
-	      alarm.schedule(function() { self.send(enq); },
-                             opts.delay);
-	    }
-            sending = false;
-          },
-          error: opts.error
-        });
-      };
-
-      if (opts.delay == 0) {
-        alarm.cancel();
-        ajax();
-      } else {
-        alarm.schedule(ajax, opts.delay);
-      }
-    }
-    
-  };
-}
-
