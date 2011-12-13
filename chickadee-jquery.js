@@ -59,6 +59,8 @@ jQuery(document).ready(function($) {
     $(this).next().toggle();
   });
   $('#toc h2').next().hide();
+  /* If prettify.js is loaded, use it to pretty print. */
+  if (typeof prettyPrint === 'function') { prettyPrint(); }
 });
 
 /* incsearch plugin */
