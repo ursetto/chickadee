@@ -166,8 +166,8 @@ jQuery(document).ready(function($) {
   }
 
   $.fn.incsearch = function(options) {
-    var opts = $.extend({}, $.fn.incsearch.defaults, options);
     return this.each(function(index) {
+      var opts = $.extend({}, $.fn.incsearch.defaults, options);
       var $sb = $(this);
       if ($.metadata) { $.extend(opts, $sb.metadata()); }
 
