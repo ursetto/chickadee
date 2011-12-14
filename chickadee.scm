@@ -68,15 +68,32 @@
 
 ;;; Pages
 
+(define (->json x)           ;; q&d JSON generator since we don't need a parser.
+  (define (quoted-string x)
+    `("\"" ,(string-substitute (irregex '(: #\")) "\\\"" x)
+      "\""))
+  (define (alist->json a)
+    (map (lambda (e) (list (quoted-string (symbol->string (car e)))
+                      ":" (to-json (cdr e))))
+         a))
+  (define (to-json x)
+    (cond ((number? x) (number->string x))
+          ((pair? x) (list "{" (intersperse (alist->json x) ",") "}"))
+          ((string? x) (quoted-string x))
+          ((symbol? x) (quoted-string x))
+          ((vector? x) (list "[" (intersperse (map ->json (vector->list x)) ",") "]"))
+          (else (error 'json "conversion unsupported" x))))
+  (tree->string (to-json x)))
+
 (define (search-form)
   `(form (@ (class "lookup")
             (action ,(cdoc-page-path))
             (method get))
          (input (@ (id "searchbox")
-                   (class "text incsearch { "
-                     "url: \"" ,(uri->string (incremental-search-uri)) "\","
-                     "delay: " ,(incremental-search-delay)
-                     " }")
+                   (class "text incsearch")
+                   (data-opts ,(->json
+                                `((url . ,(uri->string (incremental-search-uri)))
+                                  (delay . ,(incremental-search-delay)))))
                    (type text)
                    (name q)
                    (autocomplete off) ;; apparently readonly in DOM
@@ -369,9 +386,10 @@
                      (method "get"))
                   (input (@ (id "hdr-searchbox")
                             (name "q")
-                            (class "text incsearch { "
-                              "url: \"" ,(uri->string (incremental-search-uri)) "\","
-                              "delay: " ,(incremental-search-delay) " }")
+                            (class "text incsearch")
+                            (data-opts ,(->json
+                                         `((url . ,(uri->string (incremental-search-uri)))
+                                           (delay . ,(incremental-search-delay)))))
                             (type "text")
                             (accesskey "f")
                             (title "chickadee search (Ctrl-F)")

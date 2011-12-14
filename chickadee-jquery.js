@@ -74,8 +74,9 @@ jQuery(document).ready(function($) {
    selectedClass: class to apply to selected (hovered) items
    submit: selector of input to click for submit, true to click first
            submit input, false to skip submit
+   Options may be passed in data-opts attribute as a JSON hash.
 */
-/* deps: QueuedAjax */
+/* deps: QueuedAjax (included inline) */
 (function($) {
 
   /* Alarm */
@@ -169,7 +170,7 @@ jQuery(document).ready(function($) {
     return this.each(function(index) {
       var opts = $.extend({}, $.fn.incsearch.defaults, options);
       var $sb = $(this);
-      if ($.metadata) { $.extend(opts, $sb.metadata()); }
+      $.extend(opts, $sb.data('opts')); /* null attr ok */
 
       var $is = $('<div/>', { id: this.id ? this.id + "-" + opts.isclass
                               : opts.isclass + (index==0?'':index),   // id wrong

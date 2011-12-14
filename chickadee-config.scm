@@ -28,7 +28,7 @@
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 (chickadee-css-files (list (uri "/cdoc/chickadee.css")))
 (chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
-(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.2.min.js")
+(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.4.min.js")
                           (uri "/cdoc/jquery.metadata.2.1.min.js")
                           (uri "/cdoc/chickadee-jquery.js")
                           ;(uri "/cdoc/prettify-bundle.js")  ;; Uncomment if using prettify-js highlighter.
