@@ -1,6 +1,6 @@
 ;; -*- scheme -*-
 
-(define +version+ "0.9.11")
+(define +version+ "0.10.0")
 
 (compile -s -O2 -d1 -S chickadee.scm -j chickadee)
 (compile -s -O2 -d0 chickadee.import.scm)
