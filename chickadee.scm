@@ -109,7 +109,7 @@
                         (value "Regexp"))))))
 
 (define (format-id x)
-  (match (match-nodes x)
+  (match (match-nodes x (maximum-match-results))
          ((n1)
           (redirect-to (path->href (node-path n1))))
          (()
@@ -122,9 +122,11 @@
           (match-page nodes x))))
 
 (define (format-re x)
-  (match-page (match-nodes (irregex x)) x))
+  (match-page (match-nodes (irregex x) (maximum-match-results))
+              x))
 (define (format-path-re x)
-  (match-page (match-node-paths/re (irregex x)) x))
+  (match-page (match-node-paths/re (irregex x) (maximum-match-results))
+              x))
 
 (define (match-page nodes match-text)
   (let ((max-results (maximum-match-results))
@@ -138,6 +140,8 @@
         (lambda ()
           (node-page
            `("query " ,match-text " ("
+             ;; Exceeding match-results can't happen because we cap the
+             ;; result length now, but we keep the logic in place anyway
              ,(maybe (> result-length max-results)
                      `(,max-results " of "))
              ,result-length " matches)")

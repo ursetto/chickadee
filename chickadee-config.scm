@@ -34,7 +34,7 @@
                           ))
 
 (maximum-match-results 250)
-(maximum-match-signatures 100)
+(maximum-match-signatures 250)
 (incremental-search 15)
 (incremental-search-delay 50)
 (cache-nodes-for 300)

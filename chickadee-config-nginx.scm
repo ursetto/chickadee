@@ -33,8 +33,8 @@
                           (cache-bust "chickadee-jquery.js")
                           (cache-bust "prettify-bundle.js")))
 
-(maximum-match-results 250)
-(maximum-match-signatures 100)
+(maximum-match-results 150)
+(maximum-match-signatures 150)
 (incremental-search 15)
 (incremental-search-delay 50)
 (cache-nodes-for 600)
