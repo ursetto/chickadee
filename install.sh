@@ -14,4 +14,5 @@ for i in modernizr*js; do
   ln -f "$i" $DEST/
 done
 ln -f mag.png $DEST
+ln -f jquery-*.js $DEST
 

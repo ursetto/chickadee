@@ -1,6 +1,6 @@
 ;; -*- scheme -*-
 
-(define +version+ "0.10.1")
+(define +version+ "0.10.2")
 
 (compile -s -O2 -d1 -S chickadee.scm -j chickadee)
 (compile -s -O2 -d0 chickadee.import.scm)
@@ -32,6 +32,7 @@
 (create-directory/parents (make-pathname +basedir+ "logs"))
 (copy-file "chickadee-jquery.js" +cdoc+)
 (copy-file "chickadee.css" +cdoc+)
+(copy-file "jquery-1.4.4.min.js" +cdoc+)
 (copy-file "modernizr.custom.93248.js" +cdoc+)
 (copy-file "modernizr.respond.93248.js" +cdoc+)
 (copy-file "prettify-bundle.js" +cdoc+)
