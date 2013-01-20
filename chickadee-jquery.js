@@ -212,7 +212,7 @@ jQuery(document).ready(function($) {
         var submit = opts.submit;
         if (submit) {
           if (submit === true) {
-            $(':submit', $sb[0].form).first().click();
+            $('[type="submit"]', $sb[0].form).first().click();
           } else {
             $(submit).click();
           }
