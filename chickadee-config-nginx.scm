@@ -29,7 +29,7 @@
 
 (chickadee-css-files (list (cache-bust "chickadee.css")))
 (chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
-(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.4.4.min.js")
+(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.9.0.min.js")
                           (cache-bust "chickadee-jquery.js")
                           (cache-bust "prettify-bundle.js")))
 
