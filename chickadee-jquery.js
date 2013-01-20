@@ -192,8 +192,13 @@ jQuery(document).ready(function($) {
       }
       function reposition() {
         var pos = $sb.offset();
-        // Using .offset(pos) causes jumpiness on FF and
-        // wrong position on Safari.
+        // Using .offset(pos) formerly didn't work on FF and Safari;
+        // it does now, but doesn't offer any benefit.  Continue to
+        // set CSS directly for now.
+        //// $is.offset({top: pos.top + $sb.outerHeight() + 3,
+        ////             left: pos.left + 2 });
+        //// $is.width($sb.innerWidth() - 4);
+
         $is.css({left: pos.left + 2,
                  top:  pos.top + $sb.outerHeight() + 3,
                  width: $sb.innerWidth() - 4
