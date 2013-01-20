@@ -21,27 +21,6 @@ if(!window.jQuery) {
   }
 }
 
-patchMobileSafariOffset(); // http://dev.jquery.com/ticket/6446
-// http://gist.github.com/434145
-// as of jquery 1.4.2 mobile safari reports wrong values on offset()
-// bug occurs: on iPhone OS since 3.2 version (iPad)
-//             on iOS in version 4.0 (fixed in 4.1)
-function patchMobileSafariOffset() {
-  if (/webkit.*mobile/i.test(navigator.userAgent)
-      && /; CPU.*OS (?:3_2|4_0)/i.test(navigator.userAgent)
-      && "getBoundingClientRect" in document.documentElement) {
-    (function ($) {
-      $.fn.offsetOld = $.fn.offset;
-      $.fn.offset = function () {
-        var result = this.offsetOld();
-        result.top -= window.scrollY;
-        result.left -= window.scrollX;
-        return result;
-      };
-    })(jQuery);
-  }
-}
-
 jQuery(document).ready(function($) {
   var contents = $('#contents');
   contents.insertBefore($('#body'));
