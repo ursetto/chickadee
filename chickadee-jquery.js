@@ -185,9 +185,13 @@ jQuery(document).ready(function($) {
       });
 
       function hide() {
+        $(window).off("resize", reposition);
         $is.hide();
       }
       function show() {
+        $(window).on("resize", reposition);
+        // $(window).on('orientationchange', reposition); // iPhone/iPad -- but does not work
+        reposition();
         $is.show();
       }
       function reposition() {
@@ -280,12 +284,6 @@ jQuery(document).ready(function($) {
       });
 
       $sb.blur(function() { hide(); });
-
-      /* FIXME Should probably not reposition incsearch until it
-       * becomes visible. */
-      $(window).resize(reposition);
-      // $(window).on('orientationchange', reposition); // iPhone/iPad -- but does not work
-      reposition();
 
       // Cancel mousedown; don't fire blur nor allow text selection.
       $is.mousedown(function() {
