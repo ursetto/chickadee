@@ -279,7 +279,7 @@ jQuery(document).ready(function($) {
       /* FIXME Should probably not reposition incsearch until it
        * becomes visible. */
       $(window).resize(reposition);
-      // $(window).bind('orientationchange', reposition); // iPhone/iPad -- but does not work
+      // $(window).on('orientationchange', reposition); // iPhone/iPad -- but does not work
       reposition();
 
       // Cancel mousedown; don't fire blur nor allow text selection.
@@ -289,13 +289,13 @@ jQuery(document).ready(function($) {
         $sb.one('beforedeactivate', function() { return false; });
         return false;
       });
-      $is.delegate("li", "mouseup", function() {
+      $is.on("mouseup", "li", function() {
         var $t = $(this);
         $sb.val($t.text());
         hide();  // ?
         maybe_submit();
       });
-      $is.delegate("li", "mouseover",
+      $is.on("mouseover", "li",
                    function() {
                      /* CODE DUPLICATION */
                      if (selected !== null) {
