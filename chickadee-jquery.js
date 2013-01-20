@@ -4,7 +4,7 @@
 
 /* thoughts for the future:
    $('h2').toggle(function() { $('dt.defsig').next('dd').hide(); }
-                  function() { $('dt.defsig').next('dd').show(); });
+                  function() { $('dt.defsig').next('dd').show(); });  // warning: deprecated in jquery 1.9
 */
 
 /* Quick hack to make #toc and #contents visible if jQuery didn't load.
