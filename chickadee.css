@@ -185,6 +185,7 @@ dt.defsig span.sig tt {
 dt.defsig var.arg {
     font-weight: normal;
     font-style: italic;
+    text-transform: lowercase;
 }
 dt.defsig var.id {
     font-style: italic; /* looks better than normal */
@@ -193,6 +194,7 @@ dt.defsig var.id {
 dt.defsig var.dsssl {
     font-style: normal;
     font-weight: bold;
+    color: #666;
 }
 dt.defsig var.value {
     font-family: monospace;
@@ -230,6 +232,7 @@ h2 {
 h3 {
   border-bottom: 1px solid #808080;
   font-size: 1.5em;
+  margin-top: 1.5em;
 }
 
 h4 {
