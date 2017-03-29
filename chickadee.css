@@ -10,16 +10,22 @@ body {
 }
 
 ul, ol { margin: 1em 0; padding: 0 0 0 40px; } /* fix IE 6,7 bullets */
-pre, code, kbd, samp, tt { 
+pre { 
  font-family: monospace, monospace; 
- _font-family: 'courier new', monospace;
+ _font-family: 'andale mono', 'courier new', monospace;
  font-size: 0.875em;
 }
 
+code, kbd, samp, tt { 
+ /* font-family: 'courier', 'courier new', 'andale mono', monospace; */
+ font-size: 1em;
+}
+
+
 pre {
   padding: 0.2em 0 0.2em 1em;
-  margin: 1em 0 1em 0.3em;
-  border-left: 3px double black;
+  margin: 1em 0 1em 1.0em;
+  border-left: 1px solid #888;
 /*  background-color: #f4f4f4; */
 }
 input { background-color: #ffffff; }
@@ -126,25 +132,15 @@ dt {
 }
 
 dl.defsig {
-  border: 1px solid black;
-  border-left: 3px solid black;
-/*  border-right: 3px double black; */
-  border-color: black;
-  margin-left: 1em;
-/*  margin-right: 1em; */
-  -moz-border-radius-bottomright: 5px;
-  -webkit-border-bottom-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-/*  -webkit-box-shadow: #bbb 0px 1px 1px;
-  -moz-box-shadow: #bbb 0px 2px 5px;
-  box-shadow: #bbb 0px 2px 5px; */
+  margin-top: 2em;
+  margin-bottom: 2em;
 }
 
 dt.defsig {
-  padding: 0.2em 1.0em;
-  background-color: #444;
-  color: #fff;
-  border-bottom: 1px solid black;
+  padding: 0.2em 0.0em;
+  /* background-color: #444; */
+  color: #000;
+  /* border-bottom: 1px solid black; */
   font-weight: normal;
   margin: 0;
   font-size: 1em;
@@ -162,16 +158,17 @@ dt.defsig {
   /* font-style: inherit !important; */
   /* color: inherit !important; */
   font-style: normal;  
-  color: #fff;
+  /* font-weight: bold; */
+  color: #000;
 }
 dt.defsig a:hover tt {
-  border-bottom: 1px solid #fff !important;
+  border-bottom: 1px solid #000 !important;
 }
 
 dt.defsig span.type {
   float: right;
-  color: #eee;
-  font-size: 0.9375em;
+  color: #000;
+  /* font-size: 0.9375em; */
   font-style: italic;
   font-weight: normal;
 /*  border-left: 3px double black; */
@@ -179,7 +176,30 @@ dt.defsig span.type {
 dt.defsig span.sig {
 /* monospace already set via tt */
   float: left;
+  font-weight: bold;
 }
+dt.defsig span.sig tt {
+  /* font-family: inherit; */
+  font-size: 1em;
+}
+dt.defsig var.arg {
+    font-weight: normal;
+    font-style: italic;
+}
+dt.defsig var.id {
+    font-style: italic; /* looks better than normal */
+    font-weight: bold;
+}
+dt.defsig var.dsssl {
+    font-style: normal;
+    font-weight: bold;
+}
+dt.defsig var.value {
+    font-family: monospace;
+    font-style: normal;
+    font-weight: normal;
+}
+
 
 /* dt.defsig span.sig tt {
     font-family: "Georgia", "Times New Roman", serif;
@@ -195,11 +215,9 @@ dt.defsig span.sig {
    paragraph margins will use the padding as a baseline;
    if margin & padding is 0, then tables are not offset */
 dd.defsig {
-  padding-left: 1em;
-  padding-right: 1em;
+  padding-left: 1.5em;
+  padding-right: 0em;
   margin: 0;
-  margin-top: 1em;
-  margin-bottom: 1em;
   background-color: #ffffff;
 }
 
@@ -252,6 +270,7 @@ td {
 }
 dl {
   margin-left: 1em;
+  margin-right: 1em;
 }
 dt {
   margin-top: 0.2em;
