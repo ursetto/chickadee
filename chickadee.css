@@ -224,11 +224,25 @@ dd.defsig {
 h2 {
 /*  border-top: 1px solid black; */
   border-bottom: 3px double black;
+  font-size: 2em;
 }
 
 h3 {
   border-bottom: 1px solid #808080;
+  font-size: 1.5em;
 }
+
+h4 {
+  font-size: 1.17em;
+}
+
+h5 {
+  font-size: 1em;
+}
+h6 {
+  font-size: 0.8em;
+}
+
 
 /* section links */
 #main h1 a, #main h2 a, #main h3 a, #main h4 a, #main h5 a, #main h6 a {
@@ -253,8 +267,8 @@ table {
 */
   margin-left: 2em;
   margin-right: 2em;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
 }
 th {
   text-align: left;
