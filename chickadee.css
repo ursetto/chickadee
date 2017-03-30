@@ -184,21 +184,21 @@ dt.defsig span.sig tt {
   /* font-family: inherit; */
   font-size: 1em;
 }
-dt.defsig var.arg {
+dl.defsig var.arg {
     font-weight: normal;
     font-style: italic;
     text-transform: lowercase;
 }
-dt.defsig var.id {
+dl.defsig var.id {
     font-style: italic; /* looks better than normal */
     font-weight: bold;
 }
-dt.defsig var.dsssl {
+dl.defsig var.dsssl {
     font-style: normal;
     font-weight: bold;
     color: #666;
 }
-dt.defsig var.value {
+dl.defsig var.value {
     font-family: monospace;
     font-style: normal;
     font-weight: normal;
