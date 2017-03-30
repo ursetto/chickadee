@@ -134,6 +134,8 @@ dt {
 dl.defsig {
   margin-top: 2em;
   margin-bottom: 2em;
+  margin-left: 2em;
+  margin-right: 2em;
 }
 
 dt.defsig {
