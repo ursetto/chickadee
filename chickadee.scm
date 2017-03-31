@@ -333,19 +333,17 @@
         (li (i "Look up") " finds an exact match, and " (i "Regexp") " matches a regular expression.")
         (li "Regular expression matching is usually done against node names,"
             " but if a space is present, the full node path will be considered."))
-    (h3 "Quick links")
+    (h4 "Quick links")
     (ul (li ,(path-link '(chicken) "Chicken manual"))
         (li ,(path-link '(chicken language) "Supported language"))
         (li ,(path-link '(foreign) "FFI")))
     (h4 "About")
     (p ,(path-link '(chickadee))
-       " is the web interface to the "
+       " is an interface to the "
        ,(path-link '(chicken-doc))
-       " documentation system for the "
-       (a (@ (href "http://call-cc.org")) "Chicken")
-       " language.  It is running on the "
-       ,(path-link '(spiffy))
-       " webserver on Chicken " ,(chicken-version) ".")))
+       " documentation system for "
+       (a (@ (href "http://call-cc.org")) (span (@ (style "font-variant: small-caps")) "Chicken") " Scheme")
+       ".")))
 
 ;; Conditionally add Internet Explorer classes to <html> a la HTML5 Boilerplate.
 ;; Also add 'no-js' (which we will change to 'js' if JS is enabled).
