@@ -166,6 +166,13 @@ dt.defsig {
 dt.defsig a:hover tt {
   border-bottom: 1px solid #000 !important;
 }
+#main var a {
+    text-decoration: none;
+    border-bottom: none;
+}
+/*#main dd.defsig var a:hover {
+  border-bottom: 1px solid #000 !important;
+}*/
 
 dt.defsig span.type {
   float: right;
@@ -189,7 +196,7 @@ dl.defsig var.arg {
     font-style: italic;
     text-transform: lowercase;
 }
-dl.defsig var.id {
+var.id {
     font-style: italic; /* looks better than normal */
     font-weight: bold;
 }
@@ -265,7 +272,7 @@ hr {
 }
 
 table {
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-collapse: collapse;
 /*  margin-left: auto;
   margin-right: auto;
@@ -277,15 +284,14 @@ table {
 }
 th {
   text-align: left;
-  padding-left: 1em;
-  padding-right: 1em;
+  padding: 0.3em 1em;
   font-weight: bold;
-  border: 1px solid black;
+  /* border: 1px solid black; */
+  border-bottom: 1px solid black;
 }
 td {
-  border: 1px solid black;
-  padding-left: 1em;
-  padding-right: 1em;
+  /* border: 1px solid black; */
+  padding: 0.3em 1em;
 }
 dl {
   margin-left: 1em;
