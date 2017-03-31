@@ -19,6 +19,7 @@ pre {
 code, kbd, samp, tt { 
  /* font-family: 'courier', 'courier new', 'andale mono', monospace; */
  font-size: 1em;
+ letter-spacing: -1px;
 }
 
 
@@ -37,6 +38,9 @@ input { background-color: #ffffff; }
 }
 #main ul {
   list-style-type: circle;
+}
+#main p {
+    line-height: 1.33em;
 }
 
 #contents {
@@ -729,6 +733,10 @@ div.incsearch li.hover {
 	  letter-spacing: -1px;     /* Important for <=480px, but may be too squished for 600px */
     }
     table { margin-left: 0; margin-right: 0; }
+    td, th { padding: 0.2em 0.5em; }
+    #main p {
+        line-height: 1.2em;
+    }
 }
 
 @media screen and (max-width: 440px) {
@@ -760,8 +768,10 @@ div.incsearch li.hover {
 	  border-left-width: 1px; 
 	  padding-left: 0.25em;
 	  letter-spacing: -1px;
-	  font-size: 0.75em;
-   }
+	  font-size: 0.8em;
+    }
+    tt { letter-spacing: -1px; }
+
 }
 
 /* Viewport seems wide enough at 768px (iPad portrai) to support
