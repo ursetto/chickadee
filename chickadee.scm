@@ -240,7 +240,11 @@
 ;; Given a node N, return a procedure that will produce a definition href
 ;; for ID suitable for placement in a defsig in N.  That is, it will refer
 ;; to the actual child node when N is an egg (etc.) and it will refer to
-;; an anchor id in the parent when N is itself a defsig. 
+;; an anchor id in the parent when N is itself a defsig.
+;; Returns #f if the ID is not a definition inside N. This is useful when
+;; conditionally lighting up plaintext IDs as definition links. But when N
+;; is a defsig, it does not check the parent.
+
 (define (make-def->href n)
   (let ((doc (node-sxml n))
         (path (node-path n)))
@@ -248,9 +252,13 @@
         (let* ((path (butlast path))
                (href (path->href path)))
           (lambda (id)
-            (string-append href "#" (quote-identifier (definition->identifier id)))))
+            (and (or (string=? (->string id)
+                               (->string (node-id n))) ; Make sure to recognize ourselves!
+                     (node-definition-id? n id)) ; Note: Does not look in parent. Possible fixme.
+                 (string-append href "#" (quote-identifier (definition->identifier id))))))
         (lambda (id)
-          (path->href (append path (list id)))))))
+          (and (node-definition-id? n id)
+               (path->href (append path (list id))))))))
 
 (define (title-path n)
   (define (links n)
