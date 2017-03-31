@@ -121,7 +121,7 @@ input { background-color: #ffffff; }
   display: none;
 }
 #toc ul.toc {
-  padding-left: 0.5em;
+    padding: 0.3em 0.5em;
 }
 #toc ul li {
   margin: 0;
