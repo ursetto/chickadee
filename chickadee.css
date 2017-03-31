@@ -293,6 +293,9 @@ td {
   /* border: 1px solid black; */
   padding: 0.3em 1em;
 }
+tr:hover {
+    background-color: #eee;
+}
 dl {
   margin-left: 1em;
   margin-right: 1em;
