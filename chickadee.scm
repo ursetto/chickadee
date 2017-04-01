@@ -388,8 +388,8 @@
        (div (@ (id "hdr"))
             (h1 ,(path-link '() "chickadee")
                 ,(if (null? title)
-                     `((" | " ,(path-link '(chicken-doc))
-                        " server"))
+                     `(;; (" | " ,(path-link '(chicken-doc)) " " "server"
+                        )
                      `((lit " &raquo; ") ,title)))
             (h5 (label (@ (for "hdr-searchbox"))
                        "Identifier search"))

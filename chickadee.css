@@ -11,15 +11,18 @@ body {
 
 ul, ol { margin: 1em 0; padding: 0 0 0 40px; } /* fix IE 6,7 bullets */
 pre { 
- font-family: monospace, monospace; 
- _font-family: 'andale mono', 'courier new', monospace;
+ /* font-family: monospace, monospace;  */
+ font-family: 'menlo', 'lucida sans typewriter', 'andale mono', 'courier', 'courier new', monospace;
  font-size: 0.875em;
+ /* letter-spacing: -1px; */ /* this only looks good with andale mono */
+ /* ios: american typewriter, americantypewriter-condensed, couriernew, menlo */
+ /* menlo & lucida sans are very close, but they're also tall, so they don't look great in tt */
 }
 
 code, kbd, samp, tt { 
- /* font-family: 'courier', 'courier new', 'andale mono', monospace; */
- font-size: 1em;
- letter-spacing: -1px;
+ font-size: 0.875em;    /* courier needs 1.0em for proper x-height, but menlo/lucida sans are good (though M-height is too small) */
+ /*letter-spacing: -1px;*/
+ font-family: 'menlo', 'lucida sans typewriter', 'andale mono', 'courier', 'courier new', monospace;
 }
 
 
@@ -27,6 +30,7 @@ pre {
   padding: 0.2em 0 0.2em 1em;
   margin: 1em 0 1em 1.0em;
   border-left: 1px solid #888;
+  line-height: 1.33em;
 /*  background-color: #f4f4f4; */
 }
 input { background-color: #ffffff; }
@@ -170,6 +174,9 @@ dt.defsig {
 dt.defsig a:hover tt {
   border-bottom: 1px solid #000 !important;
 }
+dt.defsig a:hover var.id {
+  border-bottom: 1px solid #000 !important;  /* should this be reverse video? */
+}
 #main var a {
     text-decoration: none;
     border-bottom: none;
@@ -193,7 +200,7 @@ dt.defsig span.sig {
 }
 dt.defsig span.sig tt {
   /* font-family: inherit; */
-  font-size: 1em;
+  /* font-size: .9375em; */    /* Sometimes looks slightly better slightly bigger */
 }
 dl.defsig var.arg {
     font-weight: normal;
@@ -239,24 +246,25 @@ dd.defsig {
 h2 {
 /*  border-top: 1px solid black; */
   border-bottom: 3px double black;
-  font-size: 2em;
+  font-size: 1.4em;
+  margin-top: 1.5em;
 }
 
 h3 {
   border-bottom: 1px solid #808080;
-  font-size: 1.5em;
+  font-size: 1.4em;
   margin-top: 1.5em;
 }
 
 h4 {
-  font-size: 1.17em;
+  font-size: 1.25em;
 }
 
 h5 {
-  font-size: 1em;
+  font-size: 1.10em;
 }
 h6 {
-  font-size: 0.8em;
+  font-size: 1em;
 }
 
 
@@ -715,27 +723,33 @@ div.incsearch li.hover {
 	width: 33.3333333333%; /* override larger @media */
 	*width: 33%;
     }
-    #hdr-lookup {
-	border-top: 1px solid black;   /* stupid hack */
-    }
+    /* #hdr-lookup {
+	border-top: 1px solid black;
+    }*/
     #searchbox {
 	width: 75%;
     }
     div.buttons { width: 5em; font-size: 0.875em; }
-    dt.defsig { font-size: 0.875em; }
-    dl.defsig span.sig tt { font-size: inherit; }
-    dl.defsig { margin-left: 0; }
+    /* dt.defsig { font-size: 0.875em; } */
+    /* dl.defsig span.sig tt { font-size: inherit; } */
+    dl.defsig { margin: 1em 0; }
     pre { margin-right: 0; 
 	  margin-left: -0.75em;
 	  padding: 0.2em 0em 0.2em 0.5em;
 	  border-left-color: #666;  /* claustrophobia */
 	  -webkit-box-sizing: border-box;
-	  letter-spacing: -1px;     /* Important for <=480px, but may be too squished for 600px */
+	  /* letter-spacing: -1px; */    /* Important for <=480px, but may be too squished for 600px */
+          line-height: 1.2em;
     }
     table { margin-left: 0; margin-right: 0; }
     td, th { padding: 0.2em 0.5em; }
     #main p {
         line-height: 1.2em;
+    }
+    #main { padding: 0 8px; font-size: 0.9375em; }
+    dt.defsig span.type {   /* hack to keep it visually distinguishable from args when tightly packed */
+        color: #888;
+        font-style: normal;
     }
 }
 
@@ -755,23 +769,27 @@ div.incsearch li.hover {
     form.lookup input.button {
 	min-height: 2em;
     }
-    h3 { font-size: 1em; }   /* useful, but what about h4-h6? */
+    /* h3 { font-size: 1em; } */  /* useful, but what about h4-h6? */
     #hdr h1 { font-size: 0.875em; }
     div.buttons { width: 5em; font-size: 0.750em; }
-    dt.defsig { font-size: 0.825em; padding: 0.2em 0.5em; }
+    /*dl.defsig { font-size: 0.9375em; }*/
+    dt.defsig { padding: 0.2em 0.5em; }
     dd.defsig { padding: 0 0.5em; }
-    #main { padding: 0 8px; }
+    #main { padding: 0 8px; font-size: 0.9375em; }
     #hdr-lookup { margin-right: 8px; }
+    #hdr-searchbox { width: 10em; }
     #contents { margin-left: 8px; margin-right: 8px; }
     /* Left margin is narrower, so modify pre extending into margin */
     pre { margin-left: -0.3em; 
 	  border-left-width: 1px; 
 	  padding-left: 0.25em;
-	  letter-spacing: -1px;
+	  /* letter-spacing: -1px; */
 	  font-size: 0.8em;
+          line-height: 1.2em;
     }
-    tt { letter-spacing: -1px; }
-
+    /* tt { letter-spacing: -1px; } */
+    ul, ol { padding: 0 0 0 30px; }
+    dd { margin: 0 0 0 1em; }
 }
 
 /* Viewport seems wide enough at 768px (iPad portrai) to support
