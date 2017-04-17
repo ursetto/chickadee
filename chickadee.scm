@@ -540,7 +540,7 @@
 ;; You should also resend any associated Cache-control: directive (separately).
 (define (not-modified actual-mtime)
   (let ((headers (if (integer? actual-mtime)     ; error?
-                     `((last-modified #(,(seconds->utc-time actual-mtime))))
+                     `((last-modified #(,(seconds->utc-time actual-mtime) ())))
                      '())))
     (send-response code: 304 reason: "Not modified" headers: headers)))
 
@@ -553,7 +553,7 @@
                            (request-headers (current-request)))))
     (if (or (not header-mtime-vec)
             (> mtime (utc-time->seconds header-mtime-vec)))
-        (with-headers `((last-modified #(,(seconds->utc-time mtime))))
+        (with-headers `((last-modified #(,(seconds->utc-time mtime) ())))
                       thunk)
         (not-modified mtime))))
 
