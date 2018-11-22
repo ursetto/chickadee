@@ -23,7 +23,7 @@
 (debug-log (current-error-port))
 (ajax-log #f)   ;; Slow; not recommended for production.
 
-(cdoc-uri (uri "/cdoc"))
+(cdoc-uri (uri "/cdoc/"))
 (chickadee-uri (uri "/doc"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 
