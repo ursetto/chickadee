@@ -28,7 +28,9 @@
 (use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-(use uri-common)
+;; Wrap uri-relative-from with our own implementation.
+(use (except uri-common uri-relative-from))
+(use (prefix (only uri-common uri-relative-from) uri-common:))
 (use intarweb)
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
@@ -640,6 +642,22 @@
                                (format-re p))
                            (query p)))))
            (else (format-path "")))))
+
+(define (uri-relative-from u1 u2)
+  ;; uri-generic:uri-relative-from requires a common /base/ component or it will not
+  ;; resolve relatively. This should be fixed in a later revision of
+  ;; uri-generic. For now, add a temporary component
+  ;; to both URIs and try to resolve them relatively.
+  (define (add-base u)
+    (update-uri u path: (match (uri-path u)
+                               (('/ . path) `(/ "_xyzzy_" . ,path)))))
+  (let ((rel (uri-common:uri-relative-from (add-base u1) (add-base u2))))
+    (match (uri-path rel)
+           ((".." . _) rel)
+           ;; (('/ "_xyzzy_" . path) ('/ . ,path))
+           ;; (else (uri-relative-from u1 u2))
+           (else u1)  ;; probably good enough
+           )))
 
 ;;; handlers
 
