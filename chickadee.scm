@@ -609,21 +609,9 @@
 
 ;;;
 
-;; Including (null? p) allows queries to be passed directly to /chickadee,
-;; e.g.  /chickadee?q=  gets rewritten internally to /cdoc?q= . We don't use
-;; this in practice and it could be removed.
-(define (rewrite-chickadee-uri u p)
-  (let ((q (uri-query u)))
-    (update-uri u
-                path: (uri-path (cdoc-uri))
-                query: (if (or (null? p)         ; /chickadee
-                               (equal? p '(""))) ; /chickadee/
-                           q
-                           (update-param 'path
-                                         (string-intersperse p " ") q)))))
-
 (define (chickadee-handler p)
-  (rewrite-uri (lambda (u) (rewrite-chickadee-uri u p)))) ;?
+  (let ((path (string-intersperse p " ")))
+    (format-path path)))
 
 ;; 'id' variable is never used externally nor is it generated in internal links.
 ;; 'q' and 'id' are identical, as long as there is no space present, and query-regex is not set.
