@@ -97,7 +97,7 @@
          (input (@ (id "searchbox")
                    (class "text incsearch")
                    (data-opts ,(->json
-                                `((url . ,(uri->string (incremental-search-uri)))
+                                `((url . ,(uri->string (relative-uri (incremental-search-uri))))
                                   (delay . ,(incremental-search-delay)))))
                    (type text)
                    (name q)
