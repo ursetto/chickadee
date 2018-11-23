@@ -3,16 +3,19 @@
 
 ;; Helpers
 (define uri uri-reference)
+(define (cdoc-relative href)
+  (uri-relative-to (uri href) (cdoc-uri)))
 (define (fingerprint fn)
   ;; alternative: (number->string (file-modification-time fn))
   (substring (or (sha1sum fn) (error "file not found" fn))
              0 8))
 (define cache-bust ;; Fingerprint FN (relative to cdoc) and return cache-busting URI.
   (lambda (fn)
-    (let ((cdoc (uri->string (cdoc-uri))))
-      (uri (string-append cdoc "/" fn "?"
-                          (fingerprint (make-pathname (list (root-path) cdoc)
-                                                      fn)))))))
+    (let ((cdoc-path (uri->string (cdoc-uri))))
+      (cdoc-relative
+       (string-append fn "?"
+                      (fingerprint (make-pathname (list (root-path) cdoc-path)
+                                                  fn)))))))
 
 (root-path "root")
 (server-port 8388)
@@ -25,13 +28,18 @@
 
 (cdoc-uri (uri "/cdoc/"))
 (chickadee-uri (uri "/doc"))
-(incremental-search-uri (uri "/cdoc/ajax/prefix"))
+(incremental-search-uri (cdoc-relative "ajax/prefix"))
 
 (chickadee-css-files (list (cache-bust "chickadee.css")))
-(chickadee-early-js-files (list (uri "/cdoc/modernizr.respond.93248.js")))
+(chickadee-early-js-files (list (cdoc-relative "modernizr.respond.93248.js")))
 (chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.9.0.min.js")
                           ;; Local jQuery fallback from HTML5 Boilerplate
-                          "window.jQuery || document.write('<script src=\"/cdoc/jquery-1.9.0.min.js\"><\\/script>')"
+                          ;; We can't produce a relative URI in the config file, so this
+                          ;; will not work unless unless you are doing offline debugging
+                          ;; of this server directly on localhost.
+                          (string-append "window.jQuery || document.write('<script src=\""
+                                         (uri->string (cdoc-relative "jquery-1.9.0.min.js"))
+                                         "\"><\\/script>')")
                           (cache-bust "chickadee-jquery.js")
                           (cache-bust "prettify-bundle.js")))
 
