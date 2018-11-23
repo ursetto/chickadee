@@ -32,7 +32,7 @@
 
 (chickadee-css-files (list (cache-bust "chickadee.css")))
 (chickadee-early-js-files (list (cdoc-relative "modernizr.respond.93248.js")))
-(chickadee-js-files (list (uri "http://code.jquery.com/jquery-1.9.0.min.js")
+(chickadee-js-files (list (uri "//code.jquery.com/jquery-1.9.0.min.js")
                           ;; Local jQuery fallback from HTML5 Boilerplate
                           ;; We can't produce a relative URI in the config file, so this
                           ;; will not work unless unless you are doing offline debugging
