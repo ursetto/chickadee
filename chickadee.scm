@@ -670,7 +670,7 @@
             (let ((last-u1 (last (uri-path u1))))  ; NB, we don't need to check both. They must be identical.
               (if (equal? "" last-u1)
                   (uri-reference ".")           ;; Both are directories
-                  (uri-reference last-u1))))    ;; Both are files
+                  (update-uri rel path: (list last-u1)))))    ;; Both are files.
            
            ;; "./" == (uri->string (uri-relative-from (uri-reference "/base/foo/") (uri-reference "/base/foo/x")))
            (("." "") rel)   ;; ./ to /chickadee/ from /chickadee/x
