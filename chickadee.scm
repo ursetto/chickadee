@@ -28,9 +28,7 @@
 (use spiffy)
 (use matchable)
 (use (only uri-generic uri-encode-string))
-;; Wrap uri-relative-from with our own implementation.
-(use (except uri-common uri-relative-from))
-(use (prefix (only uri-common uri-relative-from) uri-common:))
+(use uri-common)
 (use intarweb)
 ;(load "chicken-doc-html.scm")
 (use chicken-doc-html)
@@ -650,13 +648,6 @@
                                (format-re p))
                            (query p)))))
            (else (format-path "")))))
-
-(define (uri-relative-from u1 u2)
-  (let ((rel (uri-common:uri-relative-from u1 u2)))
-    (match (uri-path rel)
-           ((".") rel)
-           (("." . rest) (update-uri rel path: rest))   ;; drop leading .
-           (else rel))))
 
 ;;; handlers
 
