@@ -147,8 +147,8 @@ dl.defsig {
 }
 
 dt.defsig {
-  padding: 0.2em 0.0em;
-  /* background-color: #444; */
+  padding: 0.2em 1.0em;
+  background-color: #eee;
   color: #000;
   /* border-bottom: 1px solid black; */
   font-weight: normal;
