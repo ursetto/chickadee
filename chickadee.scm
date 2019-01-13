@@ -22,27 +22,32 @@
   %chickadee:debug-incremental-search-latency
   )
 
-(import scheme chicken)
-(import tcp data-structures srfi-1)
-(use spiffy-request-vars chicken-doc)
-(use spiffy)
-(use matchable)
-(use (only uri-generic uri-encode-string))
-(use uri-common)
-(use intarweb)
-;(load "chicken-doc-html.scm")
-(use chicken-doc-html)
-(use (only chicken-doc-admin man-filename->path))
-(use regex) (import irregex)
-(use (only srfi-13 string-index string-concatenate))
-(use (only posix seconds->string seconds->utc-time utc-time->seconds))
-(use srfi-18)
-(use (only sxml-transforms
-           pre-post-order* universal-conversion-rules* SRV:send-reply))
+(import scheme)
+(cond-expand
+ (chicken-4
+  (import chicken)
+  (import tcp data-structures srfi-1)
+  (use spiffy-request-vars chicken-doc)
+  (use spiffy)
+  (use matchable)
+  (use (only uri-generic uri-encode-string))
+  (use uri-common)
+  (use intarweb)
+                                        ;(load "chicken-doc-html.scm")
+  (use chicken-doc-html)
+  (use (only chicken-doc-admin man-filename->path))
+  (use regex) (import irregex)
+  (use (only srfi-13 string-index string-concatenate))
+  (use (only posix seconds->string seconds->utc-time utc-time->seconds))
+  (use srfi-18)
+  (use (only sxml-transforms
+             pre-post-order* universal-conversion-rules* SRV:send-reply))
+  (use (only ports with-output-to-port with-output-to-string))
+  )
+ (else))
 
 ;;; HTML
 
-(use (only ports with-output-to-port with-output-to-string))
 (define (sxml->html doc #!optional port)
   (let* ((rules `((lit *preorder* . ,(lambda (t b) b))
                   . ,universal-conversion-rules*))

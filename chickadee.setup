@@ -4,7 +4,7 @@
 
 (compile -s -O2 -d1 -S chickadee.scm -j chickadee)
 (compile -s -O2 -d0 chickadee.import.scm)
-(compile    -O2 -d0 -S -o chickadee chickadee-cmd.scm)
+(compile    -O2 -d0 -S chickadee-cmd.scm)
 
 (install-extension
   'chickadee
@@ -12,7 +12,7 @@
   `((version ,+version+)))
 (install-program
  'chickadee-cmd
- '("chickadee")
+ '(("chickadee-cmd" "chickadee"))
  `((version ,+version+)))
 
 ;; Tree installation

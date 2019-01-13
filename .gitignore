@@ -7,3 +7,7 @@
 
 root/
 chickadee
+chickadee-cmd
+nginx.conf
+nginx/
+logs/
