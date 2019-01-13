@@ -23,7 +23,7 @@
 ;; An even number of connections is desirable as user agents
 ;; usually open two (keep-alive) connections per hostname.
 (max-connections 8)
-(cdoc-uri (uri "/cdoc"))
+(cdoc-uri (uri "/cdoc/"))
 (chickadee-uri (uri "/chickadee"))
 (incremental-search-uri (uri "/cdoc/ajax/prefix"))
 (chickadee-css-files (list (uri "/cdoc/chickadee.css")))

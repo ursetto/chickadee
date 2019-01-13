@@ -142,13 +142,13 @@ dt {
 dl.defsig {
   margin-top: 2em;
   margin-bottom: 2em;
-  margin-left: 2em;
-  margin-right: 2em;
+  margin-left: 1.5em;
+  margin-right: 1.5em;
 }
 
 dt.defsig {
-  padding: 0.2em 0.0em;
-  /* background-color: #444; */
+  padding: 0.2em 1.0em;
+  background-color: #eee;
   color: #000;
   /* border-bottom: 1px solid black; */
   font-weight: normal;
@@ -237,8 +237,8 @@ dl.defsig var.value {
    paragraph margins will use the padding as a baseline;
    if margin & padding is 0, then tables are not offset */
 dd.defsig {
-  padding-left: 1.5em;
-  padding-right: 0em;
+  padding-left: 1em;
+  padding-right: 1em;
   margin: 0;
   background-color: #ffffff;
 }

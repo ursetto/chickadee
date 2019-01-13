@@ -61,12 +61,12 @@
 (define (javascript u)
   (if (uri-reference? u)
       `(script (@ (type "text/javascript")
-                  (src ,(uri->string u))))
+                  (src ,(uri->string (relative-uri u)))))
       `(script (@ (type "text/javascript"))
                (lit ,u))))
 (define (css-link u)
   `(link (@ (rel stylesheet)
-            (href ,(uri->string u))
+            (href ,(uri->string (relative-uri u)))
             (type "text/css"))))
 
 ;;; Pages
@@ -90,12 +90,12 @@
 
 (define (search-form)
   `(form (@ (class "lookup")
-            (action ,(cdoc-page-path))
+            (action ,(uri->string (relative-uri (uri-reference (cdoc-page-path)))))
             (method get))
          (input (@ (id "searchbox")
                    (class "text incsearch")
                    (data-opts ,(->json
-                                `((url . ,(uri->string (incremental-search-uri)))
+                                `((url . ,(uri->string (relative-uri (incremental-search-uri))))
                                   (delay . ,(incremental-search-delay)))))
                    (type text)
                    (name q)
@@ -217,13 +217,33 @@
                              page-title: (last (node-path n))))))))
         (node-not-found p `(p "No node found at path " (i ,p))))))
 
+;; careful: redirect-to uses the output of this. Make sure it can handle
+;; relative URIs, or make relative conversion optional.
 (define (path->href p)             ; FIXME: use uri-relative-to, etc
-  (string-append
-   (chickadee-page-path)
-   "/"
-   (string-intersperse (map (lambda (x)
-                              (uri-encode-string (->string x)))
-                            p) "/")))
+  (define (path->uri-string p)
+    (string-append
+     (chickadee-page-path)
+     "/"
+     (string-intersperse (map (lambda (x)
+                                (uri-encode-string (->string x)))
+                              p) "/")))
+  ;; We generate a relative path from the current request uri. This
+  ;; won't be available if generating pages statically, but here we have
+  ;; multiple ways to generate the same page (/doc/foo, /cdoc?q=foo),
+  ;; match pages, &c. so it is hard to guess the entry URI.
+  (let ((u (relative-uri (uri-reference (path->uri-string p)))))
+    ;; (print "curreq: " (request-uri (current-request)))
+    ;; (print "to: " u1 " from: " u2)
+    (uri->string u)))
+
+;; All invocations of relative-uri subsequently call uri->string, so
+;; we could just add that here.
+(define (relative-uri uri)
+  (let ((current-uri
+         (update-uri (uri-reference "")   ; strip all but path from request URI
+                     path: (uri-path (request-uri (current-request))))))
+    (uri-relative-from uri current-uri)))
+
 ;; Given a node N, return a procedure that will produce
 ;; an href for any child node ID of N.  Although simple now,
 ;; this could be extended to use relative paths when the current
@@ -395,13 +415,13 @@
                        "Identifier search"))
             (form (@ (id "hdr-lookup")
                      (class "hdr-lookup")
-                     (action ,(cdoc-page-path))
+                     (action ,(uri->string (relative-uri (uri-reference (cdoc-page-path)))))
                      (method "get"))
                   (input (@ (id "hdr-searchbox")
                             (name "q")
                             (class "text incsearch")
                             (data-opts ,(->json
-                                         `((url . ,(uri->string (incremental-search-uri)))
+                                         `((url . ,(uri->string (relative-uri (incremental-search-uri))))
                                            (delay . ,(incremental-search-delay)))))
                             (type "text")
                             (accesskey "f")
@@ -441,11 +461,11 @@
                                   body
                                   page-title: "node not found")))
 
-(define cdoc-page-path (make-parameter #f)) ; cached -- probably not necessary
+(define cdoc-page-path (make-parameter #f))  ;; a string, not a URI -- redirect-to expects string
 (define cdoc-uri
   (make-parameter (uri-reference "/cdoc")
                   (lambda (x)
-                    (cdoc-page-path
+                    (cdoc-page-path    ;; not relative--can't rely on current request being set
                      (and x (uri->string x)))
                     x)))
 (define incremental-search-uri
@@ -607,18 +627,12 @@
 
 ;;;
 
-(define (rewrite-chickadee-uri u p)
-  (let ((q (uri-query u)))
-    (update-uri u
-                path: (uri-path (cdoc-uri))
-                query: (if (null? p)
-                           q
-                           (update-param 'path
-                                         (string-intersperse p " ") q)))))
-
 (define (chickadee-handler p)
-  (rewrite-uri (lambda (u) (rewrite-chickadee-uri u p)))) ;?
+  (let ((path (string-intersperse p " ")))
+    (format-path path)))
 
+;; 'id' variable is never used externally nor is it generated in internal links.
+;; 'q' and 'id' are identical, as long as there is no space present, and query-regex is not set.
 (define (cdoc-handler p)
   p ;ignore
   (with-request-vars*
