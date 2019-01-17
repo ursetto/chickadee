@@ -44,7 +44,32 @@
              pre-post-order* universal-conversion-rules* SRV:send-reply))
   (use (only ports with-output-to-port with-output-to-string))
   )
- (else))
+ (else
+  (import (chicken base)
+          (chicken condition)
+          (chicken irregex)
+          (chicken port)
+          (chicken string)
+          (chicken time)
+          (chicken time posix)
+          (chicken tcp)
+          chicken-doc
+          chicken-doc-html
+          (only chicken-doc-admin man-filename->path)
+          intarweb
+          matchable
+          regex             ;; FIXME remove -- replace string-substitute
+          spiffy
+          spiffy-request-vars
+          srfi-1
+          (only srfi-13 string-index string-concatenate)
+          srfi-18
+          sxml-transforms
+          uri-common
+          (only uri-generic uri-encode-string)          
+          )
+
+  ))
 
 ;;; HTML
 

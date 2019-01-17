@@ -10,7 +10,20 @@
   (import files)
   (use chickadee spiffy uri-common posix)
   (use matchable))
- (else))
+ (else
+  (import (chicken base))
+  (import (chicken format))
+  (import (chicken pathname))
+  (import (chicken platform))
+  (import (chicken process-context))
+  (import chickadee)
+  (import matchable)
+  (import spiffy)
+  (import uri-common)
+
+
+
+  ))
 
 (define args (command-line-arguments))
 (define +basedir+

@@ -3,8 +3,15 @@
 ;; chickadee changes to the directory holding the conf-file on startup,
 ;; so all paths below are relative to that path.
 
-(use chickadee spiffy uri-common)   ;; REQUIRED.  Do not remove.
-(use (only chicken-doc-html syntax-highlighter colorize prettify-js))
+(cond-expand
+ (chicken-4
+  (use chickadee spiffy uri-common)      ;; REQUIRED.  Do not remove.
+  (use (only chicken-doc-html syntax-highlighter colorize prettify-js)))
+ (else
+  (import chickadee spiffy uri-common    ;; REQUIRED.  Do not remove.
+          (only chicken-doc-html syntax-highlighter colorize prettify-js)
+          (chicken time))))
+
 (define uri uri-reference)          ;; A convenient alias.
 
 ;;; Main config
