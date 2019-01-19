@@ -1,8 +1,12 @@
 .svn
 *.import.*
-*.o
 *.so
+*.o
 *.c
+*.install.sh
+*.build.sh
+*.link
+*.swp
 .~/
 
 chickadee-cmd
