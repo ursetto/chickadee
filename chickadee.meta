@@ -7,8 +7,10 @@
  (license "BSD")
  (doc-from-wiki)
  (needs matchable uri-common intarweb
+        (uri-generic 2.46)
         (spiffy 4.8) spiffy-request-vars
-        (chicken-doc 0.4.4)
-        sxml-transforms uri-generic (chicken-doc-admin 0.4.0) 
+        sxml-transforms
+        (chicken-doc 0.6.0)
+        (chicken-doc-admin 0.5.0) 
         (chicken-doc-html 0.3.0))
  (files "chickadee-cmd.scm" "chickadee-config.scm" "chickadee-driver-3e8.scm" "chickadee.setup" "chickadee.release-info" "jquery.metadata.min.js" "chickadee.meta" "mag.png" "chickadee.js" "chickadee.scm" "chickadee-config-nginx.scm" "install.sh" "chickadee-jquery.js" "chickadee.css" "chickadee-driver.scm"))

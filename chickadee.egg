@@ -5,15 +5,15 @@
  (category doc-tools)
  (version "0.11.2")
  (license "BSD")
- (dependencies matchable
-               uri-common
-               intarweb
-               (spiffy 4.8)
+ (dependencies matchable     ; chicken-doc
+               uri-common    ; spiffy
+               (uri-generic 3.2)   ; spiffy
+               intarweb      ; spiffy
+               (spiffy 6.2)
                spiffy-request-vars
-               (chicken-doc 0.5.0)       ; fixme 0.6.0
-               sxml-transforms
-               uri-generic
-               (chicken-doc-admin 0.4.8)  ; fixme 0.5.0
+               sxml-transforms  ; chicken-doc
+               (chicken-doc 0.6.0)        ; chicken-doc-admin
+               (chicken-doc-admin 0.5.0)
                (chicken-doc-html 0.3.0)
                srfi-18)
  (components (extension chickadee)
