@@ -1,5 +1,14 @@
-(use chickadee spiffy uri-common simple-sha1)
-(use (only chicken-doc-html syntax-highlighter colorize prettify-js))
+(cond-expand
+ (chicken-4
+  (use chickadee spiffy uri-common)   ;; REQUIRED.  Do not remove.
+  (use simple-sha1
+       (only chicken-doc-html syntax-highlighter colorize prettify-js)))
+ (else
+  (import chickadee spiffy uri-common                ;; REQUIRED.  Do not remove.
+          simple-sha1
+          (only chicken-doc-html syntax-highlighter colorize prettify-js)
+          (chicken pathname)
+          (chicken time))))
 
 ;; Helpers
 (define uri uri-reference)

@@ -9,6 +9,7 @@
                uri-common    ; spiffy
                (uri-generic 3.2)   ; spiffy
                intarweb      ; spiffy
+               simple-sha1   ; only for production mode
                (spiffy 6.2)
                spiffy-request-vars
                sxml-transforms  ; chicken-doc
