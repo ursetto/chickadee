@@ -1,0 +1,27 @@
+;; -*- scheme -*-
+(
+ (synopsis "chicken-doc web server")
+ (author "Jim Ursetto")
+ (category doc-tools)
+ (version "0.11.2")
+ (license "BSD")
+ (dependencies matchable     ; chicken-doc
+               uri-common    ; spiffy
+               (uri-generic 3.2)   ; spiffy
+               intarweb      ; spiffy
+               (spiffy 6.2)
+               spiffy-request-vars
+               sxml-transforms  ; chicken-doc
+               (chicken-doc 0.6.0)        ; chicken-doc-admin
+               (chicken-doc-admin 0.5.0)
+               (chicken-doc-html 0.3.0)
+               srfi-18)
+ (components (extension chickadee)
+             (program chickadee-cmd
+                      (install-name "chickadee")
+                      (source "chickadee-cmd.scm")
+                      (component-dependencies chickadee))
+             (data chickadee-data
+                   (files "chickadee"))))
+
+
