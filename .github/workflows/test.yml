@@ -23,4 +23,11 @@ jobs:
         id: chicken
         with:
           chicken-version: ${{ matrix.chicken-version }}
-      - run: chicken-install -test
+      - run: |
+          case "${{ steps.chicken.outputs.chicken-version }}" in
+            # spiffy-request-vars has an intermittently broken test on chicken-4.x on Linux.
+            4.*) chicken-install spiffy-request-vars
+                 chicken-install -test ;;
+            5.*) chicken-install -test ;;
+            *) exit 1 ;;
+          esac
