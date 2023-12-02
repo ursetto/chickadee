@@ -3,7 +3,7 @@
  (synopsis "chicken-doc web server")
  (author "Jim Ursetto")
  (category doc-tools)
- (version "0.12.1")
+ (version "0.12.2")
  (license "BSD")
  (dependencies matchable     ; chicken-doc
                uri-common    ; spiffy
